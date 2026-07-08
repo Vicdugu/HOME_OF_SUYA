@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Meal {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  price       Float
+  imageUrl    String
+  isAvailable Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bookingItems BookingItem[]
+
+  @@map("meals")
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  reference       String        @unique
+  customerName    String
+  whatsapp        String
+  email           String?
+  address         String?
+  notes           String?
+  deliveryType    DeliveryType
+  deliveryFee     Float         @default(0)
+  subtotal        Float
+  discount        Float         @default(0)
+  total           Float
+  bookingDate     DateTime
+  timeSlot        String
+  status          BookingStatus @default(PENDING)
+  paymentStatus   PaymentStatus @default(UNPAID)
+  paymentProvider String?
+  paymentRef      String?
+  promoCodeId     String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  items     BookingItem[]
+  promoCode PromoCode?    @relation(fields: [promoCodeId], references: [id])
+
+  @@map("bookings")
+}
+
+model BookingItem {
+  id        String  @id @default(cuid())
+  bookingId String
+  mealId    String
+  mealName  String
+  quantity  Int
+  unitPrice Float
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  meal    Meal    @relation(fields: [mealId], references: [id])
+
+  @@map("booking_items")
+}
+
+model DeliverySettings {
+  id               String   @id @default(cuid())
+  cardiffFee       Float    @default(5.0)
+  postageFee       Float    @default(8.0)
+  postageAvailable Boolean  @default(true)
+  minOrderCardiff  Float    @default(0)
+  minOrderPostage  Float    @default(0)
+  updatedAt        DateTime @updatedAt
+
+  @@map("delivery_settings")
+}
+
+model BlockedDate {
+  id        String   @id @default(cuid())
+  date      DateTime @unique
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@map("blocked_dates")
+}
+
+model PromoCode {
+  id            String       @id @default(cuid())
+  code          String       @unique
+  discountType  DiscountType
+  discountValue Float
+  minOrder      Float        @default(0)
+  maxUses       Int?
+  usedCount     Int          @default(0)
+  expiresAt     DateTime?
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+
+  bookings Booking[]
+
+  @@map("promo_codes")
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  @@map("admin_users")
+}
+
+enum DeliveryType {
+  PICKUP
+  CARDIFF
+  POSTAGE
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+}
+
+enum DiscountType {
+  PERCENT
+  FIXED
+}

@@ -1,0 +1,25 @@
+node_modules
+
+# Environment variables — never commit these
+.env
+.env.local
+.env.*.local
+
+# Prisma generated client
+/generated/prisma
+
+# Next.js build output
+.next/
+out/
+
+# Vercel
+.vercel
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
