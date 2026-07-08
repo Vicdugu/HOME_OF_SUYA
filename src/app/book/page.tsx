@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -18,17 +18,36 @@ const STEPS = [
   { n: 4, label: "Payment" },
 ];
 
+interface DeliverySettings {
+  cardiffFee: number;
+  postageFee: number;
+  postageAvailable: boolean;
+}
+
 export default function BookPage() {
   const router = useRouter();
   const { state, setDate, setTimeSlot, setDelivery, subtotal, totalItems } =
     useCart();
 
-  // If cart is empty, send back to menu
+  const [settings, setSettings] = useState<DeliverySettings>(MOCK_DELIVERY_SETTINGS);
+  const [blockedDates, setBlockedDates] = useState<string[]>([]);
+
+  // Redirect if cart empty
   useEffect(() => {
     if (totalItems === 0) router.replace("/");
   }, [totalItems, router]);
 
-  const settings = MOCK_DELIVERY_SETTINGS;
+  // Fetch live delivery settings and blocked dates
+  useEffect(() => {
+    fetch("/api/delivery-settings")
+      .then((r) => r.json())
+      .then(setSettings)
+      .catch(() => {});
+    fetch("/api/blocked-dates")
+      .then((r) => r.json())
+      .then(setBlockedDates)
+      .catch(() => {});
+  }, []);
 
   const deliveryFee =
     !state.deliveryType || state.deliveryType === "PICKUP"
@@ -121,6 +140,7 @@ export default function BookPage() {
               <DatePicker
                 selectedDate={state.bookingDate}
                 onSelect={setDate}
+                blockedDates={blockedDates}
               />
             </section>
 

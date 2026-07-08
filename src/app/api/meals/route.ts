@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { MOCK_MEALS } from "@/lib/mock-data";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  // Once Neon DB is connected, replace this with:
-  // const meals = await prisma.meal.findMany({ where: { isAvailable: true }, orderBy: { sortOrder: "asc" } });
-  const meals = MOCK_MEALS;
+  const meals = await prisma.meal.findMany({
+    orderBy: { sortOrder: "asc" },
+  });
   return NextResponse.json(meals);
 }

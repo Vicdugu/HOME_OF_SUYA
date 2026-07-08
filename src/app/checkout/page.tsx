@@ -17,7 +17,6 @@ import { BookingOrderSummary } from "@/components/booking/BookingOrderSummary";
 import { PromoCodeInput } from "@/components/booking/PromoCodeInput";
 import { FormField, inputCls } from "@/components/ui/FormField";
 import { MOCK_DELIVERY_SETTINGS } from "@/lib/mock-data";
-
 const STEPS = [
   { n: 1, label: "Menu" },
   { n: 2, label: "Date & Delivery" },
@@ -58,13 +57,21 @@ export default function CheckoutPage() {
     useCart();
 
   // Redirect guards
+  const [settings, setSettings] = useState(MOCK_DELIVERY_SETTINGS);
+
   useEffect(() => {
     if (totalItems === 0) router.replace("/");
     else if (!state.bookingDate || !state.timeSlot || !state.deliveryType)
       router.replace("/book");
   }, [totalItems, state.bookingDate, state.timeSlot, state.deliveryType, router]);
 
-  const settings = MOCK_DELIVERY_SETTINGS;
+  useEffect(() => {
+    fetch("/api/delivery-settings")
+      .then((r) => r.json())
+      .then(setSettings)
+      .catch(() => {});
+  }, []);
+
   const deliveryFee =
     !state.deliveryType || state.deliveryType === "PICKUP"
       ? 0

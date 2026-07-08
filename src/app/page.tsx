@@ -1,15 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Flame, MapPin, Clock } from "lucide-react";
 import { MealCard } from "@/components/booking/MealCard";
 import { CartDrawer } from "@/components/booking/CartDrawer";
 import { FloatingCartButton } from "@/components/booking/FloatingCartButton";
-import { MOCK_MEALS } from "@/lib/mock-data";
+import type { MealDTO } from "@/types";
 
 export default function MenuPage() {
   const [cartOpen, setCartOpen] = useState(false);
-  const meals = MOCK_MEALS;
+  const [meals, setMeals] = useState<MealDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/meals")
+      .then((r) => r.json())
+      .then((data) => { setMeals(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
 
   const availableMeals = meals.filter((m) => m.isAvailable);
   const unavailableMeals = meals.filter((m) => !m.isAvailable);
@@ -84,7 +92,13 @@ export default function MenuPage() {
           </span>
         </h2>
 
-        {meals.length === 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="card h-72 animate-pulse bg-surface-card" />
+            ))}
+          </div>
+        ) : meals.length === 0 ? (
           <div className="text-center py-20 text-gray-500">
             <Flame size={40} className="mx-auto mb-4 opacity-30" />
             <p>Menu coming soon. Check back later!</p>

@@ -1,21 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-
-/**
- * Mock promo codes — replaced with DB query once Neon is connected.
- *
- * Real implementation:
- *   const code = await prisma.promoCode.findFirst({
- *     where: { code: body.code.toUpperCase(), isActive: true }
- *   });
- */
-const MOCK_CODES: Record<
-  string,
-  { type: "PERCENT" | "FIXED"; value: number; minOrder: number }
-> = {
-  SUYA10: { type: "PERCENT", value: 10, minOrder: 0 },
-  WELCOME5: { type: "FIXED", value: 5, minOrder: 15 },
-};
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -26,33 +11,50 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ valid: false, message: "Enter a promo code" });
   }
 
-  const promo = MOCK_CODES[code];
+  const promo = await prisma.promoCode.findFirst({
+    where: { code, isActive: true },
+  });
 
   if (!promo) {
     return NextResponse.json({ valid: false, message: "Invalid promo code" });
   }
 
+  const now = new Date();
+  if (promo.expiresAt && promo.expiresAt < now) {
+    return NextResponse.json({
+      valid: false,
+      message: "This promo code has expired",
+    });
+  }
+
+  if (promo.maxUses !== null && promo.usedCount >= promo.maxUses) {
+    return NextResponse.json({
+      valid: false,
+      message: "This promo code has reached its usage limit",
+    });
+  }
+
   if (subtotal < promo.minOrder) {
     return NextResponse.json({
       valid: false,
-      message: `Minimum order of £${promo.minOrder.toFixed(2)} required for this code`,
+      message: `Minimum order of £${promo.minOrder.toFixed(2)} required`,
     });
   }
 
   const discount =
-    promo.type === "PERCENT"
-      ? Math.round(subtotal * (promo.value / 100) * 100) / 100
-      : promo.value;
+    promo.discountType === "PERCENT"
+      ? Math.round(subtotal * (promo.discountValue / 100) * 100) / 100
+      : promo.discountValue;
 
   return NextResponse.json({
     valid: true,
     code,
-    discountType: promo.type,
-    discountValue: promo.value,
+    discountType: promo.discountType,
+    discountValue: promo.discountValue,
     discount,
     message:
-      promo.type === "PERCENT"
-        ? `${promo.value}% discount applied`
-        : `£${promo.value.toFixed(2)} discount applied`,
+      promo.discountType === "PERCENT"
+        ? `${promo.discountValue}% discount applied`
+        : `£${promo.discountValue.toFixed(2)} discount applied`,
   });
 }

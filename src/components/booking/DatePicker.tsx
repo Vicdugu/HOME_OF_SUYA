@@ -8,7 +8,6 @@ import {
   isTooSoon,
   toDateString,
 } from "@/lib/availability";
-import { MOCK_BLOCKED_DATES } from "@/lib/mock-data";
 
 const MONTH_NAMES = [
   "January","February","March","April","May","June",
@@ -19,15 +18,16 @@ const DAY_HEADERS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 interface DatePickerProps {
   selectedDate: string | null;
   onSelect: (date: string) => void;
+  blockedDates?: string[];
 }
 
-export function DatePicker({ selectedDate, onSelect }: DatePickerProps) {
+export function DatePicker({ selectedDate, onSelect, blockedDates = [] }: DatePickerProps) {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
 
   const days = getCalendarDays(viewYear, viewMonth);
-  const blockedSet = new Set(MOCK_BLOCKED_DATES);
+  const blockedSet = new Set(blockedDates);
 
   const canGoPrev =
     viewYear > today.getFullYear() || viewMonth > today.getMonth();
