@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import {
+  sendCustomerConfirmation,
+  sendAdminAlert,
+} from "@/lib/whatsapp";
+import { formatBookingDate, formatTimeSlot } from "@/lib/availability";
 
 /**
  * Stripe webhook — verifies signature and marks booking as PAID.
@@ -50,14 +55,42 @@ export async function POST(req: NextRequest) {
     const bookingId = session.metadata?.bookingId;
 
     if (bookingId) {
-      await prisma.booking.update({
+      const booking = await prisma.booking.update({
         where: { id: bookingId },
-        data: {
-          status: "CONFIRMED",
-          paymentStatus: "PAID",
-        },
+        data: { status: "CONFIRMED", paymentStatus: "PAID" },
+        include: { items: true },
       });
-      // Phase 6: WhatsApp notification fired here
+
+      // Fire WhatsApp notifications — failures are logged, never throw
+      try {
+        const notifData = {
+          reference: booking.reference,
+          customerName: booking.customerName,
+          whatsapp: booking.whatsapp,
+          bookingDate: formatBookingDate(
+            booking.bookingDate.toISOString().slice(0, 10)
+          ),
+          timeSlot: formatTimeSlot(booking.timeSlot),
+          deliveryType: booking.deliveryType,
+          address: booking.address,
+          items: booking.items.map((i) => ({
+            mealName: i.mealName,
+            quantity: i.quantity,
+            unitPrice: i.unitPrice,
+          })),
+          subtotal: booking.subtotal,
+          deliveryFee: booking.deliveryFee,
+          discount: booking.discount,
+          total: booking.total,
+          promoCode: null,
+        };
+        await Promise.allSettled([
+          sendCustomerConfirmation(notifData),
+          sendAdminAlert(notifData),
+        ]);
+      } catch (err) {
+        console.error("[Stripe webhook] Notification error:", err);
+      }
     }
   }
 
