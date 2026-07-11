@@ -3,6 +3,7 @@
  * Or via:  npm run db:seed  (after adding the script to package.json)
  */
 
+import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
