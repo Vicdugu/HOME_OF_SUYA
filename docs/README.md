@@ -10,6 +10,7 @@ This folder tracks the build process, architecture decisions, and feature docume
 | `build-log.md` | Step-by-step record of what was built and when |
 | `architecture.md` | System design, data models, and tech stack |
 | `features.md` | All features with descriptions and status |
+| `deployment.md` | Step-by-step Vercel deployment guide |
 
 ---
 
