@@ -18,9 +18,39 @@ model Meal {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  bookingItems BookingItem[]
+  bookingItems    BookingItem[]
+  variationGroups MealVariationGroup[]
 
   @@map("meals")
+}
+
+model MealVariationGroup {
+  id            String                 @id @default(cuid())
+  mealId        String
+  name          String
+  selectionType VariationSelectionType @default(SINGLE)
+  sortOrder     Int                    @default(0)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  meal    Meal                  @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  options MealVariationOption[]
+
+  @@map("meal_variation_groups")
+}
+
+model MealVariationOption {
+  id        String   @id @default(cuid())
+  groupId   String
+  name      String
+  price     Float    @default(0)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  group MealVariationGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("meal_variation_options")
 }
 
 model Booking {
@@ -105,10 +135,19 @@ model PromoCode {
 }
 
 model AdminUser {
-  id           String   @id @default(cuid())
-  username     String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
+  id                      String    @id @default(cuid())
+  username                String    @unique
+  fullName                String?
+  email                   String?   @unique
+  passwordHash            String?
+  isVerified              Boolean   @default(true)
+  role                    String    @default("ADMIN")
+  status                  String    @default("ACTIVE")
+  verificationToken       String?   @unique
+  verificationTokenExpiry DateTime?
+  resetToken              String?   @unique
+  resetTokenExpiry        DateTime?
+  createdAt               DateTime  @default(now())
 
   @@map("admin_users")
 }
@@ -129,6 +168,11 @@ enum PaymentStatus {
   UNPAID
   PAID
   REFUNDED
+}
+
+enum VariationSelectionType {
+  SINGLE
+  MULTIPLE
 }
 
 enum DiscountType {

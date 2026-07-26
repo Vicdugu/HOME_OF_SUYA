@@ -13,6 +13,7 @@ import {
   Tag,
   Menu,
   X,
+  Users,
 } from "lucide-react";
 
 const NAV = [
@@ -20,6 +21,7 @@ const NAV = [
   { href: "/admin/meals", label: "Meals", icon: UtensilsCrossed },
   { href: "/admin/bookings", label: "Bookings", icon: ClipboardList },
   { href: "/admin/promo-codes", label: "Promo Codes", icon: Tag },
+  { href: "/admin/accounts", label: "Accounts", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
@@ -63,6 +65,12 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Public auth pages — render without sidebar
+  const PUBLIC_AUTH = ["/admin/login", "/admin/verify", "/admin/forgot-password", "/admin/reset-password"];
+  if (PUBLIC_AUTH.includes(pathname)) {
+    return <>{children}</>;
+  }
 
   async function handleSignOut() {
     await fetch("/api/admin/auth/logout", { method: "POST" });

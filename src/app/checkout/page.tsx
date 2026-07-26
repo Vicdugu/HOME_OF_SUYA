@@ -16,6 +16,7 @@ import { useCart } from "@/context/CartContext";
 import { BookingOrderSummary } from "@/components/booking/BookingOrderSummary";
 import { PromoCodeInput } from "@/components/booking/PromoCodeInput";
 import { FormField, inputCls } from "@/components/ui/FormField";
+import { getDeliveryFee } from "@/lib/delivery-pricing";
 import { MOCK_DELIVERY_SETTINGS } from "@/lib/mock-data";
 const STEPS = [
   { n: 1, label: "Menu" },
@@ -72,12 +73,7 @@ export default function CheckoutPage() {
       .catch(() => {});
   }, []);
 
-  const deliveryFee =
-    !state.deliveryType || state.deliveryType === "PICKUP"
-      ? 0
-      : state.deliveryType === "CARDIFF"
-      ? settings.cardiffFee
-      : settings.postageFee;
+  const deliveryFee = getDeliveryFee(state.deliveryType, subtotal, settings);
   const total = subtotal + deliveryFee - state.promoDiscount;
 
   const needsAddress =

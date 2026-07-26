@@ -64,3 +64,41 @@ A chronological record of every build step for this system.
 - Updated `src/app/layout.tsx` — wrapped with `CartProvider`
 - Installed `lucide-react` for icons
 - Production build: ✅ 0 errors, / route 12.3 kB
+
+---
+
+## Admin Account Creation — Manual Dashboard Signup
+**Completed: 2026-07-15**
+
+- Replaced the dashboard invite-only admin creation flow with direct account creation from `src/app/admin/accounts/page.tsx`
+- Added form fields for `fullName`, `username`, `email`, `password`, `role`, and `status`
+- Added `POST /api/admin/accounts` to create a login-ready admin record immediately with a hashed password
+- Extended admin account storage to support `fullName`, `role`, and `status`
+- Added idempotent SQL column backfill in `src/lib/admin-queries.ts` so the feature works without waiting for Prisma client regeneration
+- Updated login to accept either username or email and to block disabled accounts
+- Production build validation required after these changes
+
+---
+
+## Phases 5-12 — Payments, Notifications, Tracking, Admin, Polish, Deployment
+**Completed: 2026-07-08 to 2026-07-15**
+
+- Phase 5: built booking creation, SumUp checkout, Stripe fallback checkout, payment status routes, and Stripe/SumUp webhooks
+- Phase 6: wired WhatsApp notifications and ensured notification failures do not break payment confirmation
+- Phase 7: added booking confirmation and public order tracking pages
+- Phases 8-10: built admin dashboard, meals CRUD, bookings management, CSV export, promo code manager, delivery settings, and blocked dates management
+- Phase 11: added error handling pages, not-found page, and mobile admin layout improvements
+- Phase 12: added deployment assets including `.env.example`, `vercel.json`, and deployment documentation
+- Replaced the original NextAuth-based admin approach with custom JWT cookie auth using `jose`
+- Switched public menu, availability, delivery settings, and promo validation flows from mock data to the live Neon/Postgres database
+
+---
+
+## Admin Auth Stabilisation
+**Completed: 2026-07-15**
+
+- Fixed local admin login persistence by adjusting the auth cookie to respect the actual request protocol during local HTTP testing
+- Updated the login screen to work with either username or email
+- Corrected the admin layout so `/admin/login` renders as a public auth page instead of inside the protected dashboard shell
+- Verified end-to-end admin auth flow locally across dashboard, meals, bookings, and accounts pages
+- Verified direct dashboard account creation using an authenticated session and successful cleanup of the temporary test account

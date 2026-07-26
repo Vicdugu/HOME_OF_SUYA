@@ -85,8 +85,7 @@ export default function ConfirmationPage({
     );
   }
 
-  const isPaid =
-    booking.paymentStatus === "PAID" || booking.status === "CONFIRMED";
+  const isPaid = booking.paymentStatus === "PAID";
 
   return (
     <main className="min-h-screen bg-brand-black">

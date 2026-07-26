@@ -53,43 +53,62 @@ export async function POST(req: NextRequest) {
     const session = event.data
       .object as import("stripe").Stripe.Checkout.Session;
     const bookingId = session.metadata?.bookingId;
+    const expectedReference = session.metadata?.reference;
+    const amountTotal = session.amount_total;
+    const sessionPaid = session.payment_status === "paid";
 
-    if (bookingId) {
-      const booking = await prisma.booking.update({
+    if (bookingId && sessionPaid && amountTotal !== null) {
+      const booking = await prisma.booking.findUnique({
         where: { id: bookingId },
-        data: { status: "CONFIRMED", paymentStatus: "PAID" },
         include: { items: true },
       });
 
-      // Fire WhatsApp notifications — failures are logged, never throw
-      try {
-        const notifData = {
-          reference: booking.reference,
-          customerName: booking.customerName,
-          whatsapp: booking.whatsapp,
-          bookingDate: formatBookingDate(
-            booking.bookingDate.toISOString().slice(0, 10)
-          ),
-          timeSlot: formatTimeSlot(booking.timeSlot),
-          deliveryType: booking.deliveryType,
-          address: booking.address,
-          items: booking.items.map((i) => ({
-            mealName: i.mealName,
-            quantity: i.quantity,
-            unitPrice: i.unitPrice,
-          })),
-          subtotal: booking.subtotal,
-          deliveryFee: booking.deliveryFee,
-          discount: booking.discount,
-          total: booking.total,
-          promoCode: null,
-        };
-        await Promise.allSettled([
-          sendCustomerConfirmation(notifData),
-          sendAdminAlert(notifData),
-        ]);
-      } catch (err) {
-        console.error("[Stripe webhook] Notification error:", err);
+      const expectedAmount = booking ? Math.round(booking.total * 100) : null;
+
+      if (
+        booking &&
+        booking.paymentStatus === "UNPAID" &&
+        booking.paymentProvider === "stripe" &&
+        booking.paymentRef === session.id &&
+        booking.reference === expectedReference &&
+        expectedAmount === amountTotal
+      ) {
+        const updatedBooking = await prisma.booking.update({
+          where: { id: booking.id },
+          data: { status: "CONFIRMED", paymentStatus: "PAID" },
+          include: { items: true },
+        });
+
+        // Fire WhatsApp notifications — failures are logged, never throw
+        try {
+          const notifData = {
+            reference: updatedBooking.reference,
+            customerName: updatedBooking.customerName,
+            whatsapp: updatedBooking.whatsapp,
+            bookingDate: formatBookingDate(
+              updatedBooking.bookingDate.toISOString().slice(0, 10)
+            ),
+            timeSlot: formatTimeSlot(updatedBooking.timeSlot),
+            deliveryType: updatedBooking.deliveryType,
+            address: updatedBooking.address,
+            items: updatedBooking.items.map((i) => ({
+              mealName: i.mealName,
+              quantity: i.quantity,
+              unitPrice: i.unitPrice,
+            })),
+            subtotal: updatedBooking.subtotal,
+            deliveryFee: updatedBooking.deliveryFee,
+            discount: updatedBooking.discount,
+            total: updatedBooking.total,
+            promoCode: null,
+          };
+          await Promise.allSettled([
+            sendCustomerConfirmation(notifData),
+            sendAdminAlert(notifData),
+          ]);
+        } catch (err) {
+          console.error("[Stripe webhook] Notification error:", err);
+        }
       }
     }
   }

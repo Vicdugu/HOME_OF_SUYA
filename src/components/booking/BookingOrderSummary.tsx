@@ -2,6 +2,7 @@
 
 import { ShoppingBag, Calendar, Clock, Truck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { formatMealVariationSummary } from "@/lib/meal-variations";
 import { formatCurrency } from "@/lib/utils";
 import { formatBookingDate, formatTimeSlot } from "@/lib/availability";
 
@@ -33,11 +34,12 @@ export function BookingOrderSummary({
       {/* Items */}
       <div className="space-y-2 mb-4">
         {state.items.map((item) => (
-          <div key={item.mealId} className="flex justify-between text-sm">
-            <span className="text-gray-400 truncate max-w-[60%]">
-              {item.mealName}{" "}
+          <div key={item.cartItemId} className="flex justify-between gap-3 text-sm">
+            <div className="max-w-[70%]">
+              <span className="text-gray-400 truncate">{item.mealName} </span>
               <span className="text-gray-600">×{item.quantity}</span>
-            </span>
+              <p className="text-[11px] text-gray-600 mt-0.5">{formatMealVariationSummary(item)}</p>
+            </div>
             <span className="text-white shrink-0">
               {formatCurrency(item.unitPrice * item.quantity)}
             </span>

@@ -5,6 +5,7 @@ import { X, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { QuantitySelector } from "@/components/ui/QuantitySelector";
+import { formatMealVariationSummary } from "@/lib/meal-variations";
 import { formatCurrency } from "@/lib/utils";
 
 interface CartDrawerProps {
@@ -93,12 +94,15 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
           ) : (
             state.items.map((item) => (
               <div
-                key={item.mealId}
+                key={item.cartItemId}
                 className="flex items-center gap-3 p-3 rounded-xl bg-surface-dark border border-surface-border"
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-white text-sm font-medium truncate">
                     {item.mealName}
+                  </p>
+                  <p className="text-gray-500 text-[11px] mt-0.5">
+                    {formatMealVariationSummary(item)}
                   </p>
                   <p className="text-brand-gold text-sm font-semibold mt-0.5">
                     {formatCurrency(item.unitPrice * item.quantity)}
@@ -110,7 +114,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
 
                 <div className="flex flex-col items-end gap-2">
                   <button
-                    onClick={() => removeItem(item.mealId)}
+                    onClick={() => removeItem(item.cartItemId)}
                     aria-label={`Remove ${item.mealName}`}
                     className="text-gray-600 hover:text-brand-red transition-colors duration-150"
                   >
@@ -118,8 +122,8 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                   </button>
                   <QuantitySelector
                     quantity={item.quantity}
-                    onDecrease={() => setQuantity(item.mealId, item.quantity - 1)}
-                    onIncrease={() => setQuantity(item.mealId, item.quantity + 1)}
+                    onDecrease={() => setQuantity(item.cartItemId, item.quantity - 1)}
+                    onIncrease={() => setQuantity(item.cartItemId, item.quantity + 1)}
                   />
                 </div>
               </div>

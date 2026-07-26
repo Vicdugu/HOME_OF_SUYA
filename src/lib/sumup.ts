@@ -13,18 +13,24 @@ export interface SumUpCheckout {
   checkout_reference: string;
 }
 
-export async function createSumUpCheckout(params: {
-  reference: string;
-  amount: number;
-  description: string;
-  redirectUrl: string;
-}): Promise<{ checkoutId: string; checkoutUrl: string }> {
+function getSumUpApiConfig() {
   const apiKey = process.env.SUMUP_API_KEY;
   const merchantEmail = process.env.SUMUP_MERCHANT_EMAIL;
 
   if (!apiKey || !merchantEmail) {
     throw new Error("SumUp credentials not configured");
   }
+
+  return { apiKey, merchantEmail };
+}
+
+export async function createSumUpCheckout(params: {
+  reference: string;
+  amount: number;
+  description: string;
+  redirectUrl: string;
+}): Promise<{ checkoutId: string; checkoutUrl: string }> {
+  const { apiKey, merchantEmail } = getSumUpApiConfig();
 
   const res = await fetch(`${SUMUP_API_BASE}/checkouts`, {
     method: "POST",
@@ -54,4 +60,26 @@ export async function createSumUpCheckout(params: {
     checkoutId: checkout.id,
     checkoutUrl: `https://checkout.sumup.com/pay/${checkout.id}`,
   };
+}
+
+export async function getSumUpCheckout(checkoutId: string): Promise<SumUpCheckout> {
+  const { apiKey } = getSumUpApiConfig();
+
+  const res = await fetch(`${SUMUP_API_BASE}/checkouts/${checkoutId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(
+      (err as { message?: string }).message ?? `SumUp error ${res.status}`
+    );
+  }
+
+  return res.json();
 }

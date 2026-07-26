@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import { Loader2, Save, CalendarOff, Trash2, Plus } from "lucide-react";
 import { isBookableDay, toDateString } from "@/lib/availability";
+import {
+  DISCOUNTED_POSTAGE_FEE,
+  DISCOUNTED_POSTAGE_THRESHOLD,
+} from "@/lib/delivery-pricing";
 
 interface Settings {
   cardiffFee: number; postageFee: number; postageAvailable: boolean;
@@ -100,6 +104,9 @@ export default function AdminSettingsPage() {
             </div>
           ))}
         </div>
+        <p className="text-xs text-gray-500">
+          Orders above GBP {DISCOUNTED_POSTAGE_THRESHOLD} automatically use a UK postage fee of GBP {DISCOUNTED_POSTAGE_FEE}. The postage fee set above applies to smaller orders.
+        </p>
         <label className="flex items-center gap-3 cursor-pointer">
           <input
             type="checkbox"

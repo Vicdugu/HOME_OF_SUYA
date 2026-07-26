@@ -12,6 +12,8 @@ import {
   Lock,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { getDeliveryFee } from "@/lib/delivery-pricing";
+import { formatMealVariationSummary } from "@/lib/meal-variations";
 import { formatCurrency } from "@/lib/utils";
 import { formatBookingDate, formatTimeSlot } from "@/lib/availability";
 import { MOCK_DELIVERY_SETTINGS } from "@/lib/mock-data";
@@ -57,12 +59,7 @@ export default function PaymentPage() {
       .catch(() => {});
   }, []);
 
-  const deliveryFee =
-    !state.deliveryType || state.deliveryType === "PICKUP"
-      ? 0
-      : state.deliveryType === "CARDIFF"
-      ? settings.cardiffFee
-      : settings.postageFee;
+  const deliveryFee = getDeliveryFee(state.deliveryType, subtotal, settings);
 
   const total = subtotal + deliveryFee - state.promoDiscount;
 
@@ -196,13 +193,15 @@ export default function PaymentPage() {
           <div className="space-y-1.5">
             {state.items.map((item) => (
               <div
-                key={item.mealId}
-                className="flex justify-between text-sm"
+                key={item.cartItemId}
+                className="flex justify-between gap-3 text-sm"
               >
-                <span className="text-gray-400">
-                  {item.mealName}{" "}
-                  <span className="text-gray-600">×{item.quantity}</span>
-                </span>
+                <div className="text-gray-400 max-w-[70%]">
+                  <span>
+                    {item.mealName} <span className="text-gray-600">×{item.quantity}</span>
+                  </span>
+                  <p className="text-[11px] text-gray-600 mt-0.5">{formatMealVariationSummary(item)}</p>
+                </div>
                 <span className="text-white">
                   {formatCurrency(item.unitPrice * item.quantity)}
                 </span>

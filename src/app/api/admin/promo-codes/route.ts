@@ -1,13 +1,20 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdminRequest } from "@/lib/admin-api-auth";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const authError = await requireAdminRequest(req);
+  if (authError) return authError;
+
   const codes = await prisma.promoCode.findMany({ orderBy: { createdAt: "desc" } });
   return NextResponse.json(codes);
 }
 
 export async function POST(req: NextRequest) {
+  const authError = await requireAdminRequest(req);
+  if (authError) return authError;
+
   const data = await req.json();
   const code = await prisma.promoCode.create({
     data: {
@@ -24,12 +31,18 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
+  const authError = await requireAdminRequest(req);
+  if (authError) return authError;
+
   const { id, isActive } = await req.json();
   const code = await prisma.promoCode.update({ where: { id }, data: { isActive } });
   return NextResponse.json(code);
 }
 
 export async function DELETE(req: NextRequest) {
+  const authError = await requireAdminRequest(req);
+  if (authError) return authError;
+
   const { id } = await req.json();
   await prisma.promoCode.delete({ where: { id } });
   return NextResponse.json({ ok: true });

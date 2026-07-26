@@ -4,23 +4,30 @@
  */
 import { SignJWT, jwtVerify } from "jose";
 
-const SECRET = new TextEncoder().encode(
-  process.env.NEXTAUTH_SECRET ?? "fallback-dev-secret"
-);
 export const COOKIE_NAME = "admin_token";
+
+function getAdminSecret() {
+  const secret = process.env.NEXTAUTH_SECRET?.trim();
+
+  if (!secret) {
+    throw new Error("NEXTAUTH_SECRET is required for admin authentication");
+  }
+
+  return new TextEncoder().encode(secret);
+}
 
 export async function createAdminToken(userId: string, username: string) {
   return new SignJWT({ userId, username })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("12h")
-    .sign(SECRET);
+    .sign(getAdminSecret());
 }
 
 export async function verifyAdminToken(
   token: string
 ): Promise<{ userId: string; username: string } | null> {
   try {
-    const { payload } = await jwtVerify(token, SECRET);
+    const { payload } = await jwtVerify(token, getAdminSecret());
     return payload as { userId: string; username: string };
   } catch {
     return null;

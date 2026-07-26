@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Flame, Loader2 } from "lucide-react";
 
 export default function AdminLoginPage() {
@@ -43,7 +44,7 @@ export default function AdminLoginPage() {
         <form onSubmit={handleSubmit} className="card p-6 space-y-4">
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-300" htmlFor="username">
-              Username
+              Username or email
             </label>
             <input
               id="username"
@@ -51,6 +52,7 @@ export default function AdminLoginPage() {
               autoComplete="username"
               value={form.username}
               onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
+              placeholder="Enter username or email"
               className="w-full bg-surface-dark border border-surface-border rounded-xl
                          px-4 py-3 text-white placeholder-gray-600 text-sm
                          focus:outline-none focus:ring-2 focus:ring-brand-red
@@ -85,6 +87,15 @@ export default function AdminLoginPage() {
             {loading && <Loader2 size={16} className="animate-spin" />}
             Sign In
           </button>
+
+          <div className="text-center pt-1">
+            <Link
+              href="/admin/forgot-password"
+              className="text-gray-500 hover:text-brand-gold text-xs transition-colors"
+            >
+              Forgot password?
+            </Link>
+          </div>
         </form>
       </div>
     </main>

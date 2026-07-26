@@ -6,7 +6,7 @@ import React, {
   useReducer,
   useCallback,
 } from "react";
-import type { CartItem, DeliveryType, MealDTO } from "@/types";
+import type { CartItem, DeliveryType } from "@/types";
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -42,9 +42,9 @@ const initialState: CartState = {
 // ─── Actions ──────────────────────────────────────────────────────────────────
 
 type Action =
-  | { type: "ADD_ITEM"; meal: MealDTO }
-  | { type: "REMOVE_ITEM"; mealId: string }
-  | { type: "SET_QUANTITY"; mealId: string; quantity: number }
+  | { type: "ADD_ITEM"; item: CartItem }
+  | { type: "REMOVE_ITEM"; cartItemId: string }
+  | { type: "SET_QUANTITY"; cartItemId: string; quantity: number }
   | { type: "SET_DELIVERY"; deliveryType: DeliveryType }
   | { type: "SET_DATE"; bookingDate: string }
   | { type: "SET_TIME_SLOT"; timeSlot: string }
@@ -65,12 +65,12 @@ type Action =
 function cartReducer(state: CartState, action: Action): CartState {
   switch (action.type) {
     case "ADD_ITEM": {
-      const existing = state.items.find((i) => i.mealId === action.meal.id);
+      const existing = state.items.find((i) => i.cartItemId === action.item.cartItemId);
       if (existing) {
         return {
           ...state,
           items: state.items.map((i) =>
-            i.mealId === action.meal.id
+            i.cartItemId === action.item.cartItemId
               ? { ...i, quantity: i.quantity + 1 }
               : i
           ),
@@ -78,35 +78,27 @@ function cartReducer(state: CartState, action: Action): CartState {
       }
       return {
         ...state,
-        items: [
-          ...state.items,
-          {
-            mealId: action.meal.id,
-            mealName: action.meal.name,
-            quantity: 1,
-            unitPrice: action.meal.price,
-          },
-        ],
+        items: [...state.items, action.item],
       };
     }
 
     case "REMOVE_ITEM":
       return {
         ...state,
-        items: state.items.filter((i) => i.mealId !== action.mealId),
+        items: state.items.filter((i) => i.cartItemId !== action.cartItemId),
       };
 
     case "SET_QUANTITY": {
       if (action.quantity <= 0) {
         return {
           ...state,
-          items: state.items.filter((i) => i.mealId !== action.mealId),
+          items: state.items.filter((i) => i.cartItemId !== action.cartItemId),
         };
       }
       return {
         ...state,
         items: state.items.map((i) =>
-          i.mealId === action.mealId ? { ...i, quantity: action.quantity } : i
+          i.cartItemId === action.cartItemId ? { ...i, quantity: action.quantity } : i
         ),
       };
     }
@@ -152,9 +144,9 @@ function cartReducer(state: CartState, action: Action): CartState {
 
 interface CartContextValue {
   state: CartState;
-  addItem: (meal: MealDTO) => void;
-  removeItem: (mealId: string) => void;
-  setQuantity: (mealId: string, quantity: number) => void;
+  addItem: (item: CartItem) => void;
+  removeItem: (cartItemId: string) => void;
+  setQuantity: (cartItemId: string, quantity: number) => void;
   setDelivery: (deliveryType: DeliveryType) => void;
   setDate: (date: string) => void;
   setTimeSlot: (slot: string) => void;
@@ -185,17 +177,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   );
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
 
-  const addItem = useCallback(
-    (meal: MealDTO) => dispatch({ type: "ADD_ITEM", meal }),
-    []
-  );
+  const addItem = useCallback((item: CartItem) => dispatch({ type: "ADD_ITEM", item }), []);
   const removeItem = useCallback(
-    (mealId: string) => dispatch({ type: "REMOVE_ITEM", mealId }),
+    (cartItemId: string) => dispatch({ type: "REMOVE_ITEM", cartItemId }),
     []
   );
   const setQuantity = useCallback(
-    (mealId: string, quantity: number) =>
-      dispatch({ type: "SET_QUANTITY", mealId, quantity }),
+    (cartItemId: string, quantity: number) =>
+      dispatch({ type: "SET_QUANTITY", cartItemId, quantity }),
     []
   );
   const setDelivery = useCallback(

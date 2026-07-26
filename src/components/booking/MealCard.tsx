@@ -1,11 +1,19 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { ShoppingCart } from "lucide-react";
+import { Check, ShoppingCart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { QuantitySelector } from "@/components/ui/QuantitySelector";
+import {
+  calculateMealSelectionPrice,
+  createCartItemId,
+  createCustomisedCartItem,
+  createInitialMealSelection,
+  formatPendingMealVariationSummary,
+} from "@/lib/meal-variations";
 import { formatCurrency } from "@/lib/utils";
-import type { MealDTO } from "@/types";
+import type { MealDTO, MealVariationSelection, VariationSelectionType } from "@/types";
 
 interface MealCardProps {
   meal: MealDTO;
@@ -13,13 +21,44 @@ interface MealCardProps {
 
 export function MealCard({ meal }: MealCardProps) {
   const { state, addItem, setQuantity } = useCart();
+  const [customising, setCustomising] = useState(false);
+  const [selection, setSelection] = useState<MealVariationSelection>(() =>
+    createInitialMealSelection(meal)
+  );
 
-  const cartItem = state.items.find((i) => i.mealId === meal.id);
-  const quantity = cartItem?.quantity ?? 0;
+  useEffect(() => {
+    setSelection(createInitialMealSelection(meal));
+  }, [meal]);
 
-  const handleDecrease = () => setQuantity(meal.id, quantity - 1);
+  const hasCustomisations = meal.variationGroups.length > 0;
+
+  const mealItems = state.items.filter((i) => i.mealId === meal.id);
+  const quantity = mealItems.reduce((sum, item) => sum + item.quantity, 0);
+  const selectedCartItemId = createCartItemId(meal.id, meal.variationGroups, selection);
+  const selectedCartItem = state.items.find((item) => item.cartItemId === selectedCartItemId);
+  const selectedQuantity = selectedCartItem?.quantity ?? 0;
+  const displayedPrice = hasCustomisations
+    ? calculateMealSelectionPrice(meal, selection)
+    : meal.price;
+
+  const handleAddSelection = () => addItem(createCustomisedCartItem(meal, selection));
+  const handleDecrease = () => setQuantity(selectedCartItemId, selectedQuantity - 1);
   const handleIncrease = () =>
-    quantity === 0 ? addItem(meal) : setQuantity(meal.id, quantity + 1);
+    selectedQuantity === 0
+      ? handleAddSelection()
+      : setQuantity(selectedCartItemId, selectedQuantity + 1);
+
+  function toggleOption(groupId: string, optionId: string, selectionType: VariationSelectionType) {
+    setSelection((current) => ({
+      ...current,
+      [groupId]:
+        selectionType === "SINGLE"
+          ? [optionId]
+          : current[groupId]?.includes(optionId)
+          ? current[groupId].filter((item) => item !== optionId)
+          : [...(current[groupId] ?? []), optionId],
+    }));
+  }
 
   return (
     <article
@@ -70,16 +109,96 @@ export function MealCard({ meal }: MealCardProps) {
           </p>
         </div>
 
+        {customising && meal.isAvailable && hasCustomisations && (
+          <div className="space-y-3 rounded-xl border border-surface-border bg-surface-dark/60 p-3">
+            {meal.variationGroups.map((group) => (
+              <div key={group.id} className="space-y-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
+                    {group.name}
+                  </p>
+                  <span className="text-[10px] uppercase tracking-[0.16em] text-gray-600">
+                    {group.selectionType === "SINGLE" ? "Choose one" : "Choose any"}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {group.options.map((option) => {
+                    const selected = (selection[group.id] ?? []).includes(option.id);
+
+                    return (
+                      <button
+                        key={option.id}
+                        onClick={() => toggleOption(group.id, option.id, group.selectionType)}
+                        className={[
+                          "rounded-full border px-3 py-1.5 text-xs transition-colors",
+                          selected
+                            ? group.selectionType === "MULTIPLE"
+                              ? "border-brand-gold bg-brand-gold/20 text-brand-gold"
+                              : "border-brand-red bg-brand-red text-white"
+                            : "border-surface-border text-gray-300 hover:border-brand-red/40",
+                        ].join(" ")}
+                      >
+                        {option.name}
+                        {option.price > 0 ? ` (${formatCurrency(option.price)})` : ""}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
+            <p className="text-xs text-gray-500">
+              {formatPendingMealVariationSummary(meal, selection)}
+            </p>
+          </div>
+        )}
+
         {/* Price + quantity row */}
         <div className="flex items-center justify-between mt-auto pt-2 border-t border-surface-border">
           <span className="text-brand-gold font-bold text-lg">
-            {formatCurrency(meal.price)}
+            {formatCurrency(displayedPrice)}
           </span>
 
           {meal.isAvailable ? (
-            quantity === 0 ? (
+            hasCustomisations ? (
+              !customising ? (
+                <button
+                  onClick={() => setCustomising(true)}
+                  aria-label={`Customize ${meal.name}`}
+                  className="flex items-center gap-2 btn-primary py-2 px-4 text-sm"
+                >
+                  <ShoppingCart size={15} />
+                  Customize
+                </button>
+              ) : (
+                <div className="flex flex-col items-end gap-2">
+                  {selectedQuantity === 0 ? (
+                    <button
+                      onClick={handleAddSelection}
+                      aria-label={`Add ${meal.name} with selected options to cart`}
+                      className="flex items-center gap-2 btn-primary py-2 px-4 text-sm"
+                    >
+                      <Check size={15} />
+                      Add to Order
+                    </button>
+                  ) : (
+                    <QuantitySelector
+                      quantity={selectedQuantity}
+                      onDecrease={handleDecrease}
+                      onIncrease={handleIncrease}
+                    />
+                  )}
+                  <button
+                    onClick={() => setCustomising(false)}
+                    className="text-xs text-gray-500 hover:text-white transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              )
+            ) : quantity === 0 ? (
               <button
-                onClick={() => addItem(meal)}
+                onClick={handleAddSelection}
                 aria-label={`Add ${meal.name} to cart`}
                 className="flex items-center gap-2 btn-primary py-2 px-4 text-sm"
               >
@@ -88,7 +207,7 @@ export function MealCard({ meal }: MealCardProps) {
               </button>
             ) : (
               <QuantitySelector
-                quantity={quantity}
+                quantity={selectedQuantity}
                 onDecrease={handleDecrease}
                 onIncrease={handleIncrease}
               />

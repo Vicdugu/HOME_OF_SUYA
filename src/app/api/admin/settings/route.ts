@@ -1,13 +1,20 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdminRequest } from "@/lib/admin-api-auth";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const authError = await requireAdminRequest(req);
+  if (authError) return authError;
+
   const settings = await prisma.deliverySettings.findFirst();
   return NextResponse.json(settings);
 }
 
 export async function PUT(req: NextRequest) {
+  const authError = await requireAdminRequest(req);
+  if (authError) return authError;
+
   const data = await req.json();
   const existing = await prisma.deliverySettings.findFirst();
   const settings = existing

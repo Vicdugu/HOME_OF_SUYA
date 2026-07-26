@@ -14,5 +14,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/((?!login).*)"],
+  matcher: ["/admin/((?!login|forgot-password|verify|reset-password).*)"],
 };

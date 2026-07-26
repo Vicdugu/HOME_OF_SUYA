@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { formatCartItemName } from "@/lib/meal-variations";
 import { generateReference } from "@/lib/utils";
 import { fromDateString } from "@/lib/availability";
 
@@ -77,13 +78,21 @@ export async function POST(req: NextRequest) {
       items: {
         create: items.map(
           (item: {
+            cartItemId?: string;
             mealId: string;
             mealName: string;
             quantity: number;
             unitPrice: number;
+            selections: Array<{
+              groupId: string;
+              groupName: string;
+              selectionType: "SINGLE" | "MULTIPLE";
+              optionIds: string[];
+              optionNames: string[];
+            }>;
           }) => ({
             mealId: item.mealId,
-            mealName: item.mealName,
+            mealName: formatCartItemName(item),
             quantity: item.quantity,
             unitPrice: item.unitPrice,
           })

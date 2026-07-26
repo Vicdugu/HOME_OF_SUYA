@@ -14,6 +14,7 @@ export const MOCK_MEALS: MealDTO[] = [
     imageUrl: "/images/meals/placeholder.jpg",
     isAvailable: true,
     sortOrder: 1,
+    variationGroups: [],
   },
   {
     id: "meal-2",
@@ -24,6 +25,7 @@ export const MOCK_MEALS: MealDTO[] = [
     imageUrl: "/images/meals/placeholder.jpg",
     isAvailable: true,
     sortOrder: 2,
+    variationGroups: [],
   },
   {
     id: "meal-3",
@@ -34,6 +36,7 @@ export const MOCK_MEALS: MealDTO[] = [
     imageUrl: "/images/meals/placeholder.jpg",
     isAvailable: true,
     sortOrder: 3,
+    variationGroups: [],
   },
   {
     id: "meal-4",
@@ -44,6 +47,7 @@ export const MOCK_MEALS: MealDTO[] = [
     imageUrl: "/images/meals/placeholder.jpg",
     isAvailable: true,
     sortOrder: 4,
+    variationGroups: [],
   },
   {
     id: "meal-5",
@@ -54,6 +58,7 @@ export const MOCK_MEALS: MealDTO[] = [
     imageUrl: "/images/meals/placeholder.jpg",
     isAvailable: true,
     sortOrder: 5,
+    variationGroups: [],
   },
   {
     id: "meal-6",
@@ -64,6 +69,7 @@ export const MOCK_MEALS: MealDTO[] = [
     imageUrl: "/images/meals/placeholder.jpg",
     isAvailable: false,
     sortOrder: 6,
+    variationGroups: [],
   },
 ];
 

@@ -9,6 +9,7 @@ import { DatePicker } from "@/components/booking/DatePicker";
 import { TimeSlotPicker } from "@/components/booking/TimeSlotPicker";
 import { DeliverySelector } from "@/components/booking/DeliverySelector";
 import { BookingOrderSummary } from "@/components/booking/BookingOrderSummary";
+import { getDeliveryFee } from "@/lib/delivery-pricing";
 import { MOCK_DELIVERY_SETTINGS } from "@/lib/mock-data";
 
 const STEPS = [
@@ -49,12 +50,8 @@ export default function BookPage() {
       .catch(() => {});
   }, []);
 
-  const deliveryFee =
-    !state.deliveryType || state.deliveryType === "PICKUP"
-      ? 0
-      : state.deliveryType === "CARDIFF"
-      ? settings.cardiffFee
-      : settings.postageFee;
+  const deliveryFee = getDeliveryFee(state.deliveryType, subtotal, settings);
+  const displayedPostageFee = getDeliveryFee("POSTAGE", subtotal, settings);
 
   const total = subtotal + deliveryFee - state.promoDiscount;
 
@@ -173,7 +170,7 @@ export default function BookPage() {
                   selected={state.deliveryType}
                   onSelect={setDelivery}
                   cardiffFee={settings.cardiffFee}
-                  postageFee={settings.postageFee}
+                  postageFee={displayedPostageFee}
                   postageAvailable={settings.postageAvailable}
                 />
               </section>

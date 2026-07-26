@@ -1,6 +1,10 @@
 "use client";
 
 import { MapPin, Truck, Package } from "lucide-react";
+import {
+  DISCOUNTED_POSTAGE_FEE,
+  DISCOUNTED_POSTAGE_THRESHOLD,
+} from "@/lib/delivery-pricing";
 import { formatCurrency } from "@/lib/utils";
 import type { DeliveryType } from "@/types";
 
@@ -48,7 +52,9 @@ export function DeliverySelector({
     {
       type: "POSTAGE",
       label: "UK Postage",
-      description: "Sent via Royal Mail — UK mainland only",
+      description: `Sent via Royal Mail — UK mainland only. Orders over ${formatCurrency(
+        DISCOUNTED_POSTAGE_THRESHOLD
+      )} pay ${formatCurrency(DISCOUNTED_POSTAGE_FEE)} postage.`,
       fee: postageFee,
       icon: <Package size={20} />,
       available: postageAvailable,

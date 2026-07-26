@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSumUpCheckout } from "@/lib/sumup";
 import {
   sendCustomerConfirmation,
   sendAdminAlert,
@@ -15,51 +16,66 @@ import { formatBookingDate, formatTimeSlot } from "@/lib/availability";
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
-  const checkoutRef = body.checkout_reference ?? body.id ?? null;
-  const isPaid =
-    body.status === "PAID" ||
-    body.event_type === "CHECKOUT_COMPLETED" ||
-    body.status === "SUCCESSFUL";
+  const checkoutId = typeof body.id === "string" ? body.id : null;
 
-  if (!checkoutRef || !isPaid) {
+  if (!checkoutId) {
+    return NextResponse.json({ received: true });
+  }
+
+  let checkout;
+  try {
+    checkout = await getSumUpCheckout(checkoutId);
+  } catch (err) {
+    console.error("[SumUp webhook] Checkout verification error:", err);
+    return NextResponse.json({ received: true });
+  }
+
+  const isPaid =
+    checkout.status === "PAID" ||
+    checkout.status === "SUCCESSFUL";
+
+  if (!isPaid) {
     return NextResponse.json({ received: true });
   }
 
   const booking = await prisma.booking.findFirst({
     where: {
-      OR: [{ paymentRef: checkoutRef }, { reference: checkoutRef }],
+      paymentRef: checkout.id,
+      reference: checkout.checkout_reference,
       paymentStatus: "UNPAID",
+      paymentProvider: "sumup",
     },
     include: { items: true },
   });
 
-  if (booking) {
-    await prisma.booking.update({
+  if (booking && Math.abs(booking.total - checkout.amount) < 0.01) {
+    const updatedBooking = await prisma.booking.update({
       where: { id: booking.id },
       data: { status: "CONFIRMED", paymentStatus: "PAID" },
+      include: { items: true },
     });
 
     // Fire WhatsApp notifications — failures are logged, never throw
     try {
       const notifData = {
-        reference: booking.reference,
-        customerName: booking.customerName,
-        whatsapp: booking.whatsapp,
+        reference: updatedBooking.reference,
+        customerName: updatedBooking.customerName,
+        whatsapp: updatedBooking.whatsapp,
         bookingDate: formatBookingDate(
-          booking.bookingDate.toISOString().slice(0, 10)
+          updatedBooking.bookingDate.toISOString().slice(0, 10)
         ),
-        timeSlot: formatTimeSlot(booking.timeSlot),
-        deliveryType: booking.deliveryType,
-        address: booking.address,
-        items: booking.items.map((i) => ({
+        timeSlot: formatTimeSlot(updatedBooking.timeSlot),
+        deliveryType: updatedBooking.deliveryType,
+        address: updatedBooking.address,
+        items: updatedBooking.items.map((i) => ({
           mealName: i.mealName,
           quantity: i.quantity,
           unitPrice: i.unitPrice,
         })),
-        subtotal: booking.subtotal,
-        deliveryFee: booking.deliveryFee,
-        discount: booking.discount,
-        total: booking.total,
+        subtotal: updatedBooking.subtotal,
+        deliveryFee: updatedBooking.deliveryFee,
+        discount: updatedBooking.discount,
+        total: updatedBooking.total,
         promoCode: null,
       };
       await Promise.allSettled([
