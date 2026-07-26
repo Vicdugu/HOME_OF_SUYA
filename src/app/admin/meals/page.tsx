@@ -1,6 +1,7 @@
 "use client";
 
 import { startTransition, useEffect, useState } from "react";
+import Image from "next/image";
 import { Plus, Pencil, Trash2, X, Check, Loader2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import type {
@@ -22,6 +23,11 @@ interface VariationGroupForm extends Omit<MealVariationGroupDTO, "id" | "options
 type MealForm = Omit<MealDTO, "id" | "variationGroups"> & {
   variationGroups: VariationGroupForm[];
 };
+
+interface MealPhotoOption {
+  name: string;
+  url: string;
+}
 
 const EMPTY: MealForm = {
   name: "",
@@ -110,9 +116,11 @@ export default function AdminMealsPage() {
   const [form, setForm] = useState<MealForm>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [photoOptions, setPhotoOptions] = useState<MealPhotoOption[]>([]);
 
   useEffect(() => {
     fetch("/api/admin/meals").then((r) => r.json()).then(setMeals);
+    fetch("/api/admin/meal-photos").then((r) => r.json()).then(setPhotoOptions);
   }, []);
 
   function startNew() { setEditing("new"); setForm(EMPTY); setError(""); }
@@ -385,7 +393,6 @@ export default function AdminMealsPage() {
             {[
               { key: "name", label: "Name", type: "text" },
               { key: "price", label: "Price (£)", type: "number" },
-              { key: "imageUrl", label: "Image URL", type: "text" },
               { key: "sortOrder", label: "Sort Order", type: "number" },
             ].map(({ key, label, type }) => (
               <div key={key} className="space-y-1">
@@ -402,6 +409,87 @@ export default function AdminMealsPage() {
                 />
               </div>
             ))}
+            <div className="space-y-1 sm:col-span-2">
+              <label className="block text-xs font-medium text-gray-400">Image URL</label>
+              <input
+                type="text"
+                value={form.imageUrl}
+                onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
+                className="w-full bg-surface-dark border border-surface-border rounded-xl
+                           px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-red"
+                placeholder="Select a photo below or paste an external image URL"
+              />
+            </div>
+          </div>
+          <div className="space-y-3 rounded-xl border border-surface-border bg-surface-dark/60 p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-brand-gold font-semibold text-xs uppercase tracking-widest">
+                  Meal Photos
+                </p>
+                <p className="text-gray-500 text-xs mt-1">
+                  Choose a photo from the local Photos folder for this meal, or keep using a custom image URL.
+                </p>
+              </div>
+              {form.imageUrl ? (
+                <button
+                  type="button"
+                  onClick={() => setForm((current) => ({ ...current, imageUrl: "" }))}
+                  className="text-xs text-gray-400 hover:text-white transition-colors"
+                >
+                  Clear photo
+                </button>
+              ) : null}
+            </div>
+
+            {form.imageUrl ? (
+              <div className="relative overflow-hidden rounded-xl border border-surface-border bg-surface-dark aspect-[4/3] max-w-xs">
+                <Image
+                  src={form.imageUrl}
+                  alt="Selected meal photo"
+                  fill
+                  sizes="320px"
+                  className="object-cover"
+                />
+              </div>
+            ) : null}
+
+            {photoOptions.length === 0 ? (
+              <p className="text-xs text-gray-500">No supported photos found in the Photos folder.</p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {photoOptions.map((photo) => {
+                  const selected = form.imageUrl === photo.url;
+
+                  return (
+                    <button
+                      key={photo.name}
+                      type="button"
+                      onClick={() => setForm((current) => ({ ...current, imageUrl: photo.url }))}
+                      className={[
+                        "text-left overflow-hidden rounded-xl border transition-colors",
+                        selected
+                          ? "border-brand-red ring-1 ring-brand-red"
+                          : "border-surface-border hover:border-brand-red/40",
+                      ].join(" ")}
+                    >
+                      <div className="relative aspect-[4/3] bg-surface-dark">
+                        <Image
+                          src={photo.url}
+                          alt={photo.name}
+                          fill
+                          sizes="(max-width: 640px) 50vw, 240px"
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="px-3 py-2 bg-surface-dark/90 border-t border-surface-border">
+                        <p className="text-xs text-gray-300 truncate">{photo.name}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
           <div className="space-y-1">
             <label className="block text-xs font-medium text-gray-400">Description</label>
