@@ -6,14 +6,14 @@ import { CartProvider } from "@/context/CartContext";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Malam Special Suya — BBQ Booking",
+  title: "Home of Suya — BBQ Booking",
   description:
-    "Order authentic Malam Special Suya — select your favourite BBQ meals, choose a date, and get it delivered or pick up.",
+    "Order authentic Home of Suya meals — select your favourite BBQ dishes, choose a date, and get them delivered or pick up.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
   ),
   openGraph: {
-    title: "Malam Special Suya",
+    title: "Home of Suya",
     description: "Authentic BBQ booking — Cardiff & UK Postage",
     type: "website",
   },

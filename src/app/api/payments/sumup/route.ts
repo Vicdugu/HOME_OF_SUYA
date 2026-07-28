@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     const { checkoutId, checkoutUrl } = await createSumUpCheckout({
       reference: booking.reference,
       amount: booking.total,
-      description: `Malam Special Suya — ${booking.reference}`,
+      description: `Home of Suya — ${booking.reference}`,
       redirectUrl: `${appUrl}/confirmation/${booking.reference}`,
     });
 

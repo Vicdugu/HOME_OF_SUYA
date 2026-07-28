@@ -91,7 +91,7 @@ export async function sendCustomerConfirmation(
     data.deliveryFee > 0 ? `\nDelivery: GBP ${data.deliveryFee.toFixed(2)}` : "";
 
   const message = [
-    `*Malam Special Suya -- Booking Confirmed!*`,
+    `*Home of Suya -- Booking Confirmed!*`,
     ``,
     `Hi ${data.customerName}! Your order is confirmed.`,
     ``,
@@ -107,7 +107,7 @@ export async function sendCustomerConfirmation(
     `*Total: GBP ${data.total.toFixed(2)}*`,
     ``,
     `Questions? Just reply to this message.`,
-    `Thank you for choosing Malam Special Suya!`,
+    `Thank you for choosing Home of Suya!`,
   ].join("\n");
 
   return sendMessage(data.whatsapp, message);

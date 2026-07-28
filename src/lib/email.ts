@@ -91,12 +91,12 @@ function emailShell(bodyHtml: string): string {
 <body style="margin:0;padding:0;background:#0A0A0A;font-family:system-ui,sans-serif">
   <div style="max-width:520px;margin:40px auto;background:#1A1A1A;border-radius:12px;overflow:hidden;border:1px solid #2A2A2A">
     <div style="background:linear-gradient(135deg,#C41E3A,#8B0000);padding:24px;text-align:center">
-      <h1 style="color:#D4AF37;margin:0;font-size:22px;font-weight:900;letter-spacing:-0.5px">Malam Special Suya</h1>
+      <h1 style="color:#D4AF37;margin:0;font-size:22px;font-weight:900;letter-spacing:-0.5px">Home of Suya</h1>
       <p style="color:rgba(255,255,255,0.7);margin:4px 0 0;font-size:13px">Admin Portal</p>
     </div>
     <div style="padding:32px 28px;color:#E0E0E0">${bodyHtml}</div>
     <div style="padding:16px 28px;border-top:1px solid #2A2A2A;text-align:center">
-      <p style="color:#555;font-size:11px;margin:0">This email was sent by Malam Special Suya Admin System.<br>Do not share this email with anyone.</p>
+      <p style="color:#555;font-size:11px;margin:0">This email was sent by the Home of Suya Admin System.<br>Do not share this email with anyone.</p>
     </div>
   </div>
 </body>
@@ -129,7 +129,7 @@ export async function sendVerificationEmail(
   const body = `
     <h2 style="color:#fff;margin-top:0">You've been added as an admin</h2>
     <p>Hi <strong style="color:#D4AF37">${username}</strong>,</p>
-    <p>An admin account has been created for you on the Malam Special Suya portal.</p>
+    <p>An admin account has been created for you on the Home of Suya portal.</p>
     <p>Click the button below to set your password and activate your account. <strong>This link expires in 24 hours.</strong></p>
     ${actionBtn(verifyUrl, "Set Password & Activate Account")}
     <p style="color:#888;font-size:13px">If you did not expect this email, please ignore it.</p>`;
@@ -137,7 +137,7 @@ export async function sendVerificationEmail(
   const { error } = await resend.emails.send({
     from: FROM,
     to,
-    subject: "Activate your Malam Special Suya admin account",
+    subject: "Activate your Home of Suya admin account",
     html: emailShell(body),
   });
 
@@ -164,7 +164,7 @@ export async function sendPasswordResetEmail(
   const body = `
     <h2 style="color:#fff;margin-top:0">Password Reset Request</h2>
     <p>Hi <strong style="color:#D4AF37">${username}</strong>,</p>
-    <p>We received a request to reset your Malam Special Suya admin password.</p>
+    <p>We received a request to reset your Home of Suya admin password.</p>
     <p>Click the button below to set a new password. <strong>This link expires in 1 hour.</strong></p>
     ${actionBtn(resetUrl, "Reset Password")}
     <p style="color:#888;font-size:13px">If you did not request a password reset, you can safely ignore this email. Your password will not change.</p>`;
@@ -172,7 +172,7 @@ export async function sendPasswordResetEmail(
   const { error } = await resend.emails.send({
     from: FROM,
     to,
-    subject: "Reset your Malam Special Suya admin password",
+    subject: "Reset your Home of Suya admin password",
     html: emailShell(body),
   });
 

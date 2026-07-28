@@ -38,7 +38,7 @@ export default function AdminLoginPage() {
         <div className="text-center space-y-2">
           <Flame size={36} className="text-brand-gold mx-auto" />
           <h1 className="text-white font-black text-2xl">Admin Login</h1>
-          <p className="text-gray-500 text-sm">Malam Special Suya</p>
+          <p className="text-gray-500 text-sm">Home of Suya</p>
         </div>
 
         <form onSubmit={handleSubmit} className="card p-6 space-y-4">

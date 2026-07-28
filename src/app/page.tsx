@@ -43,7 +43,7 @@ export default function MenuPage() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Flame size={28} className="text-brand-gold" />
             <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight">
-              Malam Special Suya
+              Home of Suya
             </h1>
             <Flame size={28} className="text-brand-gold" />
           </div>

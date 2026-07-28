@@ -85,7 +85,7 @@ export default function AdminLayout({
         <div className="px-4 py-5 border-b border-surface-border flex items-center gap-2">
           <Flame size={20} className="text-brand-gold" />
           <span className="text-white font-bold text-sm leading-tight">
-            Malam Suya
+            Home of Suya
             <br />
             <span className="text-gray-500 font-normal text-xs">Admin</span>
           </span>
@@ -124,7 +124,7 @@ export default function AdminLayout({
         <div className="px-4 py-5 border-b border-surface-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Flame size={20} className="text-brand-gold" />
-            <span className="text-white font-bold text-sm">Malam Suya Admin</span>
+            <span className="text-white font-bold text-sm">Home of Suya Admin</span>
           </div>
           <button
             onClick={() => setMobileOpen(false)}

@@ -1,4 +1,4 @@
-# Malam Special Suya — Project Documentation
+# Home of Suya — Project Documentation
 
 This folder tracks the build process, architecture decisions, and feature documentation for the system.
 

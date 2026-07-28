@@ -58,7 +58,7 @@ export function HeaderLogo({ size = "default" }: HeaderLogoProps) {
       {logoUrl ? (
         <img
           src={logoUrl}
-          alt="Malam Special Suya logo"
+          alt="Home of Suya logo"
           className="h-full w-full object-contain p-2"
         />
       ) : (
