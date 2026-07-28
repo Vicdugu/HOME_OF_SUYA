@@ -15,6 +15,7 @@ import {
   X,
   Users,
 } from "lucide-react";
+import { HeaderLogo } from "@/components/ui/HeaderLogo";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -149,6 +150,10 @@ export default function AdminLayout({
 
       {/* ── Main content ───────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0">
+        <header className="hidden md:flex items-center justify-end px-6 py-4 border-b border-surface-border bg-brand-black/80 backdrop-blur-sm">
+          <HeaderLogo />
+        </header>
+
         {/* Mobile top bar */}
         <header className="md:hidden flex items-center gap-3 px-4 py-3 bg-surface-dark border-b border-surface-border">
           <button
@@ -160,6 +165,9 @@ export default function AdminLayout({
           <div className="flex items-center gap-2">
             <Flame size={16} className="text-brand-gold" />
             <span className="text-white font-bold text-sm">Admin</span>
+          </div>
+          <div className="ml-auto">
+            <HeaderLogo />
           </div>
         </header>
 

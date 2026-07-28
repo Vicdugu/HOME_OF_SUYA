@@ -103,6 +103,7 @@ model DeliverySettings {
   postageAvailable Boolean  @default(true)
   minOrderCardiff  Float    @default(0)
   minOrderPostage  Float    @default(0)
+  logoUrl          String?
   updatedAt        DateTime @updatedAt
 
   @@map("delivery_settings")

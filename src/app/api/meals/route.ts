@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { normalizeMealImageUrl } from "@/lib/meal-photos";
 
 export async function GET() {
   const meals = await prisma.meal.findMany({
@@ -15,5 +16,10 @@ export async function GET() {
       },
     },
   });
-  return NextResponse.json(meals);
+  return NextResponse.json(
+    meals.map((meal) => ({
+      ...meal,
+      imageUrl: normalizeMealImageUrl(meal.imageUrl),
+    }))
+  );
 }

@@ -2,13 +2,21 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdminRequest } from "@/lib/admin-api-auth";
+import { normalizeBrandImageUrl } from "@/lib/meal-photos";
 
 export async function GET(req: NextRequest) {
   const authError = await requireAdminRequest(req);
   if (authError) return authError;
 
   const settings = await prisma.deliverySettings.findFirst();
-  return NextResponse.json(settings);
+  if (!settings) {
+    return NextResponse.json(settings);
+  }
+
+  return NextResponse.json({
+    ...settings,
+    logoUrl: normalizeBrandImageUrl(settings.logoUrl),
+  });
 }
 
 export async function PUT(req: NextRequest) {
@@ -16,6 +24,7 @@ export async function PUT(req: NextRequest) {
   if (authError) return authError;
 
   const data = await req.json();
+  const logoUrl = normalizeBrandImageUrl(data.logoUrl);
   const existing = await prisma.deliverySettings.findFirst();
   const settings = existing
     ? await prisma.deliverySettings.update({
@@ -26,8 +35,18 @@ export async function PUT(req: NextRequest) {
           postageAvailable: Boolean(data.postageAvailable),
           minOrderCardiff: Number(data.minOrderCardiff ?? 0),
           minOrderPostage: Number(data.minOrderPostage ?? 0),
+          logoUrl,
         },
       })
-    : await prisma.deliverySettings.create({ data });
+    : await prisma.deliverySettings.create({
+        data: {
+          cardiffFee: Number(data.cardiffFee),
+          postageFee: Number(data.postageFee),
+          postageAvailable: Boolean(data.postageAvailable),
+          minOrderCardiff: Number(data.minOrderCardiff ?? 0),
+          minOrderPostage: Number(data.minOrderPostage ?? 0),
+          logoUrl,
+        },
+      });
   return NextResponse.json(settings);
 }

@@ -29,6 +29,10 @@ interface MealPhotoOption {
   url: string;
 }
 
+function isLocalMealPhotoUrl(imageUrl: string) {
+  return imageUrl.startsWith("/api/meal-photos?");
+}
+
 const EMPTY: MealForm = {
   name: "",
   description: "",
@@ -449,6 +453,7 @@ export default function AdminMealsPage() {
                   alt="Selected meal photo"
                   fill
                   sizes="320px"
+                  unoptimized={isLocalMealPhotoUrl(form.imageUrl)}
                   className="object-cover"
                 />
               </div>
@@ -479,6 +484,7 @@ export default function AdminMealsPage() {
                           alt={photo.name}
                           fill
                           sizes="(max-width: 640px) 50vw, 240px"
+                          unoptimized
                           className="object-cover"
                         />
                       </div>

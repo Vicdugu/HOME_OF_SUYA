@@ -1,27 +1,47 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Loader2, Save, CalendarOff, Trash2, Plus } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2, Save, CalendarOff, Trash2, Plus, Upload, X } from "lucide-react";
 import { isBookableDay, toDateString } from "@/lib/availability";
 import {
   DISCOUNTED_POSTAGE_FEE,
   DISCOUNTED_POSTAGE_THRESHOLD,
 } from "@/lib/delivery-pricing";
+import type { DeliverySettingsDTO } from "@/types";
 
-interface Settings {
-  cardiffFee: number; postageFee: number; postageAvailable: boolean;
-  minOrderCardiff: number; minOrderPostage: number;
+const MAX_LOGO_SIZE_BYTES = 2 * 1024 * 1024;
+const ACCEPTED_LOGO_TYPES = new Set(["image/png", "image/jpeg", "image/svg+xml"]);
+
+interface Settings extends DeliverySettingsDTO {
 }
 
 interface BlockedDate { id: string; date: string; reason: string | null }
+
+function getRenderableLogoUrl(imageUrl: string | null | undefined) {
+  const normalized = String(imageUrl ?? "").trim();
+
+  if (!normalized) {
+    return null;
+  }
+
+  if (normalized.startsWith("/") || /^https?:\/\//i.test(normalized)) {
+    return normalized;
+  }
+
+  return null;
+}
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [brandingBusy, setBrandingBusy] = useState(false);
+  const [brandingError, setBrandingError] = useState("");
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
   const [newDate, setNewDate] = useState("");
   const [newReason, setNewReason] = useState("");
+  const logoInputRef = useRef<HTMLInputElement | null>(null);
+  const previewLogoUrl = getRenderableLogoUrl(settings?.logoUrl);
 
   useEffect(() => {
     fetch("/api/admin/settings").then((r) => r.json()).then(setSettings);
@@ -39,6 +59,83 @@ export default function AdminSettingsPage() {
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  }
+
+  function openLogoPicker() {
+    setBrandingError("");
+    logoInputRef.current?.click();
+  }
+
+  async function handleLogoSelected(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file || !settings) {
+      return;
+    }
+
+    const fileName = file.name.toLowerCase();
+    const hasAllowedExtension = fileName.endsWith(".png") || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".svg");
+
+    if (!hasAllowedExtension || (file.type && !ACCEPTED_LOGO_TYPES.has(file.type))) {
+      setBrandingError("Logo must be a PNG, JPG, JPEG, or SVG file.");
+      return;
+    }
+
+    if (file.size > MAX_LOGO_SIZE_BYTES) {
+      setBrandingError("Logo must be 2MB or smaller.");
+      return;
+    }
+
+    setBrandingBusy(true);
+    setBrandingError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/admin/settings/logo", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Could not upload logo");
+      }
+
+      setSettings((current) => current ? { ...current, logoUrl: data.logoUrl ?? null } : current);
+    } catch (error) {
+      setBrandingError(error instanceof Error ? error.message : "Could not upload logo");
+    } finally {
+      setBrandingBusy(false);
+    }
+  }
+
+  async function removeLogo() {
+    if (!settings) {
+      return;
+    }
+
+    setBrandingBusy(true);
+    setBrandingError("");
+
+    try {
+      const response = await fetch("/api/admin/settings/logo", {
+        method: "DELETE",
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Could not remove logo");
+      }
+
+      setSettings((current) => current ? { ...current, logoUrl: data.logoUrl ?? null } : current);
+    } catch (error) {
+      setBrandingError(error instanceof Error ? error.message : "Could not remove logo");
+    } finally {
+      setBrandingBusy(false);
+    }
   }
 
   async function addBlockedDate() {
@@ -124,6 +221,71 @@ export default function AdminSettingsPage() {
           {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
           {saved ? "Saved!" : "Save Changes"}
         </button>
+      </section>
+
+      <section className="card p-5 space-y-5">
+        <h2 className="text-brand-gold font-semibold text-xs uppercase tracking-widest">Branding</h2>
+        <input
+          ref={logoInputRef}
+          type="file"
+          accept=".png,.jpg,.jpeg,.svg,image/png,image/jpeg,image/svg+xml"
+          className="hidden"
+          onChange={handleLogoSelected}
+        />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          <button
+            type="button"
+            onClick={openLogoPicker}
+            disabled={brandingBusy}
+            className="group relative flex h-24 w-32 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-surface-border bg-surface-dark transition-colors hover:border-brand-red/50 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {previewLogoUrl ? (
+              <img
+                src={previewLogoUrl}
+                alt="Site logo preview"
+                className="h-full w-full object-contain p-3"
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-2 text-gray-500">
+                <Upload size={18} />
+                <span className="text-[11px] font-semibold uppercase tracking-[0.2em]">Upload Logo</span>
+              </div>
+            )}
+            {brandingBusy && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+                <Loader2 size={18} className="animate-spin text-white" />
+              </div>
+            )}
+          </button>
+
+          <div className="space-y-3">
+            <p className="max-w-md text-xs text-gray-500">
+              Click the logo box to upload a PNG, JPG, JPEG, or SVG. The uploaded logo is stored automatically and shown in the top-right corner of both the admin area and the customer-facing site.
+            </p>
+            <p className="text-xs text-gray-600">Maximum file size: 2MB</p>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={openLogoPicker}
+                disabled={brandingBusy}
+                className="rounded-xl border border-surface-border px-4 py-2 text-sm text-white transition-colors hover:border-brand-red/40 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {previewLogoUrl ? "Replace Logo" : "Choose Logo"}
+              </button>
+              <button
+                type="button"
+                onClick={removeLogo}
+                disabled={brandingBusy || !previewLogoUrl}
+                className="rounded-xl border border-surface-border px-4 py-2 text-sm text-gray-300 transition-colors hover:border-brand-red/40 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <X size={14} /> Remove Logo
+                </span>
+              </button>
+            </div>
+            {brandingError ? <p className="text-xs text-brand-red">{brandingError}</p> : null}
+          </div>
+        </div>
       </section>
 
       {/* Blocked dates */}

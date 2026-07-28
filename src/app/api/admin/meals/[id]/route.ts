@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdminRequest } from "@/lib/admin-api-auth";
+import { getDefaultMealPhotoUrl } from "@/lib/meal-photos";
 
 type VariationSelectionType = "SINGLE" | "MULTIPLE";
 
@@ -112,7 +113,7 @@ function parseMealInput(data: Record<string, unknown>) {
       name,
       description,
       price,
-      imageUrl: imageUrl || "/images/meals/placeholder.jpg",
+      imageUrl: imageUrl || getDefaultMealPhotoUrl(),
       isAvailable: Boolean(data.isAvailable ?? true),
       sortOrder,
     },

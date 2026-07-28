@@ -5,6 +5,7 @@ import { Flame, MapPin, Clock } from "lucide-react";
 import { MealCard } from "@/components/booking/MealCard";
 import { CartDrawer } from "@/components/booking/CartDrawer";
 import { FloatingCartButton } from "@/components/booking/FloatingCartButton";
+import { HeaderLogo } from "@/components/ui/HeaderLogo";
 import type { MealDTO } from "@/types";
 
 export default function MenuPage() {
@@ -33,6 +34,10 @@ export default function MenuPage() {
                               radial-gradient(circle at 80% 20%, #C41E3A 0%, transparent 50%)`,
           }}
         />
+
+        <div className="absolute left-4 top-4 z-10 md:left-8 md:top-6">
+          <HeaderLogo size="customer" />
+        </div>
 
         <div className="relative max-w-5xl mx-auto px-4 py-12 md:py-20 text-center">
           <div className="flex items-center justify-center gap-3 mb-4">

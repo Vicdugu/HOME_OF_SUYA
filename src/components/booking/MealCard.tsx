@@ -19,6 +19,10 @@ interface MealCardProps {
   meal: MealDTO;
 }
 
+function isLocalMealPhotoUrl(imageUrl: string) {
+  return imageUrl.startsWith("/api/meal-photos?");
+}
+
 export function MealCard({ meal }: MealCardProps) {
   const { state, addItem, setQuantity } = useCart();
   const [customising, setCustomising] = useState(false);
@@ -72,6 +76,7 @@ export function MealCard({ meal }: MealCardProps) {
           alt={meal.name}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          unoptimized={isLocalMealPhotoUrl(meal.imageUrl)}
           className="object-cover transition-transform duration-300 group-hover:scale-105"
           onError={(e) => {
             // Fallback to gradient placeholder if image fails

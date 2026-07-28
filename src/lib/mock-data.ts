@@ -3,6 +3,7 @@
  * This file will be removed once the DB is live and API routes return real data.
  */
 import type { MealDTO } from "@/types";
+import { getDefaultMealPhotoUrl } from "@/lib/meal-photos";
 
 export const MOCK_MEALS: MealDTO[] = [
   {
@@ -11,7 +12,7 @@ export const MOCK_MEALS: MealDTO[] = [
     description:
       "Thinly sliced marinated beef skewers grilled over open flame with our signature yaji spice blend.",
     price: 8.0,
-    imageUrl: "/images/meals/placeholder.jpg",
+    imageUrl: getDefaultMealPhotoUrl(),
     isAvailable: true,
     sortOrder: 1,
     variationGroups: [],
@@ -22,7 +23,7 @@ export const MOCK_MEALS: MealDTO[] = [
     description:
       "Tender chicken breast strips marinated overnight in yaji spice, flame-grilled to perfection.",
     price: 7.5,
-    imageUrl: "/images/meals/placeholder.jpg",
+    imageUrl: getDefaultMealPhotoUrl(),
     isAvailable: true,
     sortOrder: 2,
     variationGroups: [],
@@ -33,7 +34,7 @@ export const MOCK_MEALS: MealDTO[] = [
     description:
       "Juicy lamb strips with a rich smoky flavour, marinated in our special Hausa spice mix.",
     price: 9.0,
-    imageUrl: "/images/meals/placeholder.jpg",
+    imageUrl: getDefaultMealPhotoUrl(),
     isAvailable: true,
     sortOrder: 3,
     variationGroups: [],
@@ -44,7 +45,7 @@ export const MOCK_MEALS: MealDTO[] = [
     description:
       "Warm flatbread filled with suya beef, fresh tomatoes, onions, suya seasoning and house sauce.",
     price: 10.0,
-    imageUrl: "/images/meals/placeholder.jpg",
+    imageUrl: getDefaultMealPhotoUrl(),
     isAvailable: true,
     sortOrder: 4,
     variationGroups: [],
@@ -55,7 +56,7 @@ export const MOCK_MEALS: MealDTO[] = [
     description:
       "A generous platter of beef, chicken, and lamb suya sticks served with peppered onions and tomatoes.",
     price: 22.0,
-    imageUrl: "/images/meals/placeholder.jpg",
+    imageUrl: getDefaultMealPhotoUrl(),
     isAvailable: true,
     sortOrder: 5,
     variationGroups: [],
@@ -66,7 +67,7 @@ export const MOCK_MEALS: MealDTO[] = [
     description:
       "Crispy dried spiced beef — a Nigerian jerky classic. Perfect as a snack or side.",
     price: 6.5,
-    imageUrl: "/images/meals/placeholder.jpg",
+    imageUrl: getDefaultMealPhotoUrl(),
     isAvailable: false,
     sortOrder: 6,
     variationGroups: [],
@@ -89,4 +90,5 @@ export const MOCK_DELIVERY_SETTINGS = {
   postageAvailable: true,
   minOrderCardiff: 0,
   minOrderPostage: 0,
+  logoUrl: null,
 };

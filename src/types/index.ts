@@ -80,6 +80,7 @@ export interface DeliverySettingsDTO {
   postageAvailable: boolean;
   minOrderCardiff: number;
   minOrderPostage: number;
+  logoUrl: string | null;
 }
 
 export interface BookingDTO {
