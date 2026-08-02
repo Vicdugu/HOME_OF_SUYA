@@ -94,8 +94,7 @@ export default function PaymentPage() {
       if (!bookingRes.ok) throw new Error(booking.error ?? "Booking failed");
 
       // Step 2 — create payment session
-      const paymentEndpoint =
-        method === "sumup" ? "/api/payments/sumup" : "/api/payments/stripe";
+      const paymentEndpoint = "/api/payments/sumup";
 
       const payRes = await fetch(paymentEndpoint, {
         method: "POST",
@@ -285,25 +284,6 @@ export default function PaymentPage() {
               <CreditCard size={18} />
             )}
             {loading === "sumup" ? "Redirecting to SumUp…" : "Pay with SumUp"}
-          </button>
-
-          {/* Stripe — fallback */}
-          <button
-            onClick={() => handlePay("stripe")}
-            disabled={!!loading}
-            className="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-xl
-                       border border-surface-border bg-surface-dark text-white
-                       hover:border-brand-red/40 disabled:opacity-60
-                       transition-all duration-150 text-sm font-medium"
-          >
-            {loading === "stripe" ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <CreditCard size={16} className="text-gray-400" />
-            )}
-            {loading === "stripe"
-              ? "Redirecting to Stripe…"
-              : "Pay with Card (Stripe)"}
           </button>
         </div>
 

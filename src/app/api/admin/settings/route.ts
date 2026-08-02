@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdminRequest } from "@/lib/admin-api-auth";
-import { normalizeBrandImageUrl } from "@/lib/meal-photos";
+import { normalizeBrandLogoUrl } from "@/lib/branding-logo";
 
 export async function GET(req: NextRequest) {
   const authError = await requireAdminRequest(req);
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     ...settings,
-    logoUrl: normalizeBrandImageUrl(settings.logoUrl),
+    logoUrl: normalizeBrandLogoUrl(settings.logoUrl),
   });
 }
 
@@ -24,7 +24,7 @@ export async function PUT(req: NextRequest) {
   if (authError) return authError;
 
   const data = await req.json();
-  const logoUrl = normalizeBrandImageUrl(data.logoUrl);
+  const logoUrl = normalizeBrandLogoUrl(data.logoUrl);
   const existing = await prisma.deliverySettings.findFirst();
   const settings = existing
     ? await prisma.deliverySettings.update({

@@ -24,6 +24,26 @@ export function getBrandLogoUrl(version?: number | string) {
   return `/api/branding/logo?v=${encodeURIComponent(String(version))}`;
 }
 
+export function normalizeBrandLogoUrl(imageUrl: string | null | undefined) {
+  const normalized = String(imageUrl ?? "").trim();
+
+  if (!normalized) {
+    return null;
+  }
+
+  if (normalized.startsWith("/") || /^https?:\/\//i.test(normalized)) {
+    return normalized;
+  }
+
+  const fileName = normalized.split(/[\\/]/).pop()?.trim() ?? "";
+
+  if (fileName && isAllowedBrandLogo(fileName)) {
+    return getBrandLogoUrl();
+  }
+
+  return null;
+}
+
 export async function ensureBrandingDirectory() {
   await mkdir(BRANDING_DIRECTORY, { recursive: true });
 }

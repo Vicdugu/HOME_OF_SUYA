@@ -176,7 +176,7 @@ export default function ConfirmationPage({
             <div className="flex items-center gap-2">
               <Clock size={12} className="text-brand-gold shrink-0" />
               <span>
-                {formatBookingDate(booking.bookingDate)} —{" "}
+                {formatBookingDate(booking.bookingDate.slice(0, 10))} —{" "}
                 {formatTimeSlot(booking.timeSlot)}
               </span>
             </div>
