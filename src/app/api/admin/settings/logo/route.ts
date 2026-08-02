@@ -3,18 +3,12 @@ import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdminRequest } from "@/lib/admin-api-auth";
 import {
-  deleteStoredBrandLogos,
-  getBrandLogoUrl,
   isAllowedBrandLogo,
   MAX_BRAND_LOGO_SIZE_BYTES,
-  saveBrandLogo,
+  toBrandLogoDataUrl,
 } from "@/lib/branding-logo";
 
 export const runtime = "nodejs";
-
-function createVersionedLogoUrl() {
-  return getBrandLogoUrl(Date.now());
-}
 
 export async function POST(req: NextRequest) {
   const authError = await requireAdminRequest(req);
@@ -35,9 +29,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Logo must be 2MB or smaller" }, { status: 400 });
   }
 
-  await saveBrandLogo(file.name, new Uint8Array(await file.arrayBuffer()));
-
-  const logoUrl = createVersionedLogoUrl();
+  const logoUrl = toBrandLogoDataUrl(
+    file.name,
+    new Uint8Array(await file.arrayBuffer())
+  );
   const existing = await prisma.deliverySettings.findFirst();
 
   if (existing) {
@@ -57,8 +52,6 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const authError = await requireAdminRequest(req);
   if (authError) return authError;
-
-  await deleteStoredBrandLogos();
 
   const existing = await prisma.deliverySettings.findFirst();
   if (existing) {

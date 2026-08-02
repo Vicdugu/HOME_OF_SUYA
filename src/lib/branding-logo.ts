@@ -31,7 +31,11 @@ export function normalizeBrandLogoUrl(imageUrl: string | null | undefined) {
     return null;
   }
 
-  if (normalized.startsWith("/") || /^https?:\/\//i.test(normalized)) {
+  if (
+    normalized.startsWith("data:") ||
+    normalized.startsWith("/") ||
+    /^https?:\/\//i.test(normalized)
+  ) {
     return normalized;
   }
 
@@ -102,4 +106,13 @@ export function getBrandLogoContentType(fileName: string) {
     default:
       return "application/octet-stream";
   }
+}
+
+export function toBrandLogoDataUrl(fileName: string, content: Uint8Array) {
+  if (!isAllowedBrandLogo(fileName)) {
+    throw new Error("Unsupported logo format");
+  }
+
+  const mimeType = getBrandLogoContentType(fileName);
+  return `data:${mimeType};base64,${Buffer.from(content).toString("base64")}`;
 }
