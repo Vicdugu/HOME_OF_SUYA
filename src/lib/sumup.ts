@@ -11,6 +11,7 @@ export interface SumUpCheckout {
   amount: number;
   currency: string;
   checkout_reference: string;
+  hosted_checkout_url?: string;
 }
 
 function getSumUpApiConfig() {
@@ -47,6 +48,9 @@ export async function createSumUpCheckout(params: {
       description: params.description,
       return_url: params.returnUrl,
       redirect_url: params.redirectUrl,
+      hosted_checkout: {
+        enabled: true,
+      },
     }),
   });
 
@@ -58,9 +62,14 @@ export async function createSumUpCheckout(params: {
   }
 
   const checkout: SumUpCheckout = await res.json();
+
+  if (!checkout.hosted_checkout_url) {
+    throw new Error("SumUp hosted checkout URL was not returned");
+  }
+
   return {
     checkoutId: checkout.id,
-    checkoutUrl: `https://checkout.sumup.com/pay/${checkout.id}`,
+    checkoutUrl: checkout.hosted_checkout_url,
   };
 }
 
