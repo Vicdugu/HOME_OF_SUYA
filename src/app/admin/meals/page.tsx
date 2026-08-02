@@ -119,12 +119,54 @@ export default function AdminMealsPage() {
   const [editing, setEditing] = useState<string | null>(null); // meal id or "new"
   const [form, setForm] = useState<MealForm>(EMPTY);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [photoOptions, setPhotoOptions] = useState<MealPhotoOption[]>([]);
 
   useEffect(() => {
-    fetch("/api/admin/meals").then((r) => r.json()).then(setMeals);
-    fetch("/api/admin/meal-photos").then((r) => r.json()).then(setPhotoOptions);
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError("");
+
+      try {
+        const [mealsRes, photosRes] = await Promise.all([
+          fetch("/api/admin/meals"),
+          fetch("/api/admin/meal-photos"),
+        ]);
+
+        const mealsData = await mealsRes.json().catch(() => null);
+        const photosData = await photosRes.json().catch(() => []);
+
+        if (!mealsRes.ok) {
+          throw new Error(
+            mealsData && typeof mealsData.error === "string"
+              ? mealsData.error
+              : "Could not load meals"
+          );
+        }
+
+        if (!cancelled) {
+          setMeals(Array.isArray(mealsData) ? mealsData : []);
+          setPhotoOptions(Array.isArray(photosData) ? photosData : []);
+        }
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(loadError instanceof Error ? loadError.message : "Could not load meals");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   function startNew() { setEditing("new"); setForm(EMPTY); setError(""); }
@@ -242,32 +284,6 @@ export default function AdminMealsPage() {
     setError("");
 
     if (editing === "new") {
-      const tempId = `temp-${Date.now()}`;
-      const optimisticMeal: MealDTO = {
-        id: tempId,
-        ...normalized,
-        variationGroups: normalized.variationGroups.map((group, groupIndex) => ({
-          id: `${tempId}-group-${groupIndex}`,
-          name: group.name,
-          selectionType: group.selectionType,
-          sortOrder: group.sortOrder,
-          options: group.options
-            .filter((option) => option.name)
-            .map((option, optionIndex) => ({
-              id: `${tempId}-option-${groupIndex}-${optionIndex}`,
-              name: option.name,
-              price: option.price,
-              sortOrder: option.sortOrder,
-            })),
-        })),
-      };
-
-      startTransition(() => {
-        setMeals((prev) => [...prev, optimisticMeal].sort((a, b) => a.sortOrder - b.sortOrder));
-      });
-      setEditing(null);
-      setForm(EMPTY);
-
       try {
         const res = await fetch("/api/admin/meals", {
           method: "POST",
@@ -281,14 +297,11 @@ export default function AdminMealsPage() {
         }
 
         startTransition(() => {
-          setMeals((prev) => prev
-            .map((item) => (item.id === tempId ? meal : item))
-            .sort((a, b) => a.sortOrder - b.sortOrder));
+          setMeals((prev) => [...prev, meal].sort((a, b) => a.sortOrder - b.sortOrder));
         });
+        setEditing(null);
+        setForm(EMPTY);
       } catch (err) {
-        startTransition(() => {
-          setMeals((prev) => prev.filter((item) => item.id !== tempId));
-        });
         setError(err instanceof Error ? err.message : "Could not add meal");
       }
     } else {
@@ -322,13 +335,6 @@ export default function AdminMealsPage() {
         })),
       };
 
-      startTransition(() => {
-        setMeals((prev) => prev
-          .map((meal) => meal.id === mealId ? optimisticMeal : meal)
-          .sort((a, b) => a.sortOrder - b.sortOrder));
-      });
-      setEditing(null);
-
       try {
         const res = await fetch(`/api/admin/meals/${mealId}`, {
           method: "PUT",
@@ -348,10 +354,11 @@ export default function AdminMealsPage() {
             .map((meal) => meal.id === mealId ? updatedMeal : meal)
             .sort((a, b) => a.sortOrder - b.sortOrder));
         });
+        setEditing(null);
       } catch (err) {
         startTransition(() => {
           setMeals((prev) => prev
-            .map((meal) => meal.id === previousMeal.id ? previousMeal : meal)
+            .map((meal) => meal.id === optimisticMeal.id ? previousMeal : meal)
             .sort((a, b) => a.sortOrder - b.sortOrder));
         });
         setError(err instanceof Error ? err.message : "Could not update meal");
@@ -382,6 +389,10 @@ export default function AdminMealsPage() {
         <div>
           <h1 className="text-white font-black text-2xl">Meals</h1>
           <p className="text-gray-500 text-sm">{meals.length} meals on the menu</p>
+        {loading ? (
+          <div className="card p-4 text-sm text-gray-500">Loading meals...</div>
+        ) : null}
+
         </div>
         <button onClick={startNew} className="btn-primary flex items-center gap-2 px-4 py-2 text-sm">
           <Plus size={15} /> Add Meal

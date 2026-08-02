@@ -14,7 +14,7 @@ function getResend(): Resend | null {
   return _resend;
 }
 
-const FROM = process.env.FROM_EMAIL ?? "noreply@malamspecialsuya.com";
+const FROM = process.env.FROM_EMAIL ?? "noreply@homeofsuya.com";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
 /**

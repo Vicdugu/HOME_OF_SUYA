@@ -7,7 +7,7 @@
 ### 1. Connect GitHub to Vercel
 
 1. Go to [vercel.com](https://vercel.com) → New Project
-2. Import `Vicdugu/MALAM_SPECIAL_SUYA` from GitHub
+2. Import the Home of Suya GitHub repository from your account
 3. Framework preset: **Next.js** (auto-detected)
 4. Root directory: `/` (default)
 5. Build command: `npx prisma generate && next build` ← set this manually

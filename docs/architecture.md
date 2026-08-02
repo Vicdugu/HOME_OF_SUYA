@@ -41,7 +41,6 @@ src/
 │   ├── auth.ts
 │   ├── whatsapp.ts
 │   ├── email.ts
-│   ├── mock-data.ts          ← TEMP: removed when DB connects
 │   └── utils.ts
 ├── middleware.ts              ← Admin route protection
 └── types/index.ts

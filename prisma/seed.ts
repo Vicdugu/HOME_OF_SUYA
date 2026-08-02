@@ -30,7 +30,7 @@ async function main() {
     await prisma.deliverySettings.create({
       data: {
         cardiffFee: 5.0,
-        postageFee: 8.0,
+        postageFee: 7.0,
         postageAvailable: true,
         minOrderCardiff: 0,
         minOrderPostage: 0,

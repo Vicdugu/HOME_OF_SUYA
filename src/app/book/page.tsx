@@ -9,8 +9,8 @@ import { DatePicker } from "@/components/booking/DatePicker";
 import { TimeSlotPicker } from "@/components/booking/TimeSlotPicker";
 import { DeliverySelector } from "@/components/booking/DeliverySelector";
 import { BookingOrderSummary } from "@/components/booking/BookingOrderSummary";
+import { DEFAULT_DELIVERY_SETTINGS } from "@/lib/delivery-settings";
 import { getDeliveryFee } from "@/lib/delivery-pricing";
-import { MOCK_DELIVERY_SETTINGS } from "@/lib/mock-data";
 
 const STEPS = [
   { n: 1, label: "Menu" },
@@ -30,7 +30,7 @@ export default function BookPage() {
   const { state, setDate, setTimeSlot, setDelivery, subtotal, totalItems } =
     useCart();
 
-  const [settings, setSettings] = useState<DeliverySettings>(MOCK_DELIVERY_SETTINGS);
+  const [settings, setSettings] = useState<DeliverySettings>(DEFAULT_DELIVERY_SETTINGS);
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
 
   // Redirect if cart empty

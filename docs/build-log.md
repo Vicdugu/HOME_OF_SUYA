@@ -38,7 +38,7 @@ A chronological record of every build step for this system.
 **Completed: 2026-07-08**
 
 - Created `src/lib/availability.ts` — client-safe utilities: `isBookableDay`, `isTooSoon`, `toDateString`, `fromDateString`, `getCalendarDays`, `formatBookingDate`, `formatTimeSlot`, `getAvailableDates`, `TIME_SLOTS` constant
-- Added `MOCK_BLOCKED_DATES` and `MOCK_DELIVERY_SETTINGS` to `src/lib/mock-data.ts`
+- Added temporary blocked-date and delivery-settings defaults to support the booking flow before the database-backed settings were finalized
 - Created `GET /api/availability` — returns next 10 weeks of Tue/Fri dates minus blocked
 - Created `GET /api/delivery-settings` — returns Cardiff fee, postage fee, availability toggle
 - Created `src/components/booking/DatePicker.tsx` — custom calendar grid, Tue/Fri selectable, past/blocked disabled
@@ -58,8 +58,8 @@ A chronological record of every build step for this system.
 - Created `src/components/booking/MealCard.tsx` — meal image, name, description, price, inline quantity selector, sold-out state
 - Created `src/components/booking/CartDrawer.tsx` — slide-in drawer, item list, remove, quantity adjust, subtotal, proceed CTA
 - Created `src/components/booking/FloatingCartButton.tsx` — sticky bottom bar showing item count + subtotal, hidden when cart empty
-- Created `src/app/api/meals/route.ts` — GET /api/meals (returns mock data; will switch to DB in Phase 3 DB step)
-- Created `src/lib/mock-data.ts` — 6 sample suya meals for UI development before DB is connected
+- Created `src/app/api/meals/route.ts` — GET /api/meals for the public menu flow
+- Added temporary sample meals for early UI development before the database-backed menu was connected
 - Updated `src/app/page.tsx` — full menu page: hero banner, "how it works" steps, responsive meal grid, unavailable section
 - Updated `src/app/layout.tsx` — wrapped with `CartProvider`
 - Installed `lucide-react` for icons

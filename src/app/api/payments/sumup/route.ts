@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
       reference: booking.reference,
       amount: booking.total,
       description: `Home of Suya — ${booking.reference}`,
+      returnUrl: `${appUrl}/api/payments/webhook/sumup`,
       redirectUrl: `${appUrl}/confirmation/${booking.reference}`,
     });
 

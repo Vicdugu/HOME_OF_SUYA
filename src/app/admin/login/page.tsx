@@ -22,13 +22,21 @@ export default function AdminLoginPage() {
       body: JSON.stringify(form),
     });
 
+    const data = await res.json().catch(() => ({} as { error?: string }));
+
     setLoading(false);
 
     if (res.ok) {
       router.push("/admin");
       router.refresh();
     } else {
-      setError("Invalid username or password");
+      setError(
+        typeof data.error === "string" && data.error
+          ? data.error
+          : res.status >= 500
+            ? "Sign-in failed due to a server error. Try again shortly."
+            : "Invalid username or password"
+      );
     }
   }
 

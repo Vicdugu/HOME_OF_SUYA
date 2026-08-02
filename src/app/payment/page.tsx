@@ -12,11 +12,11 @@ import {
   Lock,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { DEFAULT_DELIVERY_SETTINGS } from "@/lib/delivery-settings";
 import { getDeliveryFee } from "@/lib/delivery-pricing";
 import { formatMealVariationSummary } from "@/lib/meal-variations";
 import { formatCurrency } from "@/lib/utils";
 import { formatBookingDate, formatTimeSlot } from "@/lib/availability";
-import { MOCK_DELIVERY_SETTINGS } from "@/lib/mock-data";
 
 const STEPS = [
   { n: 1, label: "Menu" },
@@ -31,7 +31,7 @@ export default function PaymentPage() {
   const router = useRouter();
   const { state, subtotal, totalItems, clearCart } = useCart();
 
-  const [settings, setSettings] = useState(MOCK_DELIVERY_SETTINGS);
+  const [settings, setSettings] = useState(DEFAULT_DELIVERY_SETTINGS);
   const [loading, setLoading] = useState<PaymentMethod | null>(null);
   const [error, setError] = useState<string | null>(null);
 

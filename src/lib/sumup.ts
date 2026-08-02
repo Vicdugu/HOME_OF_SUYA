@@ -28,6 +28,7 @@ export async function createSumUpCheckout(params: {
   reference: string;
   amount: number;
   description: string;
+  returnUrl: string;
   redirectUrl: string;
 }): Promise<{ checkoutId: string; checkoutUrl: string }> {
   const { apiKey, merchantEmail } = getSumUpApiConfig();
@@ -44,6 +45,7 @@ export async function createSumUpCheckout(params: {
       currency: "GBP",
       pay_to_email: merchantEmail,
       description: params.description,
+      return_url: params.returnUrl,
       redirect_url: params.redirectUrl,
     }),
   });

@@ -16,8 +16,8 @@ import { useCart } from "@/context/CartContext";
 import { BookingOrderSummary } from "@/components/booking/BookingOrderSummary";
 import { PromoCodeInput } from "@/components/booking/PromoCodeInput";
 import { FormField, inputCls } from "@/components/ui/FormField";
+import { DEFAULT_DELIVERY_SETTINGS } from "@/lib/delivery-settings";
 import { getDeliveryFee } from "@/lib/delivery-pricing";
-import { MOCK_DELIVERY_SETTINGS } from "@/lib/mock-data";
 const STEPS = [
   { n: 1, label: "Menu" },
   { n: 2, label: "Date & Delivery" },
@@ -58,7 +58,7 @@ export default function CheckoutPage() {
     useCart();
 
   // Redirect guards
-  const [settings, setSettings] = useState(MOCK_DELIVERY_SETTINGS);
+  const [settings, setSettings] = useState(DEFAULT_DELIVERY_SETTINGS);
 
   useEffect(() => {
     if (totalItems === 0) router.replace("/");
