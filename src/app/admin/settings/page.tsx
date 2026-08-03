@@ -24,7 +24,11 @@ function getRenderableLogoUrl(imageUrl: string | null | undefined) {
     return null;
   }
 
-  if (normalized.startsWith("/") || /^https?:\/\//i.test(normalized)) {
+  if (
+    normalized.startsWith("data:") ||
+    normalized.startsWith("/") ||
+    /^https?:\/\//i.test(normalized)
+  ) {
     return normalized;
   }
 
