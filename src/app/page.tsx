@@ -73,7 +73,7 @@ export default function MenuPage() {
               </Link>
               <Link
                 href="/contact"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-brand-gold/45 bg-black/25 px-6 py-3 text-sm font-black uppercase tracking-[0.12em] text-brand-gold backdrop-blur-sm transition-transform transition-colors hover:-translate-y-0.5 hover:border-brand-gold hover:text-white"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/70 bg-[#f8f1e4] px-6 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#111111] shadow-lg shadow-black/20 transition-transform transition-colors hover:-translate-y-0.5 hover:bg-white"
               >
                 <PartyPopper size={16} />
                 Catering / Contact Us
