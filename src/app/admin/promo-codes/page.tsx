@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Trash2, ToggleLeft, ToggleRight, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Plus, Trash2, ToggleLeft, ToggleRight, Loader2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 interface PromoCode {
   id: string; code: string; discountType: string; discountValue: number;
   minOrder: number; maxUses: number | null; usedCount: number;
-  expiresAt: string | null; isActive: boolean; createdAt: string;
+  expiresAt: string | null; isActive: boolean; isHidden: boolean; createdAt: string;
 }
 
 const EMPTY = {
@@ -60,6 +60,17 @@ export default function AdminPromoCodesPage() {
       body: JSON.stringify({ id }),
     });
     setCodes((prev) => prev.filter((c) => c.id !== id));
+  }
+
+  async function toggleHidden(id: string, isHidden: boolean) {
+    const res = await fetch("/api/admin/promo-codes", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, isHidden: !isHidden }),
+    });
+    const updated = await res.json().catch(() => null);
+    if (!res.ok || !updated) return;
+    setCodes((prev) => prev.map((c) => c.id === id ? updated : c));
   }
 
   return (
@@ -128,9 +139,13 @@ export default function AdminPromoCodesPage() {
       {/* List */}
       <div className="space-y-3">
         {codes.map((c) => (
-          <div key={c.id} className={`card p-4 flex items-center gap-4 ${!c.isActive ? "opacity-50" : ""}`}>
+          <div key={c.id} className={`card p-4 flex items-center gap-4 ${!c.isActive || c.isHidden ? "opacity-60" : ""}`}>
             <div className="flex-1 min-w-0">
-              <p className="text-brand-gold font-mono font-bold">{c.code}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-brand-gold font-mono font-bold">{c.code}</p>
+                {!c.isActive ? <span className="rounded-full border border-amber-500/30 px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-amber-300">Inactive</span> : null}
+                {c.isHidden ? <span className="rounded-full border border-surface-border px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-gray-300">Hidden</span> : null}
+              </div>
               <p className="text-gray-400 text-xs">
                 {c.discountType === "PERCENT" ? `${c.discountValue}% off` : `£${c.discountValue} off`}
                 {c.minOrder > 0 && ` · min £${c.minOrder}`}
@@ -140,6 +155,9 @@ export default function AdminPromoCodesPage() {
             </div>
             <button onClick={() => toggle(c.id, c.isActive)} className="text-gray-400 hover:text-white transition-colors">
               {c.isActive ? <ToggleRight size={20} className="text-green-400" /> : <ToggleLeft size={20} />}
+            </button>
+            <button onClick={() => toggleHidden(c.id, c.isHidden)} className="text-gray-400 hover:text-white transition-colors" title={c.isHidden ? "Unhide promo code" : "Hide promo code"}>
+              {c.isHidden ? <Eye size={18} /> : <EyeOff size={18} />}
             </button>
             <button onClick={() => remove(c.id)} className="text-gray-500 hover:text-brand-red transition-colors">
               <Trash2 size={15} />

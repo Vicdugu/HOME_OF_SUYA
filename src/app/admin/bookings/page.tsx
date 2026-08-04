@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { formatCurrency } from "@/lib/utils";
 import { formatBookingDate, formatTimeSlot } from "@/lib/availability";
-import { Download, Filter } from "lucide-react";
+import { Download, Trash2 } from "lucide-react";
 
 interface BookingItem { mealName: string; quantity: number }
 interface Booking {
@@ -28,6 +28,7 @@ export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filter, setFilter] = useState<string>("ALL");
   const [search, setSearch] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/bookings").then((r) => r.json()).then(setBookings);
@@ -43,6 +44,34 @@ export default function AdminBookingsPage() {
       body: JSON.stringify({ id, ...patch }),
     });
     setBookings((prev) => prev.map((b) => b.id === id ? { ...b, ...patch } : b));
+  }
+
+  async function deleteBooking(id: string, reference: string) {
+    const confirmed = window.confirm(`Delete booking ${reference}? This cannot be undone.`);
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingId(id);
+
+    try {
+      const res = await fetch("/api/admin/bookings", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(typeof data?.error === "string" ? data.error : "Could not delete booking");
+      }
+
+      setBookings((prev) => prev.filter((booking) => booking.id !== id));
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "Could not delete booking");
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   const filtered = bookings.filter((b) => {
@@ -171,6 +200,15 @@ export default function AdminBookingsPage() {
                           <option value="RESOLVED">Request resolved</option>
                         </select>
                       ) : null}
+                      <button
+                        type="button"
+                        onClick={() => deleteBooking(b.id, b.reference)}
+                        disabled={deletingId === b.id}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/30 px-2 py-1 text-xs text-red-300 transition-colors hover:border-red-400 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <Trash2 size={12} />
+                        {deletingId === b.id ? "Deleting..." : "Delete"}
+                      </button>
                     </div>
                   </td>
                 </tr>

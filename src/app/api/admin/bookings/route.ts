@@ -37,3 +37,20 @@ export async function PUT(req: NextRequest) {
   const [bookingWithOps] = await mergeBookingOps([booking]);
   return NextResponse.json(bookingWithOps);
 }
+
+export async function DELETE(req: NextRequest) {
+  const authError = await requireAdminRequest(req);
+  if (authError) return authError;
+
+  const { id } = await req.json();
+
+  if (typeof id !== "string" || id.trim().length === 0) {
+    return NextResponse.json({ error: "Booking id is required" }, { status: 400 });
+  }
+
+  await prisma.booking.delete({
+    where: { id },
+  });
+
+  return NextResponse.json({ ok: true });
+}

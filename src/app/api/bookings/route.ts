@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logBookingEvent } from "@/lib/booking-analytics";
 import { formatCartItemName } from "@/lib/meal-variations";
+import { mergePromoCodeVisibility } from "@/lib/promo-code-visibility";
 import { getRequestFingerprint, isRateLimited } from "@/lib/request-guard";
 import { generateReference } from "@/lib/utils";
 import { TIME_SLOTS } from "@/lib/availability";
@@ -103,10 +104,11 @@ export async function POST(req: NextRequest) {
     const promo = await prisma.promoCode.findFirst({
       where: { code: promoCodeStr, isActive: true },
     });
-    if (promo) {
-      promoCodeId = promo.id;
+    const [promoWithVisibility] = promo ? await mergePromoCodeVisibility([promo]) : [null];
+    if (promoWithVisibility && !promoWithVisibility.isHidden) {
+      promoCodeId = promoWithVisibility.id;
       await prisma.promoCode.update({
-        where: { id: promo.id },
+        where: { id: promoWithVisibility.id },
         data: { usedCount: { increment: 1 } },
       });
     }

@@ -121,6 +121,7 @@ export interface PromoCodeDTO {
   usedCount: number;
   expiresAt: string | null;
   isActive: boolean;
+  isHidden: boolean;
 }
 
 export interface CateringEnquiryDTO {

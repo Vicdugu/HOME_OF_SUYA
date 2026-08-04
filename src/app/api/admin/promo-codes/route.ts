@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdminRequest } from "@/lib/admin-api-auth";
+import { mergePromoCodeVisibility, setPromoCodeHidden } from "@/lib/promo-code-visibility";
 
 export async function GET(req: NextRequest) {
   const authError = await requireAdminRequest(req);
   if (authError) return authError;
 
   const codes = await prisma.promoCode.findMany({ orderBy: { createdAt: "desc" } });
-  return NextResponse.json(codes);
+  return NextResponse.json(await mergePromoCodeVisibility(codes));
 }
 
 export async function POST(req: NextRequest) {
@@ -27,16 +28,24 @@ export async function POST(req: NextRequest) {
       isActive: data.isActive ?? true,
     },
   });
-  return NextResponse.json(code, { status: 201 });
+  const [codeWithVisibility] = await mergePromoCodeVisibility([code]);
+  return NextResponse.json(codeWithVisibility, { status: 201 });
 }
 
 export async function PUT(req: NextRequest) {
   const authError = await requireAdminRequest(req);
   if (authError) return authError;
 
-  const { id, isActive } = await req.json();
-  const code = await prisma.promoCode.update({ where: { id }, data: { isActive } });
-  return NextResponse.json(code);
+  const { id, isActive, isHidden } = await req.json();
+  const code = await prisma.promoCode.update({
+    where: { id },
+    data: isActive === undefined ? {} : { isActive },
+  });
+  if (typeof isHidden === "boolean") {
+    await setPromoCodeHidden(id, isHidden);
+  }
+  const [codeWithVisibility] = await mergePromoCodeVisibility([code]);
+  return NextResponse.json(codeWithVisibility);
 }
 
 export async function DELETE(req: NextRequest) {
