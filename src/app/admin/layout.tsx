@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   Users,
+  PartyPopper,
 } from "lucide-react";
 import { HeaderLogo } from "@/components/ui/HeaderLogo";
 
@@ -22,6 +23,7 @@ const NAV = [
   { href: "/admin/meals", label: "Meals", icon: UtensilsCrossed },
   { href: "/admin/bookings", label: "Bookings", icon: ClipboardList },
   { href: "/admin/promo-codes", label: "Promo Codes", icon: Tag },
+  { href: "/admin/catering-enquiries", label: "Catering", icon: PartyPopper },
   { href: "/admin/accounts", label: "Accounts", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];

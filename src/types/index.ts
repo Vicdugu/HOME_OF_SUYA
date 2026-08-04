@@ -3,6 +3,10 @@ export type BookingStatus = "PENDING" | "CONFIRMED" | "CANCELLED";
 export type PaymentStatus = "UNPAID" | "PAID" | "REFUNDED";
 export type DiscountType = "PERCENT" | "FIXED";
 export type VariationSelectionType = "SINGLE" | "MULTIPLE";
+export type MealStockStatus = "IN_STOCK" | "LOW_STOCK" | "SOLD_OUT";
+export type MealSpiceLevel = "NOT_SPICY" | "MILD" | "MEDIUM" | "HOT" | "EXTRA_HOT";
+export type CateringEnquiryStatus = "NEW" | "CONTACTED" | "QUOTED" | "BOOKED" | "CLOSED";
+export type CateringServiceStyle = "PICKUP" | "DELIVERY" | "FULL_SERVICE" | "UNSURE";
 
 /** Extended AdminUser type including fields added after initial migration */
 export interface AdminUserFull {
@@ -70,6 +74,9 @@ export interface MealDTO {
   price: number;
   imageUrl: string;
   isAvailable: boolean;
+  stockStatus: MealStockStatus;
+  allergenInfo: string | null;
+  spiceLevel: MealSpiceLevel | null;
   sortOrder: number;
   variationGroups: MealVariationGroupDTO[];
 }
@@ -114,4 +121,24 @@ export interface PromoCodeDTO {
   usedCount: number;
   expiresAt: string | null;
   isActive: boolean;
+}
+
+export interface CateringEnquiryDTO {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string | null;
+  eventDate: string | null;
+  guestCount: number | null;
+  venue: string | null;
+  budget: string | null;
+  serviceStyle: CateringServiceStyle;
+  deliveryArea: string | null;
+  message: string;
+  status: CateringEnquiryStatus;
+  quoteAmount: number | null;
+  quoteNotes: string | null;
+  adminNotes: string | null;
+  createdAt: string;
+  updatedAt: string;
 }

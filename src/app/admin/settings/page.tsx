@@ -147,7 +147,7 @@ export default function AdminSettingsPage() {
     const [y, m, d] = newDate.split("-").map(Number);
     const date = new Date(y, m - 1, d);
     if (!isBookableDay(date)) {
-      alert("Only Tuesdays and Fridays can be blocked.");
+      alert("Only Tuesdays and Thursdays can be blocked.");
       return;
     }
     const res = await fetch("/api/admin/blocked-dates", {
@@ -297,7 +297,7 @@ export default function AdminSettingsPage() {
         <h2 className="text-brand-gold font-semibold text-xs uppercase tracking-widest flex items-center gap-2">
           <CalendarOff size={14} /> Blocked Dates
         </h2>
-        <p className="text-gray-500 text-xs">Block specific Tuesdays or Fridays (e.g. holidays, sold-out days).</p>
+        <p className="text-gray-500 text-xs">Block specific Tuesdays or Thursdays (e.g. holidays, sold-out days).</p>
 
         <div className="flex flex-wrap gap-3">
           <input

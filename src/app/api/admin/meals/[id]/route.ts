@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdminRequest } from "@/lib/admin-api-auth";
+import {
+  mergeMealMetadata,
+  normalizeSpiceLevel,
+  normalizeStockStatus,
+  saveMealMetadata,
+} from "@/lib/meal-metadata";
 import { getDefaultMealPhotoUrl } from "@/lib/meal-photos";
 
 type VariationSelectionType = "SINGLE" | "MULTIPLE";
@@ -86,6 +92,9 @@ function parseMealInput(data: Record<string, unknown>) {
   const price = Number(data.price);
   const sortOrder = Number(data.sortOrder ?? 0);
   const imageUrl = String(data.imageUrl ?? "").trim();
+  const allergenInfoRaw = String(data.allergenInfo ?? "").trim();
+  const spiceLevel = normalizeSpiceLevel(data.spiceLevel);
+  const stockStatus = normalizeStockStatus(data.stockStatus);
   const variationGroups = parseVariationGroups(data.variationGroups);
 
   if (!name) {
@@ -114,8 +123,11 @@ function parseMealInput(data: Record<string, unknown>) {
       description,
       price,
       imageUrl: imageUrl || getDefaultMealPhotoUrl(),
-      isAvailable: Boolean(data.isAvailable ?? true),
+      isAvailable: Boolean(data.isAvailable ?? true) && stockStatus !== "SOLD_OUT",
       sortOrder,
+      allergenInfo: allergenInfoRaw || null,
+      spiceLevel,
+      stockStatus,
     },
     variationGroups: variationGroups.groups,
   };
@@ -137,7 +149,12 @@ export async function PUT(
   const meal = await prisma.meal.update({
     where: { id },
     data: {
-      ...payload.data,
+      name: payload.data.name,
+      description: payload.data.description,
+      price: payload.data.price,
+      imageUrl: payload.data.imageUrl,
+      isAvailable: payload.data.isAvailable,
+      sortOrder: payload.data.sortOrder,
       variationGroups: {
         deleteMany: {},
         create: payload.variationGroups.map((group) => ({
@@ -165,7 +182,13 @@ export async function PUT(
       },
     },
   });
-  return NextResponse.json(meal);
+  await saveMealMetadata(meal.id, {
+    allergenInfo: payload.data.allergenInfo,
+    spiceLevel: payload.data.spiceLevel,
+    stockStatus: payload.data.stockStatus,
+  });
+  const [mealWithMetadata] = await mergeMealMetadata([meal]);
+  return NextResponse.json(mealWithMetadata);
 }
 
 export async function DELETE(

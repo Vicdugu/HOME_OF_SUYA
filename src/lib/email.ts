@@ -17,6 +17,98 @@ function getResend(): Resend | null {
 const FROM = process.env.FROM_EMAIL ?? "noreply@homeofsuya.com";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
+export async function sendContactEnquiryEmail(data: {
+  name: string;
+  email: string;
+  phone: string | null;
+  message: string;
+}): Promise<boolean> {
+  const resend = getResend();
+  if (!ADMIN_EMAIL || !resend) return false;
+
+  const safeName = data.name.replace(/[<>]/g, "");
+  const safeEmail = data.email.replace(/[<>]/g, "");
+  const safePhone = data.phone ? data.phone.replace(/[<>]/g, "") : null;
+  const safeMessage = data.message
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br />");
+
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to: ADMIN_EMAIL,
+    replyTo: safeEmail,
+    subject: `Contact enquiry — ${safeName}`,
+    html: `
+      <h2>New Contact Enquiry</h2>
+      <p><strong>Name:</strong> ${safeName}</p>
+      <p><strong>Email:</strong> ${safeEmail}</p>
+      <p><strong>Phone:</strong> ${safePhone || "Not provided"}</p>
+      <p><strong>Message:</strong></p>
+      <div style="padding:12px 14px;border-radius:10px;background:#111827;color:#e5e7eb;border:1px solid #374151">${safeMessage}</div>
+    `,
+  });
+
+  if (error) {
+    console.error("[Email] Contact enquiry failed:", error);
+    return false;
+  }
+
+  return true;
+}
+
+export async function sendCateringEnquiryEmail(data: {
+  fullName: string;
+  email: string;
+  phone: string | null;
+  eventDate: string | null;
+  guestCount: number | null;
+  venue: string | null;
+  budget: string | null;
+  serviceStyle: string;
+  deliveryArea: string | null;
+  message: string;
+}): Promise<boolean> {
+  const resend = getResend();
+  if (!ADMIN_EMAIL || !resend) return false;
+
+  const safe = (value: string | null | undefined) => String(value ?? "").replace(/[<>]/g, "");
+  const safeMessage = data.message
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br />");
+
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to: ADMIN_EMAIL,
+    replyTo: data.email,
+    subject: `Catering enquiry — ${safe(data.fullName)}`,
+    html: `
+      <h2>New Catering Enquiry</h2>
+      <p><strong>Name:</strong> ${safe(data.fullName)}</p>
+      <p><strong>Email:</strong> ${safe(data.email)}</p>
+      <p><strong>Phone:</strong> ${safe(data.phone) || "Not provided"}</p>
+      <p><strong>Event date:</strong> ${safe(data.eventDate) || "Not provided"}</p>
+      <p><strong>Guest count:</strong> ${data.guestCount ?? "Not provided"}</p>
+      <p><strong>Venue:</strong> ${safe(data.venue) || "Not provided"}</p>
+      <p><strong>Budget:</strong> ${safe(data.budget) || "Not provided"}</p>
+      <p><strong>Service style:</strong> ${safe(data.serviceStyle)}</p>
+      <p><strong>Delivery area:</strong> ${safe(data.deliveryArea) || "Not provided"}</p>
+      <p><strong>Message:</strong></p>
+      <div style="padding:12px 14px;border-radius:10px;background:#111827;color:#e5e7eb;border:1px solid #374151">${safeMessage}</div>
+    `,
+  });
+
+  if (error) {
+    console.error("[Email] Catering enquiry failed:", error);
+    return false;
+  }
+
+  return true;
+}
+
 /**
  * Sends a new-booking alert email to the admin.
  */

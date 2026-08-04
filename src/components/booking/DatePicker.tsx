@@ -18,16 +18,16 @@ const DAY_HEADERS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 interface DatePickerProps {
   selectedDate: string | null;
   onSelect: (date: string) => void;
-  blockedDates?: string[];
+  availableDates?: string[];
 }
 
-export function DatePicker({ selectedDate, onSelect, blockedDates = [] }: DatePickerProps) {
+export function DatePicker({ selectedDate, onSelect, availableDates = [] }: DatePickerProps) {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
 
   const days = getCalendarDays(viewYear, viewMonth);
-  const blockedSet = new Set(blockedDates);
+  const availableSet = new Set(availableDates);
 
   const canGoPrev =
     viewYear > today.getFullYear() || viewMonth > today.getMonth();
@@ -91,10 +91,11 @@ export function DatePicker({ selectedDate, onSelect, blockedDates = [] }: DatePi
 
           const dateStr = toDateString(date);
           const isSelected = selectedDate === dateStr;
-          const isTueFri = isBookableDay(date);
+          const isBookable = isBookableDay(date);
           const isPast = isTooSoon(date);
-          const isBlocked = blockedSet.has(dateStr);
-          const isSelectable = isTueFri && !isPast && !isBlocked;
+          const isAvailable = availableSet.has(dateStr);
+          const isBlocked = isBookable && !isPast && !isAvailable;
+          const isSelectable = isBookable && !isPast && isAvailable;
 
           return (
             <div key={dateStr} className="flex items-center justify-center py-0.5">
@@ -104,8 +105,8 @@ export function DatePicker({ selectedDate, onSelect, blockedDates = [] }: DatePi
                 title={
                   isBlocked
                     ? "Not available"
-                    : !isTueFri
-                    ? "Bookings on Tue & Fri only"
+                    : !isBookable
+                    ? "Bookings on Tue & Thu only"
                     : undefined
                 }
                 className={[
@@ -129,7 +130,7 @@ export function DatePicker({ selectedDate, onSelect, blockedDates = [] }: DatePi
       <p className="text-gray-600 text-xs mt-3 text-center">
         Available on{" "}
         <span className="text-brand-gold font-medium">Tuesdays</span> &amp;{" "}
-        <span className="text-brand-gold font-medium">Fridays</span> only
+        <span className="text-brand-gold font-medium">Thursdays</span> only
       </p>
     </div>
   );

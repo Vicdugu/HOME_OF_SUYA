@@ -16,6 +16,7 @@ import { useCart } from "@/context/CartContext";
 import { BookingOrderSummary } from "@/components/booking/BookingOrderSummary";
 import { PromoCodeInput } from "@/components/booking/PromoCodeInput";
 import { FormField, inputCls } from "@/components/ui/FormField";
+import { trackClientEvent } from "@/lib/client-analytics";
 import { DEFAULT_DELIVERY_SETTINGS } from "@/lib/delivery-settings";
 import { getDeliveryFee } from "@/lib/delivery-pricing";
 const STEPS = [
@@ -61,6 +62,7 @@ export default function CheckoutPage() {
   const [settings, setSettings] = useState(DEFAULT_DELIVERY_SETTINGS);
 
   useEffect(() => {
+    trackClientEvent("view_checkout_step", "checkout");
     if (totalItems === 0) router.replace("/");
     else if (!state.bookingDate || !state.timeSlot || !state.deliveryType)
       router.replace("/book");
@@ -108,6 +110,10 @@ export default function CheckoutPage() {
       email: form.email.trim(),
       address: form.address.trim(),
       notes: form.notes.trim(),
+    });
+    trackClientEvent("advance_to_payment", "checkout", {
+      hasEmail: Boolean(form.email.trim()),
+      needsAddress,
     });
     router.push("/payment");
   }

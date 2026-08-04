@@ -55,7 +55,7 @@ export default function MenuPage() {
           <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
             <span className="flex items-center gap-1.5 bg-white/10 text-white text-xs px-3 py-1.5 rounded-full border border-white/20">
               <Clock size={12} className="text-brand-gold" />
-              Tuesdays &amp; Fridays only
+              Tuesdays &amp; Thursdays only
             </span>
             <span className="flex items-center gap-1.5 bg-white/10 text-white text-xs px-3 py-1.5 rounded-full border border-white/20">
               <MapPin size={12} className="text-brand-gold" />

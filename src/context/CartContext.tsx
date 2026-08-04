@@ -104,7 +104,7 @@ function cartReducer(state: CartState, action: Action): CartState {
     }
 
     case "SET_DELIVERY":
-      return { ...state, deliveryType: action.deliveryType };
+      return { ...state, deliveryType: action.deliveryType, timeSlot: null };
 
     case "SET_DATE":
       return { ...state, bookingDate: action.bookingDate, timeSlot: null };

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Check, ShoppingCart } from "lucide-react";
+import { AlertTriangle, Check, Flame, ShoppingCart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { QuantitySelector } from "@/components/ui/QuantitySelector";
 import {
@@ -21,6 +21,10 @@ interface MealCardProps {
 
 function isLocalMealPhotoUrl(imageUrl: string) {
   return imageUrl.startsWith("/api/meal-photos?");
+}
+
+function formatSpiceLevel(spiceLevel: MealDTO["spiceLevel"]) {
+  return spiceLevel ? spiceLevel.replace(/_/g, " ").toLowerCase() : null;
 }
 
 export function MealCard({ meal }: MealCardProps) {
@@ -44,6 +48,15 @@ export function MealCard({ meal }: MealCardProps) {
   const displayedPrice = hasCustomisations
     ? calculateMealSelectionPrice(meal, selection)
     : meal.price;
+  const isSoldOut = meal.stockStatus === "SOLD_OUT";
+  const stockLabel = isSoldOut
+    ? "Sold Out"
+    : meal.stockStatus === "LOW_STOCK"
+    ? "Low Stock"
+    : meal.isAvailable
+    ? "In Stock"
+    : "Unavailable";
+  const spiceLabel = formatSpiceLevel(meal.spiceLevel);
 
   const handleAddSelection = () => addItem(createCustomisedCartItem(meal, selection));
   const handleDecrease = () => setQuantity(selectedCartItemId, selectedQuantity - 1);
@@ -90,7 +103,7 @@ export function MealCard({ meal }: MealCardProps) {
         {!meal.isAvailable && (
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="bg-black/70 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-              Unavailable
+              {isSoldOut ? "Sold Out" : "Unavailable"}
             </span>
           </div>
         )}
@@ -109,9 +122,26 @@ export function MealCard({ meal }: MealCardProps) {
           <h3 className="text-white font-semibold text-base leading-snug">
             {meal.name}
           </h3>
+          <div className="mt-2 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.16em]">
+            <span className={`rounded-full border px-2 py-1 ${meal.stockStatus === "LOW_STOCK" ? "border-amber-500/40 text-amber-300" : meal.stockStatus === "SOLD_OUT" ? "border-brand-red/40 text-brand-red" : "border-green-500/30 text-green-300"}`}>
+              {stockLabel}
+            </span>
+            {spiceLabel ? (
+              <span className="rounded-full border border-brand-gold/30 px-2 py-1 text-brand-gold inline-flex items-center gap-1">
+                <Flame size={10} />
+                {spiceLabel}
+              </span>
+            ) : null}
+          </div>
           <p className="text-gray-400 text-sm mt-1 line-clamp-2 leading-relaxed">
             {meal.description}
           </p>
+          {meal.allergenInfo ? (
+            <p className="mt-2 text-[11px] text-amber-200/85 inline-flex items-start gap-1.5">
+              <AlertTriangle size={12} className="mt-0.5 shrink-0" />
+              <span>Allergens: {meal.allergenInfo}</span>
+            </p>
+          ) : null}
         </div>
 
         {customising && meal.isAvailable && hasCustomisations && (

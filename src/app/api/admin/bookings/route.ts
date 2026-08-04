@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdminRequest } from "@/lib/admin-api-auth";
+import {
+  mergeBookingOps,
+  normalizeCustomerRequestStatus,
+  normalizeFulfilmentStage,
+  updateBookingOps,
+} from "@/lib/booking-ops";
 
 export async function GET(req: NextRequest) {
   const authError = await requireAdminRequest(req);
@@ -12,17 +18,22 @@ export async function GET(req: NextRequest) {
     include: { items: { select: { mealName: true, quantity: true } } },
     take: 200,
   });
-  return NextResponse.json(bookings);
+  return NextResponse.json(await mergeBookingOps(bookings));
 }
 
 export async function PUT(req: NextRequest) {
   const authError = await requireAdminRequest(req);
   if (authError) return authError;
 
-  const { id, status } = await req.json();
+  const { id, status, fulfilmentStage, customerRequestStatus } = await req.json();
   const booking = await prisma.booking.update({
     where: { id },
     data: { status },
   });
-  return NextResponse.json(booking);
+  await updateBookingOps(booking.id, {
+    fulfilmentStage: normalizeFulfilmentStage(fulfilmentStage),
+    customerRequestStatus: normalizeCustomerRequestStatus(customerRequestStatus),
+  });
+  const [bookingWithOps] = await mergeBookingOps([booking]);
+  return NextResponse.json(bookingWithOps);
 }

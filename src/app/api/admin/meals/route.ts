@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdminRequest } from "@/lib/admin-api-auth";
+import {
+  mergeMealMetadata,
+  normalizeSpiceLevel,
+  normalizeStockStatus,
+  saveMealMetadata,
+} from "@/lib/meal-metadata";
 import { getDefaultMealPhotoUrl, normalizeMealImageUrl } from "@/lib/meal-photos";
 
 type VariationSelectionType = "SINGLE" | "MULTIPLE";
@@ -86,6 +92,9 @@ function parseMealInput(data: Record<string, unknown>) {
   const price = Number(data.price);
   const sortOrder = Number(data.sortOrder ?? 0);
   const imageUrl = String(data.imageUrl ?? "").trim();
+  const allergenInfoRaw = String(data.allergenInfo ?? "").trim();
+  const spiceLevel = normalizeSpiceLevel(data.spiceLevel);
+  const stockStatus = normalizeStockStatus(data.stockStatus);
   const variationGroups = parseVariationGroups(data.variationGroups);
 
   if (!name) {
@@ -114,8 +123,11 @@ function parseMealInput(data: Record<string, unknown>) {
       description,
       price,
       imageUrl: imageUrl || getDefaultMealPhotoUrl(),
-      isAvailable: Boolean(data.isAvailable ?? true),
+      isAvailable: Boolean(data.isAvailable ?? true) && stockStatus !== "SOLD_OUT",
       sortOrder,
+      allergenInfo: allergenInfoRaw || null,
+      spiceLevel,
+      stockStatus,
     },
     variationGroups: variationGroups.groups,
   };
@@ -138,8 +150,9 @@ export async function GET(req: NextRequest) {
       },
     },
   });
+  const mealsWithMetadata = await mergeMealMetadata(meals);
   return NextResponse.json(
-    meals.map((meal) => ({
+    mealsWithMetadata.map((meal) => ({
       ...meal,
       imageUrl: normalizeMealImageUrl(meal.imageUrl),
     }))
@@ -157,7 +170,12 @@ export async function POST(req: NextRequest) {
 
   const meal = await prisma.meal.create({
     data: {
-      ...payload.data,
+      name: payload.data.name,
+      description: payload.data.description,
+      price: payload.data.price,
+      imageUrl: payload.data.imageUrl,
+      isAvailable: payload.data.isAvailable,
+      sortOrder: payload.data.sortOrder,
       variationGroups: {
         create: payload.variationGroups.map((group) => ({
           name: group.name,
@@ -184,5 +202,11 @@ export async function POST(req: NextRequest) {
       },
     },
   });
-  return NextResponse.json(meal, { status: 201 });
+  await saveMealMetadata(meal.id, {
+    allergenInfo: payload.data.allergenInfo,
+    spiceLevel: payload.data.spiceLevel,
+    stockStatus: payload.data.stockStatus,
+  });
+  const [mealWithMetadata] = await mergeMealMetadata([meal]);
+  return NextResponse.json(mealWithMetadata, { status: 201 });
 }

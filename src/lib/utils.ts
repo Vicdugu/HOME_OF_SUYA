@@ -12,7 +12,7 @@ export function generateReference(): string {
 
 /**
  * Returns the next 8 weeks of available booking dates
- * (Tuesdays = 2, Fridays = 5) excluding blocked dates.
+ * (Tuesdays = 2, Thursdays = 4) excluding blocked dates.
  */
 export function getAvailableDates(
   blockedDates: Date[],
@@ -32,7 +32,7 @@ export function getAvailableDates(
 
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     const day = d.getDay();
-    if (day === 2 || day === 5) {
+    if (day === 2 || day === 4) {
       const copy = new Date(d);
       if (!blockedMs.has(toDateOnly(copy).getTime())) {
         dates.push(copy);

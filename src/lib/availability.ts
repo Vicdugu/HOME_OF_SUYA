@@ -12,10 +12,10 @@ export const TIME_SLOTS = [
 
 export type TimeSlotId = (typeof TIME_SLOTS)[number]["id"];
 
-/** Tuesday = 2, Friday = 5 */
+/** Tuesday = 2, Thursday = 4 */
 export function isBookableDay(date: Date): boolean {
   const d = date.getDay();
-  return d === 2 || d === 5;
+  return d === 2 || d === 4;
 }
 
 /** Dates must be at least 1 full day ahead (no same-day booking) */
@@ -76,7 +76,7 @@ export function formatTimeSlot(slotId: string): string {
 }
 
 /**
- * Returns the next `weeksAhead` weeks of available Tue/Fri dates,
+ * Returns the next `weeksAhead` weeks of available Tue/Thu dates,
  * excluding any in the blockedDates array.
  */
 export function getAvailableDates(
@@ -97,7 +97,7 @@ export function getAvailableDates(
 
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     const day = d.getDay();
-    if (day === 2 || day === 5) {
+    if (day === 2 || day === 4) {
       const copy = new Date(d.getFullYear(), d.getMonth(), d.getDate());
       if (!blockedMs.has(copy.getTime())) dates.push(copy);
     }

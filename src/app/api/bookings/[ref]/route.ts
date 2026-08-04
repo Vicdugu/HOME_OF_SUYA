@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { mergeBookingOps } from "@/lib/booking-ops";
 
 export async function GET(
   _req: Request,
@@ -15,5 +16,6 @@ export async function GET(
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
   }
 
-  return NextResponse.json(booking);
+  const [bookingWithOps] = await mergeBookingOps([booking]);
+  return NextResponse.json(bookingWithOps);
 }

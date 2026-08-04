@@ -10,6 +10,10 @@ interface Booking {
   id: string; reference: string; customerName: string; whatsapp: string;
   email: string | null; deliveryType: string; bookingDate: string;
   timeSlot: string; status: string; paymentStatus: string;
+  fulfilmentStage: string;
+  customerRequestType: string | null;
+  customerRequestMessage: string | null;
+  customerRequestStatus: string | null;
   total: number; createdAt: string;
   items: BookingItem[];
 }
@@ -29,13 +33,16 @@ export default function AdminBookingsPage() {
     fetch("/api/admin/bookings").then((r) => r.json()).then(setBookings);
   }, []);
 
-  async function updateStatus(id: string, status: string) {
+  async function updateBooking(
+    id: string,
+    patch: Partial<Pick<Booking, "status" | "fulfilmentStage" | "customerRequestStatus">>
+  ) {
     await fetch("/api/admin/bookings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status }),
+      body: JSON.stringify({ id, ...patch }),
     });
-    setBookings((prev) => prev.map((b) => b.id === id ? { ...b, status } : b));
+    setBookings((prev) => prev.map((b) => b.id === id ? { ...b, ...patch } : b));
   }
 
   const filtered = bookings.filter((b) => {
@@ -98,7 +105,7 @@ export default function AdminBookingsPage() {
           <table className="w-full text-sm">
             <thead className="bg-surface-dark border-b border-surface-border">
               <tr>
-                {["Reference", "Customer", "Date", "Delivery", "Total", "Status", "Actions"].map((h) => (
+                {["Reference", "Customer", "Date", "Delivery", "Total", "Status", "Stage", "Actions"].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-gray-400 font-medium text-xs uppercase tracking-wider">
                     {h}
                   </th>
@@ -112,6 +119,11 @@ export default function AdminBookingsPage() {
                   <td className="px-4 py-3">
                     <p className="text-white font-medium">{b.customerName}</p>
                     <p className="text-gray-500 text-xs">{b.whatsapp}</p>
+                    {b.customerRequestType ? (
+                      <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-amber-400">
+                        {b.customerRequestType} request{b.customerRequestStatus ? ` · ${b.customerRequestStatus}` : ""}
+                      </p>
+                    ) : null}
                   </td>
                   <td className="px-4 py-3 text-gray-300 text-xs">
                     {formatBookingDate(b.bookingDate.slice(0, 10))}
@@ -126,21 +138,46 @@ export default function AdminBookingsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <select
-                      value={b.status}
-                      onChange={(e) => updateStatus(b.id, e.target.value)}
-                      className="bg-surface-dark border border-surface-border rounded-lg
-                                 px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-red"
+                      value={b.fulfilmentStage}
+                      onChange={(e) => updateBooking(b.id, { fulfilmentStage: e.target.value })}
+                      className="bg-surface-dark border border-surface-border rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-red"
                     >
-                      <option value="PENDING">Pending</option>
-                      <option value="CONFIRMED">Confirmed</option>
-                      <option value="CANCELLED">Cancelled</option>
+                      <option value="RECEIVED">Received</option>
+                      <option value="PREPARING">Preparing</option>
+                      <option value="READY">Ready</option>
+                      <option value="OUT_FOR_DELIVERY">Out for delivery</option>
+                      <option value="COMPLETED">Completed</option>
                     </select>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="space-y-2">
+                      <select
+                        value={b.status}
+                        onChange={(e) => updateBooking(b.id, { status: e.target.value })}
+                        className="bg-surface-dark border border-surface-border rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-red"
+                      >
+                        <option value="PENDING">Pending</option>
+                        <option value="CONFIRMED">Confirmed</option>
+                        <option value="CANCELLED">Cancelled</option>
+                      </select>
+                      {b.customerRequestType ? (
+                        <select
+                          value={b.customerRequestStatus ?? "OPEN"}
+                          onChange={(e) => updateBooking(b.id, { customerRequestStatus: e.target.value })}
+                          className="bg-surface-dark border border-surface-border rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-brand-red"
+                        >
+                          <option value="OPEN">Request open</option>
+                          <option value="REVIEWED">Request reviewed</option>
+                          <option value="RESOLVED">Request resolved</option>
+                        </select>
+                      ) : null}
+                    </div>
                   </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center text-gray-500">
+                  <td colSpan={8} className="px-4 py-10 text-center text-gray-500">
                     No bookings found
                   </td>
                 </tr>

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { mergeMealMetadata } from "@/lib/meal-metadata";
 import { normalizeMealImageUrl } from "@/lib/meal-photos";
 
 export async function GET() {
@@ -16,8 +17,9 @@ export async function GET() {
       },
     },
   });
+  const mealsWithMetadata = await mergeMealMetadata(meals);
   return NextResponse.json(
-    meals.map((meal) => ({
+    mealsWithMetadata.map((meal) => ({
       ...meal,
       imageUrl: normalizeMealImageUrl(meal.imageUrl),
     }))

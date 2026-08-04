@@ -12,6 +12,7 @@ import {
   Lock,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { trackClientEvent } from "@/lib/client-analytics";
 import { DEFAULT_DELIVERY_SETTINGS } from "@/lib/delivery-settings";
 import { getDeliveryFee } from "@/lib/delivery-pricing";
 import { formatMealVariationSummary } from "@/lib/meal-variations";
@@ -37,6 +38,7 @@ export default function PaymentPage() {
 
   // Guards
   useEffect(() => {
+    trackClientEvent("view_payment_step", "payment");
     if (totalItems === 0) router.replace("/");
     else if (!state.bookingDate || !state.timeSlot || !state.deliveryType)
       router.replace("/book");
@@ -66,6 +68,7 @@ export default function PaymentPage() {
   async function handlePay(method: PaymentMethod) {
     setLoading(method);
     setError(null);
+    trackClientEvent("payment_attempt_started", "payment", { method });
 
     try {
       // Step 1 — create booking
@@ -115,6 +118,7 @@ export default function PaymentPage() {
       clearCart();
       window.location.href = payData.checkoutUrl;
     } catch (err) {
+      trackClientEvent("payment_attempt_failed", "payment", { method });
       setError(err instanceof Error ? err.message : "Something went wrong");
       setLoading(null);
     }
@@ -291,6 +295,13 @@ export default function PaymentPage() {
           By paying you agree to our terms. A WhatsApp confirmation will be
           sent to {state.customerWhatsapp} once payment is confirmed.
         </p>
+
+        <div className="card p-5 space-y-3 text-sm text-gray-300">
+          <h2 className="text-brand-gold font-semibold text-xs uppercase tracking-widest">Booking Terms</h2>
+          <p>Allergy information is shown per meal where available, but please contact us directly for severe allergy requirements.</p>
+          <p>Cancellations and reschedule requests can be submitted from the order tracking page after checkout.</p>
+          <p>Payment secures your slot. Unpaid bookings may expire automatically to release availability.</p>
+        </div>
       </div>
     </main>
   );

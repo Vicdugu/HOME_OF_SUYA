@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
+  AlertCircle,
   CheckCircle,
   Clock,
   XCircle,
@@ -13,6 +14,7 @@ import {
   MapPin,
   ArrowLeft,
   Loader2,
+  Send,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { formatBookingDate, formatTimeSlot } from "@/lib/availability";
@@ -34,6 +36,10 @@ interface Booking {
   timeSlot: string;
   status: string;
   paymentStatus: string;
+  fulfilmentStage: string;
+  customerRequestType: string | null;
+  customerRequestMessage: string | null;
+  customerRequestStatus: string | null;
   subtotal: number;
   deliveryFee: number;
   discount: number;
@@ -83,6 +89,11 @@ export default function TrackRefPage({
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [ref, setRef] = useState("");
+  const [requestType, setRequestType] = useState<"CANCEL" | "RESCHEDULE">("CANCEL");
+  const [requestMessage, setRequestMessage] = useState("");
+  const [requestBusy, setRequestBusy] = useState(false);
+  const [requestFeedback, setRequestFeedback] = useState<string | null>(null);
+  const [resumeBusy, setResumeBusy] = useState(false);
 
   useEffect(() => {
     params.then(({ ref: r }) => setRef(r));
@@ -122,6 +133,73 @@ export default function TrackRefPage({
   const statusKey = booking.status as keyof typeof STATUS_CONFIG;
   const statusCfg = STATUS_CONFIG[statusKey] ?? STATUS_CONFIG.PENDING;
 
+  async function handleRequest() {
+    if (!booking) {
+      return;
+    }
+
+    if (requestMessage.trim().length < 10) {
+      setRequestFeedback("Please provide more detail for the team.");
+      return;
+    }
+
+    setRequestBusy(true);
+    setRequestFeedback(null);
+
+    try {
+      const response = await fetch(`/api/bookings/${booking.reference}/request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestType, message: requestMessage.trim() }),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(typeof data.error === "string" ? data.error : "Could not send request");
+      }
+
+      setBooking((current) => current ? {
+        ...current,
+        customerRequestType: requestType,
+        customerRequestMessage: requestMessage.trim(),
+        customerRequestStatus: "OPEN",
+      } : current);
+      setRequestMessage("");
+      setRequestFeedback(typeof data.message === "string" ? data.message : "Your request has been sent.");
+    } catch (error) {
+      setRequestFeedback(error instanceof Error ? error.message : "Could not send request");
+    } finally {
+      setRequestBusy(false);
+    }
+  }
+
+  async function resumePayment() {
+    if (!booking) {
+      return;
+    }
+
+    setResumeBusy(true);
+    setRequestFeedback(null);
+
+    try {
+      const response = await fetch("/api/payments/sumup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: booking.id, reference: booking.reference }),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(typeof data.error === "string" ? data.error : "Could not resume payment");
+      }
+
+      window.location.href = data.checkoutUrl;
+    } catch (error) {
+      setRequestFeedback(error instanceof Error ? error.message : "Could not resume payment");
+      setResumeBusy(false);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-brand-black">
       <div className="max-w-lg mx-auto px-4 py-10 space-y-6">
@@ -137,7 +215,26 @@ export default function TrackRefPage({
           <div className="flex justify-center">{statusCfg.icon}</div>
           <p className={`font-black text-xl ${statusCfg.colour}`}>{statusCfg.label}</p>
           <p className="text-gray-400 text-sm font-mono">{booking.reference}</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-gray-400">
+            Stage: {booking.fulfilmentStage.replace(/_/g, " ")}
+          </p>
         </div>
+
+        {booking.paymentStatus === "UNPAID" && booking.status === "PENDING" ? (
+          <div className="card p-5 space-y-3 border border-brand-gold/20 bg-brand-gold/5">
+            <p className="text-white font-semibold">Payment not completed</p>
+            <p className="text-sm text-gray-400">
+              Your slot is only held briefly while payment is pending. Resume checkout below.
+            </p>
+            <button
+              onClick={resumePayment}
+              disabled={resumeBusy}
+              className="btn-primary px-5 py-3 text-sm disabled:opacity-70"
+            >
+              {resumeBusy ? "Redirecting..." : "Resume Payment"}
+            </button>
+          </div>
+        ) : null}
 
         {/* Booking details */}
         <div className="card p-5 space-y-4">
@@ -207,6 +304,62 @@ export default function TrackRefPage({
               <span className="text-brand-gold font-black text-lg">{formatCurrency(booking.total)}</span>
             </div>
           </div>
+        </div>
+
+        <div className="card p-5 space-y-4">
+          <h2 className="text-brand-gold font-bold text-sm uppercase tracking-widest">
+            Need to change this booking?
+          </h2>
+          <p className="text-sm text-gray-400">
+            Send a cancellation or reschedule request directly to the team.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => setRequestType("CANCEL")}
+              className={`rounded-xl px-4 py-2 text-sm border ${requestType === "CANCEL" ? "border-brand-red bg-brand-red/10 text-white" : "border-surface-border text-gray-300"}`}
+            >
+              Cancellation request
+            </button>
+            <button
+              type="button"
+              onClick={() => setRequestType("RESCHEDULE")}
+              className={`rounded-xl px-4 py-2 text-sm border ${requestType === "RESCHEDULE" ? "border-brand-red bg-brand-red/10 text-white" : "border-surface-border text-gray-300"}`}
+            >
+              Reschedule request
+            </button>
+          </div>
+          <textarea
+            rows={4}
+            value={requestMessage}
+            onChange={(e) => setRequestMessage(e.target.value)}
+            placeholder="Tell us what you need changed and include any preferred new date or time."
+            className="w-full bg-surface-dark border border-surface-border rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-red resize-none"
+          />
+          {booking.customerRequestType ? (
+            <div className="rounded-xl border border-surface-border bg-surface-dark/60 px-4 py-3 text-xs text-gray-300">
+              <p className="font-semibold text-white">Latest request</p>
+              <p className="mt-1 uppercase tracking-[0.16em] text-amber-400">
+                {booking.customerRequestType} · {booking.customerRequestStatus ?? "OPEN"}
+              </p>
+              {booking.customerRequestMessage ? <p className="mt-2 text-gray-400">{booking.customerRequestMessage}</p> : null}
+            </div>
+          ) : null}
+          {requestFeedback ? (
+            <p className="text-sm text-gray-300 inline-flex items-center gap-2">
+              <AlertCircle size={14} className="text-brand-gold" />
+              {requestFeedback}
+            </p>
+          ) : null}
+          <button
+            type="button"
+            onClick={handleRequest}
+            disabled={requestBusy}
+            className="btn-primary inline-flex items-center gap-2 px-5 py-3 text-sm disabled:opacity-70"
+          >
+            {requestBusy ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+            {requestBusy ? "Sending request..." : "Send request"}
+          </button>
         </div>
 
         {/* Help */}
