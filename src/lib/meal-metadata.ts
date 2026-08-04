@@ -1,5 +1,8 @@
 import { prisma } from "@/lib/prisma";
 
+const SCHEMA = "malam_suya";
+const TABLE = `${SCHEMA}.meals`;
+
 export type MealStockStatus = "IN_STOCK" | "LOW_STOCK" | "SOLD_OUT";
 export type MealSpiceLevel = "MILD" | "MEDIUM" | "HOT" | "EXTRA_HOT" | "NOT_SPICY";
 
@@ -12,16 +15,16 @@ type MealMetadataRow = {
 
 export async function ensureMealMetadataColumns() {
   await prisma.$executeRawUnsafe(
-    `ALTER TABLE meals ADD COLUMN IF NOT EXISTS "allergenInfo" TEXT`
+    `ALTER TABLE ${TABLE} ADD COLUMN IF NOT EXISTS "allergenInfo" TEXT`
   );
   await prisma.$executeRawUnsafe(
-    `ALTER TABLE meals ADD COLUMN IF NOT EXISTS "spiceLevel" TEXT`
+    `ALTER TABLE ${TABLE} ADD COLUMN IF NOT EXISTS "spiceLevel" TEXT`
   );
   await prisma.$executeRawUnsafe(
-    `ALTER TABLE meals ADD COLUMN IF NOT EXISTS "stockStatus" TEXT NOT NULL DEFAULT 'IN_STOCK'`
+    `ALTER TABLE ${TABLE} ADD COLUMN IF NOT EXISTS "stockStatus" TEXT NOT NULL DEFAULT 'IN_STOCK'`
   );
   await prisma.$executeRawUnsafe(
-    `UPDATE meals SET "stockStatus" = 'IN_STOCK' WHERE "stockStatus" IS NULL OR BTRIM("stockStatus") = ''`
+    `UPDATE ${TABLE} SET "stockStatus" = 'IN_STOCK' WHERE "stockStatus" IS NULL OR BTRIM("stockStatus") = ''`
   );
 }
 
@@ -61,7 +64,7 @@ export async function getMealMetadataMap(mealIds: string[]) {
   }
 
   const rows = await prisma.$queryRawUnsafe<MealMetadataRow[]>(
-    `SELECT id, "allergenInfo", "spiceLevel", "stockStatus" FROM meals WHERE id = ANY($1)`,
+    `SELECT id, "allergenInfo", "spiceLevel", "stockStatus" FROM ${TABLE} WHERE id = ANY($1)`,
     mealIds
   );
 
@@ -99,7 +102,7 @@ export async function saveMealMetadata(
 ) {
   await ensureMealMetadataColumns();
   await prisma.$executeRawUnsafe(
-    `UPDATE meals
+    `UPDATE ${TABLE}
      SET "allergenInfo" = $1,
          "spiceLevel" = $2,
          "stockStatus" = $3,

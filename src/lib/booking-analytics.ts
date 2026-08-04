@@ -1,8 +1,11 @@
 import { prisma } from "@/lib/prisma";
 
+const SCHEMA = "malam_suya";
+const TABLE = `${SCHEMA}.booking_analytics_events`;
+
 export async function ensureAnalyticsTable() {
   await prisma.$executeRawUnsafe(`
-    CREATE TABLE IF NOT EXISTS booking_analytics_events (
+    CREATE TABLE IF NOT EXISTS ${TABLE} (
       id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
       event_name TEXT NOT NULL,
       page TEXT,
@@ -21,7 +24,7 @@ export async function logBookingEvent(data: {
 }) {
   await ensureAnalyticsTable();
   await prisma.$executeRawUnsafe(
-    `INSERT INTO booking_analytics_events (event_name, page, reference, metadata)
+    `INSERT INTO ${TABLE} (event_name, page, reference, metadata)
      VALUES ($1, $2, $3, $4::jsonb)`,
     data.eventName,
     data.page ?? null,

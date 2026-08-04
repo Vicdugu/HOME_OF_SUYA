@@ -1,5 +1,8 @@
 import { prisma } from "@/lib/prisma";
 
+const SCHEMA = "malam_suya";
+const TABLE = `${SCHEMA}.bookings`;
+
 export type BookingFulfilmentStage =
   | "RECEIVED"
   | "PREPARING"
@@ -21,22 +24,22 @@ type BookingOpsRow = {
 
 export async function ensureBookingOpsColumns() {
   await prisma.$executeRawUnsafe(
-    `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS "fulfilmentStage" TEXT NOT NULL DEFAULT 'RECEIVED'`
+    `ALTER TABLE ${TABLE} ADD COLUMN IF NOT EXISTS "fulfilmentStage" TEXT NOT NULL DEFAULT 'RECEIVED'`
   );
   await prisma.$executeRawUnsafe(
-    `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS "customerRequestType" TEXT`
+    `ALTER TABLE ${TABLE} ADD COLUMN IF NOT EXISTS "customerRequestType" TEXT`
   );
   await prisma.$executeRawUnsafe(
-    `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS "customerRequestMessage" TEXT`
+    `ALTER TABLE ${TABLE} ADD COLUMN IF NOT EXISTS "customerRequestMessage" TEXT`
   );
   await prisma.$executeRawUnsafe(
-    `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS "customerRequestStatus" TEXT`
+    `ALTER TABLE ${TABLE} ADD COLUMN IF NOT EXISTS "customerRequestStatus" TEXT`
   );
   await prisma.$executeRawUnsafe(
-    `ALTER TABLE bookings ADD COLUMN IF NOT EXISTS "customerRequestCreatedAt" TIMESTAMP(3)`
+    `ALTER TABLE ${TABLE} ADD COLUMN IF NOT EXISTS "customerRequestCreatedAt" TIMESTAMP(3)`
   );
   await prisma.$executeRawUnsafe(
-    `UPDATE bookings SET "fulfilmentStage" = 'RECEIVED' WHERE "fulfilmentStage" IS NULL OR BTRIM("fulfilmentStage") = ''`
+    `UPDATE ${TABLE} SET "fulfilmentStage" = 'RECEIVED' WHERE "fulfilmentStage" IS NULL OR BTRIM("fulfilmentStage") = ''`
   );
 }
 
@@ -94,7 +97,7 @@ export async function getBookingOpsMap(ids: string[]) {
 
   const rows = await prisma.$queryRawUnsafe<BookingOpsRow[]>(
     `SELECT id, "fulfilmentStage", "customerRequestType", "customerRequestMessage", "customerRequestStatus", "customerRequestCreatedAt"
-     FROM bookings
+     FROM ${TABLE}
      WHERE id = ANY($1)`,
     ids
   );
@@ -139,13 +142,13 @@ export async function updateBookingOps(
 
   const currentRows = await prisma.$queryRawUnsafe<BookingOpsRow[]>(
     `SELECT id, "fulfilmentStage", "customerRequestType", "customerRequestMessage", "customerRequestStatus", "customerRequestCreatedAt"
-     FROM bookings WHERE id = $1 LIMIT 1`,
+     FROM ${TABLE} WHERE id = $1 LIMIT 1`,
     id
   );
   const current = currentRows[0];
 
   await prisma.$executeRawUnsafe(
-    `UPDATE bookings
+    `UPDATE ${TABLE}
      SET "fulfilmentStage" = $1,
          "customerRequestType" = $2,
          "customerRequestMessage" = $3,

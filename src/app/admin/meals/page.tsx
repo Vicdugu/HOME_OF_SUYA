@@ -364,14 +364,21 @@ export default function AdminMealsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(normalized),
         });
-        const meal = await res.json();
+
+        const meal = await res.json().catch(() => null);
 
         if (!res.ok) {
-          throw new Error(meal.error ?? "Could not add meal");
+          throw new Error(
+            meal && typeof meal.error === "string" ? meal.error : `Could not add meal (${res.status})`
+          );
+        }
+
+        if (!meal || typeof meal !== "object") {
+          throw new Error("Meal was created but the server returned an invalid response");
         }
 
         startTransition(() => {
-          setMeals((prev) => [...prev, meal].sort((a, b) => a.sortOrder - b.sortOrder));
+          setMeals((prev) => [...prev, meal as MealDTO].sort((a, b) => a.sortOrder - b.sortOrder));
         });
         setEditing(null);
         setForm(EMPTY);
@@ -421,11 +428,15 @@ export default function AdminMealsPage() {
           throw new Error(data.error ?? "Could not update meal");
         }
 
-        const updatedMeal = await res.json();
+        const updatedMeal = await res.json().catch(() => null);
+
+        if (!updatedMeal || typeof updatedMeal !== "object") {
+          throw new Error("Meal was updated but the server returned an invalid response");
+        }
 
         startTransition(() => {
           setMeals((prev) => prev
-            .map((meal) => meal.id === mealId ? updatedMeal : meal)
+            .map((meal) => meal.id === mealId ? updatedMeal as MealDTO : meal)
             .sort((a, b) => a.sortOrder - b.sortOrder));
         });
         setEditing(null);

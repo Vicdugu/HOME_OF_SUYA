@@ -1,5 +1,8 @@
 import { prisma } from "@/lib/prisma";
 
+const SCHEMA = "malam_suya";
+const TABLE = `${SCHEMA}.catering_enquiries`;
+
 export type CateringEnquiryStatus =
   | "NEW"
   | "CONTACTED"
@@ -55,7 +58,7 @@ type CateringEnquiryRow = {
 
 export async function ensureCateringEnquiriesTable() {
   await prisma.$executeRawUnsafe(`
-    CREATE TABLE IF NOT EXISTS catering_enquiries (
+    CREATE TABLE IF NOT EXISTS ${TABLE} (
       id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
       "fullName" TEXT NOT NULL,
       email TEXT NOT NULL,
@@ -141,7 +144,7 @@ export async function createCateringEnquiry(data: {
 }) {
   await ensureCateringEnquiriesTable();
   const rows = await prisma.$queryRawUnsafe<CateringEnquiryRow[]>(
-    `INSERT INTO catering_enquiries (
+    `INSERT INTO ${TABLE} (
       "fullName", email, phone, "eventDate", "guestCount", venue, budget,
       "serviceStyle", "deliveryArea", message, status, "createdAt", "updatedAt"
     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'NEW',NOW(),NOW())
@@ -163,7 +166,7 @@ export async function createCateringEnquiry(data: {
 export async function listCateringEnquiries() {
   await ensureCateringEnquiriesTable();
   const rows = await prisma.$queryRawUnsafe<CateringEnquiryRow[]>(
-    `SELECT * FROM catering_enquiries ORDER BY "createdAt" DESC`
+    `SELECT * FROM ${TABLE} ORDER BY "createdAt" DESC`
   );
   return rows.map(toRecord);
 }
@@ -179,7 +182,7 @@ export async function updateCateringEnquiry(
 ) {
   await ensureCateringEnquiriesTable();
   const current = await prisma.$queryRawUnsafe<CateringEnquiryRow[]>(
-    `SELECT * FROM catering_enquiries WHERE id = $1 LIMIT 1`,
+    `SELECT * FROM ${TABLE} WHERE id = $1 LIMIT 1`,
     id
   );
   const row = current[0];
@@ -187,7 +190,7 @@ export async function updateCateringEnquiry(
     throw new Error("Enquiry not found");
   }
   const rows = await prisma.$queryRawUnsafe<CateringEnquiryRow[]>(
-    `UPDATE catering_enquiries
+    `UPDATE ${TABLE}
      SET status = $1,
          "quoteAmount" = $2,
          "quoteNotes" = $3,
