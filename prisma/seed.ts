@@ -50,20 +50,12 @@ async function main() {
       sortOrder: 1,
     },
     {
-      name: "Suya Beef",
-      description:
-        "Premium beef cuts seasoned with authentic West African spices and slow-grilled over charcoal.",
-      price: 14.0,
-      imageUrl: "https://res.cloudinary.com/demo/image/upload/sample.jpg",
-      sortOrder: 2,
-    },
-    {
       name: "Mixed Suya Platter",
       description:
         "A generous mix of chicken and beef suya with fresh salad, tomatoes, onions, and extra spice.",
       price: 18.0,
       imageUrl: "https://res.cloudinary.com/demo/image/upload/sample.jpg",
-      sortOrder: 3,
+      sortOrder: 2,
     },
   ];
 

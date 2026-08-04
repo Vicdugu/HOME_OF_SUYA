@@ -10,6 +10,8 @@ import {
 } from "@/lib/meal-metadata";
 import { getDefaultMealPhotoUrl, normalizeMealImageUrl } from "@/lib/meal-photos";
 
+const HIDDEN_LEGACY_MEAL_NAMES = new Set(["Suya Beef"]);
+
 type VariationSelectionType = "SINGLE" | "MULTIPLE";
 
 function parseVariationGroups(value: unknown) {
@@ -150,7 +152,9 @@ export async function GET(req: NextRequest) {
       },
     },
   });
-  const mealsWithMetadata = await mergeMealMetadata(meals);
+  const mealsWithMetadata = await mergeMealMetadata(
+    meals.filter((meal) => !HIDDEN_LEGACY_MEAL_NAMES.has(meal.name))
+  );
   return NextResponse.json(
     mealsWithMetadata.map((meal) => ({
       ...meal,
