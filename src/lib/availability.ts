@@ -4,9 +4,7 @@
  */
 
 export const TIME_SLOTS = [
-  { id: "12:00-14:00", label: "12:00 PM – 2:00 PM" },
   { id: "14:00-16:00", label: "2:00 PM – 4:00 PM" },
-  { id: "16:00-18:00", label: "4:00 PM – 6:00 PM" },
   { id: "18:00-20:00", label: "6:00 PM – 8:00 PM" },
 ] as const;
 

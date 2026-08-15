@@ -5,9 +5,7 @@ export const BOOKING_CUTOFF_HOUR_LOCAL = 18;
 export const UNPAID_BOOKING_HOLD_MINUTES = 30;
 
 export const SLOT_CAPACITY_BY_DELIVERY: Record<string, Record<DeliveryType, number>> = {
-  "12:00-14:00": { PICKUP: 8, CARDIFF: 8, POSTAGE: 10 },
   "14:00-16:00": { PICKUP: 8, CARDIFF: 8, POSTAGE: 10 },
-  "16:00-18:00": { PICKUP: 6, CARDIFF: 7, POSTAGE: 9 },
   "18:00-20:00": { PICKUP: 6, CARDIFF: 7, POSTAGE: 9 },
 };
 
