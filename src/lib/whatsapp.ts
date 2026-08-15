@@ -53,6 +53,7 @@ export interface BookingNotificationData {
   reference: string;
   customerName: string;
   whatsapp: string;
+  email?: string | null;
   bookingDate: string;  // human-readable, e.g. "Tuesday, 15 July 2025"
   timeSlot: string;     // human-readable, e.g. "2:00 PM - 4:00 PM"
   deliveryType: string; // "PICKUP" | "CARDIFF" | "POSTAGE"

@@ -6,6 +6,10 @@ import {
   sendCustomerConfirmation,
   sendAdminAlert,
 } from "@/lib/whatsapp";
+import {
+  sendCustomerConfirmationEmail,
+  sendAdminBookingAlert,
+} from "@/lib/email";
 import { formatBookingDate, formatTimeSlot } from "@/lib/availability";
 
 /**
@@ -55,12 +59,13 @@ export async function POST(req: NextRequest) {
       include: { items: true },
     });
 
-    // Fire WhatsApp notifications — failures are logged, never throw
+    // Fire WhatsApp and email notifications — failures are logged, never throw
     try {
       const notifData = {
         reference: updatedBooking.reference,
         customerName: updatedBooking.customerName,
         whatsapp: updatedBooking.whatsapp,
+        email: updatedBooking.email,
         bookingDate: formatBookingDate(
           updatedBooking.bookingDate.toISOString().slice(0, 10)
         ),
@@ -79,8 +84,12 @@ export async function POST(req: NextRequest) {
         promoCode: null,
       };
       await Promise.allSettled([
+        // WhatsApp notifications
         sendCustomerConfirmation(notifData),
         sendAdminAlert(notifData),
+        // Email notifications
+        sendCustomerConfirmationEmail(notifData),
+        sendAdminBookingAlert(notifData),
       ]);
     } catch (err) {
       console.error("[SumUp webhook] Notification error:", err);

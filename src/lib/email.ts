@@ -170,8 +170,53 @@ export async function sendCustomerConfirmationEmail(
   data: BookingNotificationData
 ): Promise<boolean> {
   if (process.env.CUSTOMER_EMAIL_ENABLED !== "true") return false;
-  // Will be implemented when customer emails are activated
-  return false;
+
+  const resend = getResend();
+  if (!resend) return false;
+
+  const itemsHtml = data.items
+    .map(
+      (i) =>
+        `<tr>
+          <td style="padding:4px 8px">${i.mealName}</td>
+          <td style="padding:4px 8px;text-align:center">${i.quantity}</td>
+          <td style="padding:4px 8px;text-align:right">£${(i.unitPrice * i.quantity).toFixed(2)}</td>
+        </tr>`
+    )
+    .join("");
+
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to: data.email || "noreply@homeofsuya.com",
+    subject: `Your Booking Confirmed — ${data.reference}`,
+    html: `
+      <h2>Booking Confirmed!</h2>
+      <p>Hi <strong>${data.customerName}</strong>,</p>
+      <p>Your booking has been confirmed and paid. Here are your order details:</p>
+      <p><strong>Reference:</strong> ${data.reference}</p>
+      <p><strong>Date & Time:</strong> ${data.bookingDate} — ${data.timeSlot}</p>
+      <p><strong>Delivery:</strong> ${data.deliveryType}${data.address ? ` → ${data.address}` : ""}</p>
+      <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:16px 0">
+        <thead>
+          <tr style="background:#C41E3A;color:#fff">
+            <th style="padding:6px 8px;text-align:left">Item</th>
+            <th style="padding:6px 8px">Qty</th>
+            <th style="padding:6px 8px;text-align:right">Price</th>
+          </tr>
+        </thead>
+        <tbody>${itemsHtml}</tbody>
+      </table>
+      <p><strong>Total: £${data.total.toFixed(2)}</strong></p>
+      <p style="color:#888;font-size:13px">We'll send you a message on WhatsApp when your order is ready!</p>
+    `,
+  });
+
+  if (error) {
+    console.error("[Email] Customer confirmation failed:", error);
+    return false;
+  }
+
+  return true;
 }
 
 // ─── Admin Auth Emails ────────────────────────────────────────────────────────
