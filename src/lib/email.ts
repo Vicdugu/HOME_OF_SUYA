@@ -122,9 +122,9 @@ export async function sendAdminBookingAlert(
     .map(
       (i) =>
         `<tr>
-          <td style="padding:4px 8px">${i.mealName}</td>
-          <td style="padding:4px 8px;text-align:center">${i.quantity}</td>
-          <td style="padding:4px 8px;text-align:right">£${(i.unitPrice * i.quantity).toFixed(2)}</td>
+          <td style="padding:3px 6px;font-size:13px">${i.mealName}</td>
+          <td style="padding:3px 6px;text-align:center;font-size:13px">${i.quantity}</td>
+          <td style="padding:3px 6px;text-align:right;font-size:13px">£${(i.unitPrice * i.quantity).toFixed(2)}</td>
         </tr>`
     )
     .join("");
@@ -140,12 +140,12 @@ export async function sendAdminBookingAlert(
       <p><strong>WhatsApp:</strong> ${data.whatsapp}</p>
       <p><strong>Date:</strong> ${data.bookingDate} — ${data.timeSlot}</p>
       <p><strong>Delivery:</strong> ${data.deliveryType}${data.address ? ` → ${data.address}` : ""}</p>
-      <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%">
+      <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:auto">
         <thead>
           <tr style="background:#C41E3A;color:#fff">
-            <th style="padding:6px 8px;text-align:left">Item</th>
-            <th style="padding:6px 8px">Qty</th>
-            <th style="padding:6px 8px;text-align:right">Price</th>
+            <th style="padding:4px 6px;text-align:left;font-size:12px;font-weight:bold">Item</th>
+            <th style="padding:4px 6px;font-size:12px;font-weight:bold">Qty</th>
+            <th style="padding:4px 6px;text-align:right;font-size:12px;font-weight:bold">Price</th>
           </tr>
         </thead>
         <tbody>${itemsHtml}</tbody>
@@ -178,9 +178,9 @@ export async function sendCustomerConfirmationEmail(
     .map(
       (i) =>
         `<tr>
-          <td style="padding:4px 8px">${i.mealName}</td>
-          <td style="padding:4px 8px;text-align:center">${i.quantity}</td>
-          <td style="padding:4px 8px;text-align:right">£${(i.unitPrice * i.quantity).toFixed(2)}</td>
+          <td style="padding:3px 6px;font-size:13px">${i.mealName}</td>
+          <td style="padding:3px 6px;text-align:center;font-size:13px">${i.quantity}</td>
+          <td style="padding:3px 6px;text-align:right;font-size:13px">£${(i.unitPrice * i.quantity).toFixed(2)}</td>
         </tr>`
     )
     .join("");
@@ -196,12 +196,12 @@ export async function sendCustomerConfirmationEmail(
       <p><strong>Reference:</strong> ${data.reference}</p>
       <p><strong>Date & Time:</strong> ${data.bookingDate} — ${data.timeSlot}</p>
       <p><strong>Delivery:</strong> ${data.deliveryType}${data.address ? ` → ${data.address}` : ""}</p>
-      <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:16px 0">
+      <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:auto;margin:16px 0">
         <thead>
           <tr style="background:#C41E3A;color:#fff">
-            <th style="padding:6px 8px;text-align:left">Item</th>
-            <th style="padding:6px 8px">Qty</th>
-            <th style="padding:6px 8px;text-align:right">Price</th>
+            <th style="padding:4px 6px;text-align:left;font-size:12px;font-weight:bold">Item</th>
+            <th style="padding:4px 6px;font-size:12px;font-weight:bold">Qty</th>
+            <th style="padding:4px 6px;text-align:right;font-size:12px;font-weight:bold">Price</th>
           </tr>
         </thead>
         <tbody>${itemsHtml}</tbody>
