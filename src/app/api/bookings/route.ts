@@ -46,10 +46,19 @@ export async function POST(req: NextRequest) {
     !bookingDate ||
     !timeSlot ||
     !customerName ||
-    !customerWhatsapp
+    !customerWhatsapp ||
+    !customerEmail
   ) {
     return NextResponse.json(
       { error: "Missing required booking fields" },
+      { status: 400 }
+    );
+  }
+
+  // Validate email format
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(customerEmail).trim())) {
+    return NextResponse.json(
+      { error: "Invalid email address" },
       { status: 400 }
     );
   }

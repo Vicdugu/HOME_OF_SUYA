@@ -44,7 +44,9 @@ function validate(form: FormValues, needsAddress: boolean): FormErrors {
   } else if (!/^[\d\s+\-().]{7,15}$/.test(form.whatsapp.trim())) {
     e.whatsapp = "Enter a valid phone number";
   }
-  if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+  if (!form.email.trim()) {
+    e.email = "Email address is required";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
     e.email = "Enter a valid email address";
   }
   if (needsAddress && !form.address.trim()) {
@@ -241,7 +243,8 @@ export default function CheckoutPage() {
               <FormField
                 label="Email Address"
                 htmlFor="email"
-                hint="Optional"
+                required
+                hint="We'll send order updates here"
                 error={errors.email}
               >
                 <div className="relative">
