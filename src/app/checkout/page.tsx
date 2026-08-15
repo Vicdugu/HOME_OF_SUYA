@@ -217,7 +217,7 @@ export default function CheckoutPage() {
                 label="WhatsApp Number"
                 htmlFor="whatsapp"
                 required
-                hint="We'll send your booking confirmation here"
+                hint="We'll send order updates here"
                 error={errors.whatsapp}
               >
                 <div
@@ -244,7 +244,7 @@ export default function CheckoutPage() {
                 label="Email Address"
                 htmlFor="email"
                 required
-                hint="We'll send order updates here"
+                hint="We'll send your booking confirmation here"
                 error={errors.email}
               >
                 <div className="relative">
