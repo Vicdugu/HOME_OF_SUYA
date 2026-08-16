@@ -1,10 +1,14 @@
 import path from "node:path";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile, readFile as fsReadFile } from "node:fs/promises";
+import { put } from "@vercel/blob";
 
 const ALLOWED_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp"]);
 const LEGACY_PLACEHOLDER_PATH = "/images/meals/placeholder.jpg";
 const DEFAULT_MEAL_PHOTO_NAME = "Logo.jpeg";
 export const MAX_MEAL_PHOTO_SIZE_BYTES = 5 * 1024 * 1024;
+
+const isVercelEnv = process.env.VERCEL_URL || process.env.VERCEL;
+const hasBlobToken = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 
 export function getMealPhotosDirectory() {
   return path.join(process.cwd(), "Photos");
@@ -20,7 +24,9 @@ export function getMealPhotoPath(fileName: string) {
 }
 
 export async function ensureMealPhotosDirectory() {
-  await mkdir(getMealPhotosDirectory(), { recursive: true });
+  if (!isVercelEnv || !hasBlobToken) {
+    await mkdir(getMealPhotosDirectory(), { recursive: true });
+  }
 }
 
 export function getMealPhotoUrl(fileName: string) {
@@ -48,11 +54,52 @@ export async function saveMealPhoto(fileName: string, content: Uint8Array) {
     throw new Error("Unsupported meal photo format");
   }
 
-  await ensureMealPhotosDirectory();
-
   const storedFileName = createStoredMealPhotoName(fileName);
-  await writeFile(getMealPhotoPath(storedFileName), content);
+
+  if (isVercelEnv && hasBlobToken) {
+    // Use Vercel Blob Storage in production
+    try {
+      await put(`meal-photos/${storedFileName}`, Buffer.from(content), {
+        contentType: getMealPhotoContentType(storedFileName),
+        access: "public",
+      });
+    } catch (error) {
+      // Fall back to local storage if blob upload fails
+      await ensureMealPhotosDirectory();
+      await writeFile(getMealPhotoPath(storedFileName), content);
+    }
+  } else {
+    // Fall back to local filesystem in development
+    await ensureMealPhotosDirectory();
+    await writeFile(getMealPhotoPath(storedFileName), content);
+  }
+
   return storedFileName;
+}
+
+export async function readMealPhoto(fileName: string): Promise<Uint8Array> {
+  // Always try local filesystem first (works in dev and may work in prod if persisted)
+  try {
+    const buf = await fsReadFile(getMealPhotoPath(fileName));
+    return new Uint8Array(buf);
+  } catch {
+    // If local file doesn't exist, try Vercel Blob Storage if configured
+    if (isVercelEnv && hasBlobToken) {
+      try {
+        const response = await fetch(`https://blob.vercelusercontent.com/meal-photos/${fileName}`, {
+          headers: {
+            Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
+          },
+        });
+        if (!response.ok) throw new Error("Photo not found in blob storage");
+        const buffer = await response.arrayBuffer();
+        return new Uint8Array(buffer);
+      } catch (blobError) {
+        throw new Error("Photo not found");
+      }
+    }
+    throw new Error("Photo not found");
+  }
 }
 
 export function normalizeMealImageUrl(imageUrl: string | null | undefined) {

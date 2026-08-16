@@ -1,9 +1,8 @@
-import { readFile } from "node:fs/promises";
 import { NextResponse } from "next/server";
 import {
   getMealPhotoContentType,
-  getMealPhotoPath,
   isAllowedMealPhoto,
+  readMealPhoto,
 } from "@/lib/meal-photos";
 
 export const runtime = "nodejs";
@@ -20,11 +19,16 @@ export async function GET(req: Request) {
   }
 
   try {
-    const buffer = await readFile(getMealPhotoPath(fileName));
-
-    return new NextResponse(buffer, {
+    const buffer = await readMealPhoto(fileName);
+    const contentType = getMealPhotoContentType(fileName);
+    
+    // Convert Uint8Array to a format Response accepts
+    const data = new Uint8Array(buffer) as any;
+    
+    return new Response(data, {
+      status: 200,
       headers: {
-        "Content-Type": getMealPhotoContentType(fileName),
+        "Content-Type": contentType,
         "Cache-Control": "public, max-age=3600",
       },
     });
