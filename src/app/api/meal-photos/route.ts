@@ -9,7 +9,10 @@ import {
 export const runtime = "nodejs";
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000";
+  const { searchParams } = new URL(req.url, baseUrl);
   const fileName = searchParams.get("name")?.trim();
 
   if (!fileName || !isAllowedMealPhoto(fileName)) {
