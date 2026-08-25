@@ -15,7 +15,6 @@
 | Promo code field | ✅ Built | 4 |
 | Order summary at checkout | ✅ Built | 4 |
 | SumUp payment link | ✅ Built | 5 |
-| Stripe fallback payment | ✅ Built | 5 |
 | Booking confirmation page | ✅ Built | 7 |
 | Order tracker (by reference) | ✅ Built | 7 |
 | WhatsApp confirmation to customer | ✅ Built | 6 |

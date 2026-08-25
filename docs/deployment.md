@@ -35,10 +35,15 @@ Go to **Project → Settings → Environment Variables** and add every variable 
 | Variable | Where to get it |
 |---|---|
 | `SUMUP_API_KEY` | SumUp Developer Portal |
-| `SUMUP_MERCHANT_EMAIL` | Your SumUp account email |
-| `STRIPE_SECRET_KEY` | Stripe Dashboard → API Keys |
-| `STRIPE_WEBHOOK_SECRET` | Stripe Dashboard → Webhooks (after step 4) |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe Dashboard → API Keys |
+| `SUMUP_MERCHANT_CODE` | SumUp merchant code for the receiving account |
+
+**Optional for OAuth-style SumUp setup:**
+
+| Variable | Where to get it |
+|---|---|
+| `SUMUP_CLIENT_ID` | SumUp Developer Portal → OAuth client |
+| `SUMUP_CLIENT_SECRET` | SumUp Developer Portal → OAuth client |
+| `SUMUP_OAUTH_REDIRECT_URI` | Fixed callback URL, e.g. `https://YOUR-DOMAIN.com/api/sumup/oauth/callback` |
 
 **Required for WhatsApp notifications:**
 
@@ -59,12 +64,6 @@ After adding env vars → **Deployments → Redeploy** (with latest commit).
 ### 4. Register Webhook URLs
 
 After your domain is live:
-
-**Stripe:**
-1. Stripe Dashboard → Developers → Webhooks → Add endpoint
-2. URL: `https://YOUR-DOMAIN.com/api/payments/webhook/stripe`
-3. Events: `checkout.session.completed`
-4. Copy the signing secret → set as `STRIPE_WEBHOOK_SECRET`
 
 **SumUp:**
 1. SumUp Developer Portal → Your App → Webhooks

@@ -26,14 +26,12 @@ const STEPS = [
   { n: 4, label: "Payment" },
 ];
 
-type PaymentMethod = "sumup" | "stripe";
-
 export default function PaymentPage() {
   const router = useRouter();
   const { state, subtotal, totalItems, clearCart } = useCart();
 
   const [settings, setSettings] = useState(DEFAULT_DELIVERY_SETTINGS);
-  const [loading, setLoading] = useState<PaymentMethod | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Guards
@@ -65,10 +63,10 @@ export default function PaymentPage() {
 
   const total = subtotal + deliveryFee - state.promoDiscount;
 
-  async function handlePay(method: PaymentMethod) {
-    setLoading(method);
+  async function handlePay() {
+    setLoading(true);
     setError(null);
-    trackClientEvent("payment_attempt_started", "payment", { method });
+    trackClientEvent("payment_attempt_started", "payment", { method: "sumup" });
 
     try {
       // Step 1 — create booking
@@ -118,9 +116,9 @@ export default function PaymentPage() {
       clearCart();
       window.location.href = payData.checkoutUrl;
     } catch (err) {
-      trackClientEvent("payment_attempt_failed", "payment", { method });
+      trackClientEvent("payment_attempt_failed", "payment", { method: "sumup" });
       setError(err instanceof Error ? err.message : "Something went wrong");
-      setLoading(null);
+      setLoading(false);
     }
   }
 
@@ -278,16 +276,16 @@ export default function PaymentPage() {
         <div className="space-y-3">
           {/* SumUp — primary */}
           <button
-            onClick={() => handlePay("sumup")}
-            disabled={!!loading}
+            onClick={handlePay}
+            disabled={loading}
             className="btn-primary w-full py-4 text-base flex items-center justify-center gap-3 disabled:opacity-60"
           >
-            {loading === "sumup" ? (
+            {loading ? (
               <Loader2 size={18} className="animate-spin" />
             ) : (
               <CreditCard size={18} />
             )}
-            {loading === "sumup" ? "Redirecting to SumUp…" : "Pay with SumUp"}
+            {loading ? "Redirecting to SumUp…" : "Pay with SumUp"}
           </button>
         </div>
 

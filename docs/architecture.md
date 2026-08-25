@@ -10,8 +10,7 @@
 | Database | PostgreSQL via Neon.tech (serverless) |
 | Auth | NextAuth.js v4 — credentials provider |
 | Images | Cloudinary |
-| Payment (primary) | SumUp Payment Links |
-| Payment (fallback) | Stripe Checkout |
+| Payment | SumUp Hosted Checkout |
 | WhatsApp | Meta WhatsApp Cloud API |
 | Email | Resend (admin only; customer email off by default) |
 | Deployment | Vercel (primary) or Netlify |

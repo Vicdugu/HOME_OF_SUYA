@@ -83,7 +83,7 @@ A chronological record of every build step for this system.
 ## Phases 5-12 — Payments, Notifications, Tracking, Admin, Polish, Deployment
 **Completed: 2026-07-08 to 2026-07-15**
 
-- Phase 5: built booking creation, SumUp checkout, Stripe fallback checkout, payment status routes, and Stripe/SumUp webhooks
+- Phase 5: built booking creation, SumUp checkout, payment status routes, and SumUp webhooks
 - Phase 6: wired WhatsApp notifications and ensured notification failures do not break payment confirmation
 - Phase 7: added booking confirmation and public order tracking pages
 - Phases 8-10: built admin dashboard, meals CRUD, bookings management, CSV export, promo code manager, delivery settings, and blocked dates management
