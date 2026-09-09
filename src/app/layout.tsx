@@ -4,6 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import FooterWrapper from "@/components/ui/FooterWrapper";
 import GlobalHeader from "@/components/ui/GlobalHeader";
+import CookieConsent from "@/components/ui/CookieConsent";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -48,6 +49,7 @@ export default function RootLayout({
           <GlobalHeader />
           {children}
           <FooterWrapper />
+          <CookieConsent />
         </CartProvider>
       </body>
     </html>
