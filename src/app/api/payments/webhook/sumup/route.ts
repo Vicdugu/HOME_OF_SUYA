@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { createHmac } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { getSumUpCheckout } from "@/lib/sumup";
 import {
@@ -13,14 +14,53 @@ import {
 import { formatBookingDate, formatTimeSlot } from "@/lib/availability";
 
 /**
+ * Verify SumUp webhook signature using HMAC-SHA256
+ * SumUp sends signature in X-Signature header
+ */
+function verifySumUpSignature(body: string, signature: string | null): boolean {
+  if (!signature) {
+    console.error("[SumUp webhook] Missing X-Signature header");
+    return false;
+  }
+
+  const webhookSecret = process.env.SUMUP_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error("[SumUp webhook] SUMUP_WEBHOOK_SECRET not configured");
+    return false;
+  }
+
+  // SumUp sends HMAC-SHA256 signature
+  const expectedSignature = createHmac("sha256", webhookSecret)
+    .update(body)
+    .digest("hex");
+
+  // Use constant-time comparison to prevent timing attacks
+  return signature === expectedSignature;
+}
+
+/**
  * SumUp webhook — fires when a checkout is completed.
- * SumUp sends: { id, checkout_reference, status, event_type }
- * Verify by matching checkout_reference to our booking reference.
+ * Signature must be verified before processing payment.
  */
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  const signature = req.headers.get("x-signature");
+  const body = await req.text();
 
-  const checkoutId = typeof body.id === "string" ? body.id : null;
+  // Verify webhook signature
+  if (!verifySumUpSignature(body, signature)) {
+    console.error("[SumUp webhook] Signature verification failed");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  let webhookData;
+  try {
+    webhookData = JSON.parse(body);
+  } catch {
+    console.error("[SumUp webhook] Invalid JSON body");
+    return NextResponse.json({ received: true });
+  }
+
+  const checkoutId = typeof webhookData.id === "string" ? webhookData.id : null;
 
   if (!checkoutId) {
     return NextResponse.json({ received: true });
@@ -30,7 +70,7 @@ export async function POST(req: NextRequest) {
   try {
     checkout = await getSumUpCheckout(checkoutId);
   } catch (err) {
-    console.error("[SumUp webhook] Checkout verification error:", err);
+    console.error("[SumUp webhook] Checkout verification failed");
     return NextResponse.json({ received: true });
   }
 

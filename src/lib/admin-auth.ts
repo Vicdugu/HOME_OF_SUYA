@@ -19,7 +19,7 @@ function getAdminSecret() {
 export async function createAdminToken(userId: string, username: string) {
   return new SignJWT({ userId, username })
     .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("12h")
+    .setExpirationTime("1h")
     .sign(getAdminSecret());
 }
 

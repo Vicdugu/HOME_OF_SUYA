@@ -21,8 +21,8 @@ export async function POST(req: NextRequest) {
   const rawToken = generateToken();
   await refreshAdminVerificationToken(admin.id, hashToken(rawToken), tokenExpiry(24));
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  await sendVerificationEmail(admin.email, admin.username, `${appUrl}/admin/verify?token=${rawToken}`);
+  // Send token via email body (not in URL to prevent exposure in browser history/logs)
+  await sendVerificationEmail(admin.email, admin.username, rawToken);
 
   return NextResponse.json({ ok: true });
 }

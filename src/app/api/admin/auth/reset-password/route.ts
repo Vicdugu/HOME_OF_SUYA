@@ -20,10 +20,10 @@ export async function POST(req: NextRequest) {
   const admin = await findAdminByResetToken(hashToken(token));
 
   if (!admin) {
-    return NextResponse.json({ error: "Invalid or already used reset link" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid or expired reset token" }, { status: 400 });
   }
   if (!isTokenValid(admin.resetTokenExpiry)) {
-    return NextResponse.json({ error: "This reset link has expired. Please request a new one." }, { status: 400 });
+    return NextResponse.json({ error: "Reset token has expired. Please request a new one." }, { status: 400 });
   }
 
   await resetAdminPassword(admin.id, await bcrypt.hash(password, 12));

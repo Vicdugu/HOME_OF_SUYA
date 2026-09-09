@@ -44,7 +44,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ checkoutUrl });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "SumUp error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Log detailed error server-side only
+    console.error("[SumUp payment] Error creating checkout:", err);
+    // Return generic error to client to avoid leaking sensitive info
+    return NextResponse.json({ error: "Unable to process payment. Please try again." }, { status: 500 });
   }
 }

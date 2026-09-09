@@ -20,10 +20,10 @@ export async function POST(req: NextRequest) {
   const admin = await findAdminByVerificationToken(hashToken(token));
 
   if (!admin) {
-    return NextResponse.json({ error: "Invalid or already used verification link" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid or expired verification token" }, { status: 400 });
   }
   if (!isTokenValid(admin.verificationTokenExpiry)) {
-    return NextResponse.json({ error: "This verification link has expired. Ask an admin to resend it." }, { status: 400 });
+    return NextResponse.json({ error: "Verification token has expired. Ask an admin to resend it." }, { status: 400 });
   }
 
   await activateAdminUser(admin.id, await bcrypt.hash(password, 12));

@@ -1,19 +1,16 @@
 "use client";
 
-import { Suspense } from "react";
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Flame, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Flame, Loader2, CheckCircle } from "lucide-react";
 import { inputCls } from "@/components/ui/FormField";
 
 type State = "idle" | "loading" | "success" | "error";
 
-function ResetForm() {
+export default function ResetPasswordPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token") ?? "";
-
+  const [token, setToken] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [state, setState] = useState<State>("idle");
@@ -21,6 +18,7 @@ function ResetForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!token.trim()) { setMessage("Please paste your reset token"); return; }
     if (password !== confirm) { setMessage("Passwords do not match"); return; }
     if (password.length < 8) { setMessage("Password must be at least 8 characters"); return; }
 
@@ -42,27 +40,13 @@ function ResetForm() {
     }
   }
 
-  if (!token) {
-    return (
-      <main className="min-h-screen bg-brand-black flex items-center justify-center px-4">
-        <div className="text-center space-y-4">
-          <AlertCircle size={40} className="text-brand-red mx-auto" />
-          <p className="text-white font-bold">Invalid reset link</p>
-          <Link href="/admin/forgot-password" className="text-brand-gold text-sm hover:underline">
-            Request a new one
-          </Link>
-        </div>
-      </main>
-    );
-  }
-
   return (
     <main className="min-h-screen bg-brand-black flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-8">
         <div className="text-center space-y-2">
           <Flame size={36} className="text-brand-gold mx-auto" />
           <h1 className="text-white font-black text-2xl">Reset Password</h1>
-          <p className="text-gray-500 text-sm">Enter your new password below</p>
+          <p className="text-gray-500 text-sm">Check your email for the reset token</p>
         </div>
 
         {state === "success" ? (
@@ -72,6 +56,18 @@ function ResetForm() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="card p-6 space-y-4">
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-gray-300">Reset Token</label>
+              <input
+                type="text"
+                value={token}
+                onChange={(e) => { setToken(e.target.value); setMessage(""); }}
+                placeholder="Paste token from email"
+                className={inputCls()}
+              />
+              <p className="text-xs text-gray-500">Token was sent to your email address</p>
+            </div>
+
             <div className="space-y-1.5">
               <label className="block text-sm font-medium text-gray-300">New Password</label>
               <input
@@ -83,6 +79,7 @@ function ResetForm() {
                 className={inputCls()}
               />
             </div>
+
             <div className="space-y-1.5">
               <label className="block text-sm font-medium text-gray-300">Confirm Password</label>
               <input
@@ -112,24 +109,12 @@ function ResetForm() {
 
             <div className="text-center">
               <Link href="/admin/forgot-password" className="text-gray-500 hover:text-white text-xs transition-colors">
-                Request new link
+                Request new reset token
               </Link>
             </div>
           </form>
         )}
       </div>
     </main>
-  );
-}
-
-export default function ResetPasswordPage() {
-  return (
-    <Suspense fallback={
-      <main className="min-h-screen bg-brand-black flex items-center justify-center">
-        <Loader2 size={28} className="animate-spin text-brand-gold" />
-      </main>
-    }>
-      <ResetForm />
-    </Suspense>
   );
 }

@@ -20,8 +20,8 @@ export async function POST(req: NextRequest) {
   const rawToken = generateToken();
   await setAdminResetToken(admin.id, hashToken(rawToken), tokenExpiry(1));
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  await sendPasswordResetEmail(admin.email!, admin.username, `${appUrl}/admin/reset-password?token=${rawToken}`);
+  // Send token via email body (not in URL to prevent exposure in browser history/logs)
+  await sendPasswordResetEmail(admin.email!, admin.username, rawToken);
 
   return OK;
 }
