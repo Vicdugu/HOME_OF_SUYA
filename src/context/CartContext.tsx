@@ -5,6 +5,7 @@ import React, {
   useContext,
   useReducer,
   useCallback,
+  useState,
 } from "react";
 import type { CartItem, DeliveryType } from "@/types";
 
@@ -162,6 +163,8 @@ interface CartContextValue {
   }) => void;
   subtotal: number;
   totalItems: number;
+  cartOpen: boolean;
+  setCartOpen: (open: boolean) => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -170,6 +173,7 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState);
+  const [cartOpen, setCartOpenState] = useState(false);
 
   const subtotal = state.items.reduce(
     (sum, item) => sum + item.unitPrice * item.quantity,
@@ -217,6 +221,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }) => dispatch({ type: "SET_CUSTOMER_DETAILS", details }),
     []
   );
+  const setCartOpen = useCallback((open: boolean) => setCartOpenState(open), []);
 
   return (
     <CartContext.Provider
@@ -234,6 +239,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setCustomerDetails,
         subtotal,
         totalItems,
+        cartOpen,
+        setCartOpen,
       }}
     >
       {children}

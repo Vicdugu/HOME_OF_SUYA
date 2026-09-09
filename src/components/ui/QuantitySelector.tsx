@@ -18,9 +18,12 @@ export function QuantitySelector({
   max = 99,
 }: QuantitySelectorProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2" onClick={(event) => event.stopPropagation()}>
       <button
-        onClick={onDecrease}
+        onClick={(event) => {
+          event.stopPropagation();
+          onDecrease();
+        }}
         disabled={quantity <= min}
         aria-label="Decrease quantity"
         className="w-8 h-8 rounded-full border border-surface-border
@@ -37,7 +40,10 @@ export function QuantitySelector({
       </span>
 
       <button
-        onClick={onIncrease}
+        onClick={(event) => {
+          event.stopPropagation();
+          onIncrease();
+        }}
         disabled={quantity >= max}
         aria-label="Increase quantity"
         className="w-8 h-8 rounded-full bg-brand-red

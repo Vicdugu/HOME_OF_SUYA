@@ -7,13 +7,14 @@ import { MealCard } from "@/components/booking/MealCard";
 import { CartDrawer } from "@/components/booking/CartDrawer";
 import { FloatingCartButton } from "@/components/booking/FloatingCartButton";
 import { HeaderLogo } from "@/components/ui/HeaderLogo";
+import { useCart } from "@/context/CartContext";
 import type { MealDTO } from "@/types";
 
 export default function MenuPage() {
-  const [cartOpen, setCartOpen] = useState(false);
   const [meals, setMeals] = useState<MealDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [customizingMealId, setCustomizingMealId] = useState<string | null>(null);
+  const { totalItems, cartOpen, setCartOpen } = useCart();
 
   useEffect(() => {
     fetch("/api/meals")
@@ -27,6 +28,20 @@ export default function MenuPage() {
 
   return (
     <main className="min-h-screen bg-brand-black">
+      <button
+        type="button"
+        onClick={() => setCartOpen(true)}
+        aria-label={`Open cart with ${totalItems} item${totalItems === 1 ? "" : "s"}`}
+        className="fixed left-4 top-4 z-40 flex items-center justify-center rounded-full border border-brand-gold/40 bg-brand-black/80 p-2.5 text-brand-gold shadow-lg shadow-black/30 backdrop-blur-sm transition hover:bg-brand-black sm:hidden"
+      >
+        <ShoppingBag size={18} />
+        {totalItems > 0 && (
+          <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-red px-1 text-[10px] font-black text-white">
+            {totalItems > 9 ? "9+" : totalItems}
+          </span>
+        )}
+      </button>
+
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <header className="relative isolate overflow-hidden border-b border-brand-gold/15 bg-brand-gradient">
         <div

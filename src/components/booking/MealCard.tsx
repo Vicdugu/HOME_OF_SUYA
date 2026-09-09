@@ -66,7 +66,17 @@ export function MealCard({
     : "Unavailable";
   const spiceLabel = formatSpiceLevel(meal.spiceLevel);
 
-  const handleAddSelection = () => addItem(createCustomisedCartItem(meal, selection));
+  const handleOpenCustomization = () => {
+    if (!meal.isAvailable || !hasCustomisations) return;
+    setCustomising(true);
+    onCustomizeStart();
+  };
+
+  const handleAddSelection = () => {
+    addItem(createCustomisedCartItem(meal, selection));
+    setCustomising(false);
+    onCustomizeEnd();
+  };
   const handleDecrease = () => setQuantity(selectedCartItemId, selectedQuantity - 1);
   const handleIncrease = () =>
     selectedQuantity === 0
@@ -87,7 +97,22 @@ export function MealCard({
 
   return (
     <article
-      className={`card flex flex-col overflow-hidden transition-all duration-200
+      role="button"
+      tabIndex={meal.isAvailable && hasCustomisations ? 0 : -1}
+      aria-label={meal.isAvailable && hasCustomisations ? `Customize ${meal.name}` : meal.name}
+      onClick={(event) => {
+        if (event.target instanceof HTMLElement && event.target.closest("button")) return;
+        if (!customising && meal.isAvailable && hasCustomisations) {
+          handleOpenCustomization();
+        }
+      }}
+      onKeyDown={(event) => {
+        if ((event.key === "Enter" || event.key === " ") && meal.isAvailable && hasCustomisations) {
+          event.preventDefault();
+          handleOpenCustomization();
+        }
+      }}
+      className={`card flex flex-col overflow-hidden transition-all duration-200 cursor-pointer
         ${!meal.isAvailable ? "opacity-50" : "hover:border-brand-red/40"}`}
     >
       {/* Meal image */}
@@ -153,7 +178,7 @@ export function MealCard({
         </div>
 
         {customising && meal.isAvailable && hasCustomisations && (
-          <div className="space-y-3 rounded-xl border border-surface-border bg-surface-dark/60 p-3">
+          <div className="space-y-3 rounded-xl border border-surface-border bg-surface-dark/60 p-3" onClick={(event) => event.stopPropagation()}>
             {meal.variationGroups.map((group) => (
               <div key={group.id} className="space-y-1.5">
                 <div className="flex items-center justify-between gap-3">
@@ -171,7 +196,10 @@ export function MealCard({
                     return (
                       <button
                         key={option.id}
-                        onClick={() => toggleOption(group.id, option.id, group.selectionType)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          toggleOption(group.id, option.id, group.selectionType);
+                        }}
                         className={[
                           "rounded-full border px-3 py-1.5 text-xs transition-colors",
                           selected
@@ -206,9 +234,9 @@ export function MealCard({
             hasCustomisations ? (
               !customising ? (
                 <button
-                  onClick={() => {
-                    setCustomising(true);
-                    onCustomizeStart();
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleOpenCustomization();
                   }}
                   aria-label={`Customize ${meal.name}`}
                   className="flex items-center gap-1.5 btn-primary py-1.5 px-3 text-xs sm:py-2 sm:px-4 sm:text-sm"
@@ -220,7 +248,10 @@ export function MealCard({
                 <div className="flex flex-col items-end gap-2">
                   {selectedQuantity === 0 ? (
                     <button
-                      onClick={handleAddSelection}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleAddSelection();
+                      }}
                       aria-label={`Add ${meal.name} with selected options to cart`}
                       className="flex items-center gap-1.5 btn-primary py-1.5 px-3 text-xs sm:py-2 sm:px-4 sm:text-sm"
                     >
@@ -235,7 +266,8 @@ export function MealCard({
                     />
                   )}
                   <button
-                    onClick={() => {
+                    onClick={(event) => {
+                      event.stopPropagation();
                       setCustomising(false);
                       onCustomizeEnd();
                     }}
@@ -247,7 +279,10 @@ export function MealCard({
               )
             ) : quantity === 0 ? (
               <button
-                onClick={handleAddSelection}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleAddSelection();
+                }}
                 aria-label={`Add ${meal.name} to cart`}
                 className="flex items-center gap-1.5 btn-primary py-1.5 px-3 text-xs sm:py-2 sm:px-4 sm:text-sm"
               >
