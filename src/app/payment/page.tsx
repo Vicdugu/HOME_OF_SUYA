@@ -33,6 +33,8 @@ export default function PaymentPage() {
   const [settings, setSettings] = useState(DEFAULT_DELIVERY_SETTINGS);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [termsError, setTermsError] = useState(false);
 
   // Guards
   useEffect(() => {
@@ -64,6 +66,11 @@ export default function PaymentPage() {
   const total = subtotal + deliveryFee - state.promoDiscount;
 
   async function handlePay() {
+    if (!agreedToTerms) {
+      setTermsError(true);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     trackClientEvent("payment_attempt_started", "payment", { method: "sumup" });
@@ -271,6 +278,40 @@ export default function PaymentPage() {
             </div>
           </div>
         )}
+
+        {/* ── Terms & Conditions ───────────────────────────── */}
+        <div className="card p-5 space-y-3">
+          <div className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              id="payment-terms"
+              checked={agreedToTerms}
+              onChange={(e) => {
+                setAgreedToTerms(e.target.checked);
+                setTermsError(false);
+              }}
+              className="w-5 h-5 rounded border border-gray-600 bg-surface-dark text-brand-orange focus:ring-2 focus:ring-brand-orange focus:ring-offset-2 focus:ring-offset-brand-black cursor-pointer mt-0.5 shrink-0"
+            />
+            <label htmlFor="payment-terms" className="cursor-pointer flex-1">
+              <span className="text-sm text-gray-300">
+                I agree to the{" "}
+                <a
+                  href="/terms-and-conditions"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-orange hover:text-orange-400 underline font-semibold"
+                >
+                  Terms & Conditions
+                </a>
+              </span>
+            </label>
+          </div>
+          {termsError && (
+            <p className="text-red-500 text-sm">
+              You must agree to the Terms & Conditions to proceed with payment
+            </p>
+          )}
+        </div>
 
         {/* ── Payment buttons ───────────────────────────────── */}
         <div className="space-y-3">

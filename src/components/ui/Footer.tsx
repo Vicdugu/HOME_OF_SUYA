@@ -40,6 +40,11 @@ export default function Footer() {
             <h4 className="text-md font-semibold mb-4">Legal</h4>
             <ul className="space-y-2 text-sm">
               <li>
+                <a href="/terms-and-conditions" className="text-gray-400 hover:text-brand-orange transition">
+                  Terms & Conditions
+                </a>
+              </li>
+              <li>
                 <a href="/privacy-policy" className="text-gray-400 hover:text-brand-orange transition">
                   Privacy Policy
                 </a>

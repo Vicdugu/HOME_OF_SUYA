@@ -36,7 +36,7 @@ interface FormValues {
 
 type FormErrors = Partial<Record<keyof FormValues, string>>;
 
-function validate(form: FormValues, needsAddress: boolean): FormErrors {
+function validate(form: FormValues, needsAddress: boolean, agreedToTerms: boolean): FormErrors {
   const e: FormErrors = {};
   if (!form.name.trim()) e.name = "Name is required";
   if (!form.whatsapp.trim()) {
@@ -91,6 +91,8 @@ export default function CheckoutPage() {
     notes: state.customerNotes,
   });
   const [errors, setErrors] = useState<FormErrors>({});
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [termsError, setTermsError] = useState(false);
 
   function set(field: keyof FormValues, value: string) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -98,8 +100,10 @@ export default function CheckoutPage() {
   }
 
   function handleSubmit() {
-    const e = validate(form, needsAddress);
-    if (Object.keys(e).length > 0) {
+    const e = validate(form, needsAddress, agreedToTerms);
+    setTermsError(!agreedToTerms);
+    
+    if (Object.keys(e).length > 0 || !agreedToTerms) {
       setErrors(e);
       // Scroll to first error
       const first = document.querySelector("[data-error]");
@@ -331,6 +335,40 @@ export default function CheckoutPage() {
                 Promo Code
               </h2>
               <PromoCodeInput />
+            </section>
+
+            {/* ── Terms & Conditions ───────────────────────────── */}
+            <section className="card p-6 space-y-4">
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="terms"
+                  checked={agreedToTerms}
+                  onChange={(e) => {
+                    setAgreedToTerms(e.target.checked);
+                    setTermsError(false);
+                  }}
+                  className="w-5 h-5 rounded border border-gray-600 bg-surface-dark text-brand-orange focus:ring-2 focus:ring-brand-orange focus:ring-offset-2 focus:ring-offset-brand-black cursor-pointer mt-0.5 shrink-0"
+                />
+                <label htmlFor="terms" className="cursor-pointer flex-1">
+                  <span className="text-sm text-gray-300">
+                    I agree to the{" "}
+                    <a
+                      href="/terms-and-conditions"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-brand-orange hover:text-orange-400 underline font-semibold"
+                    >
+                      Terms & Conditions
+                    </a>
+                  </span>
+                </label>
+              </div>
+              {termsError && (
+                <p className="text-red-500 text-sm">
+                  You must agree to the Terms & Conditions to continue
+                </p>
+              )}
             </section>
 
             {/* ── Submit ───────────────────────────────────────── */}
