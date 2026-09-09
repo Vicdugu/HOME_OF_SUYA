@@ -200,9 +200,9 @@ export function MealCard({ meal }: MealCardProps) {
                 <button
                   onClick={() => setCustomising(true)}
                   aria-label={`Customize ${meal.name}`}
-                  className="flex items-center gap-2 btn-primary py-2 px-4 text-sm"
+                  className="flex items-center gap-1.5 btn-primary py-1.5 px-3 text-xs sm:py-2 sm:px-4 sm:text-sm"
                 >
-                  <ShoppingCart size={15} />
+                  <ShoppingCart size={14} className="sm:size-4" />
                   Customize
                 </button>
               ) : (
@@ -211,9 +211,9 @@ export function MealCard({ meal }: MealCardProps) {
                     <button
                       onClick={handleAddSelection}
                       aria-label={`Add ${meal.name} with selected options to cart`}
-                      className="flex items-center gap-2 btn-primary py-2 px-4 text-sm"
+                      className="flex items-center gap-1.5 btn-primary py-1.5 px-3 text-xs sm:py-2 sm:px-4 sm:text-sm"
                     >
-                      <Check size={15} />
+                      <Check size={14} className="sm:size-4" />
                       Add to Order
                     </button>
                   ) : (
@@ -235,9 +235,9 @@ export function MealCard({ meal }: MealCardProps) {
               <button
                 onClick={handleAddSelection}
                 aria-label={`Add ${meal.name} to cart`}
-                className="flex items-center gap-2 btn-primary py-2 px-4 text-sm"
+                className="flex items-center gap-1.5 btn-primary py-1.5 px-3 text-xs sm:py-2 sm:px-4 sm:text-sm"
               >
-                <ShoppingCart size={15} />
+                <ShoppingCart size={14} className="sm:size-4" />
                 Add
               </button>
             ) : (

@@ -61,7 +61,7 @@ export default function Footer() {
         {/* Divider */}
         <div className="border-t border-gray-700 pt-8">
           <p className="text-center text-gray-400 text-sm">
-            © 2026 Questbridge Consulting Ltd. All rights reserved.
+            © 2026 Home of Suya. All rights reserved.
           </p>
         </div>
       </div>
