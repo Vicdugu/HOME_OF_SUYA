@@ -68,11 +68,39 @@ async function getSumUpApiConfig() {
   const apiKey = process.env.SUMUP_API_KEY ?? envFileValues.SUMUP_API_KEY;
   const merchantCode = process.env.SUMUP_MERCHANT_CODE ?? envFileValues.SUMUP_MERCHANT_CODE;
   const merchantEmail = process.env.SUMUP_MERCHANT_EMAIL ?? envFileValues.SUMUP_MERCHANT_EMAIL;
-  const accessToken = storedToken?.accessToken ?? apiKey;
+
+  // Check if stored token exists and is still valid (not expired)
+  let accessToken: string | undefined;
+  if (storedToken?.expiresAt) {
+    const now = Date.now();
+    const expiresAt = new Date(storedToken.expiresAt).getTime();
+    const tokenExpiresSoon = expiresAt - now < 5 * 60 * 1000; // Less than 5 minutes
+
+    if (tokenExpiresSoon) {
+      console.warn(
+        "[SumUp] OAuth token expiring soon. Falling back to API key."
+      );
+      accessToken = apiKey;
+    } else {
+      // Token is still valid, use it
+      accessToken = storedToken.accessToken;
+    }
+  } else if (storedToken?.accessToken) {
+    // Token exists but no expiration info, use it cautiously
+    accessToken = storedToken.accessToken;
+  } else {
+    // No stored token, use API key
+    accessToken = apiKey;
+  }
+
+  // Final fallback to API key if OAuth token is unavailable
+  if (!accessToken) {
+    accessToken = apiKey;
+  }
 
   if (!accessToken || (!merchantCode && !merchantEmail)) {
     throw new Error(
-      `[sumup-debug-v2] SumUp credentials not configured (accessToken=${accessToken ? "present" : "missing"}, apiKey=${apiKey ? "present" : "missing"}, merchantCode=${merchantCode ? "present" : "missing"}, merchantEmail=${merchantEmail ? "present" : "missing"}, cwd=${process.cwd()}, envPath=${envPath}, envFileExists=${existsSync(envPath) ? "yes" : "no"}, envFileKeys=${Object.keys(envFileValues).filter((key) => key.startsWith("SUMUP_")).join(",") || "none"})`
+      "SumUp credentials not configured. Please check your environment variables."
     );
   }
 

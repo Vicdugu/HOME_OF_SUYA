@@ -124,6 +124,26 @@ export async function getStoredSumUpToken(): Promise<SumUpStoredToken | null> {
     };
   } catch (err) {
     console.error("[SumUp Auth] Failed to decrypt stored token:", err);
+    // Decryption failed - return null to trigger fallback to API key
     return null;
   }
+}
+
+/**
+ * Check if stored token is valid (not expired or expiring soon).
+ * Returns true if token is still usable, false if expired or expiring within 5 minutes.
+ */
+export async function isStoredTokenValid(): Promise<boolean> {
+  const token = await getStoredSumUpToken();
+  if (!token?.expiresAt) {
+    // No expiration info, can't determine validity - return false to be safe
+    return false;
+  }
+
+  const now = Date.now();
+  const expiresAt = new Date(token.expiresAt).getTime();
+  const timeUntilExpiry = expiresAt - now;
+
+  // Token is valid if it expires in more than 5 minutes
+  return timeUntilExpiry > 5 * 60 * 1000;
 }
