@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { encryptToken, decryptToken } from "@/lib/encryption";
 
 const SCHEMA = "malam_suya";
 const TABLE = `${SCHEMA}.delivery_settings`;
@@ -71,6 +72,10 @@ export async function storeSumUpToken(token: {
       ? new Date(Date.now() + token.expiresIn * 1000)
       : null;
 
+  // Encrypt tokens before storing
+  const encryptedAccessToken = encryptToken(token.accessToken);
+  const encryptedRefreshToken = token.refreshToken ? encryptToken(token.refreshToken) : null;
+
   await prisma.$executeRawUnsafe(
     `UPDATE ${TABLE}
      SET "sumupAccessToken" = $1,
@@ -80,8 +85,8 @@ export async function storeSumUpToken(token: {
          "sumupTokenExpiresAt" = $5,
          "updatedAt" = NOW()
      WHERE id = $6`,
-    token.accessToken,
-    token.refreshToken ?? null,
+    encryptedAccessToken,
+    encryptedRefreshToken,
     token.tokenType ?? null,
     token.scope ?? null,
     expiresAt,
@@ -105,11 +110,20 @@ export async function getStoredSumUpToken(): Promise<SumUpStoredToken | null> {
     return null;
   }
 
-  return {
-    accessToken: token.sumupAccessToken,
-    refreshToken: token.sumupRefreshToken,
-    tokenType: token.sumupTokenType,
-    scope: token.sumupTokenScope,
-    expiresAt: token.sumupTokenExpiresAt,
-  };
+  try {
+    // Decrypt tokens from database
+    const decryptedAccessToken = decryptToken(token.sumupAccessToken);
+    const decryptedRefreshToken = token.sumupRefreshToken ? decryptToken(token.sumupRefreshToken) : null;
+
+    return {
+      accessToken: decryptedAccessToken,
+      refreshToken: decryptedRefreshToken,
+      tokenType: token.sumupTokenType,
+      scope: token.sumupTokenScope,
+      expiresAt: token.sumupTokenExpiresAt,
+    };
+  } catch (err) {
+    console.error("[SumUp Auth] Failed to decrypt stored token:", err);
+    return null;
+  }
 }

@@ -1,3 +1,19 @@
+/**
+ * Legacy In-Memory Rate Limiting
+ * 
+ * DEPRECATED: For new endpoints, use the Redis-based rate limiter in rate-limit-redis.ts
+ * This implementation is kept for backward compatibility but:
+ * - Lost on server restart/redeploy
+ * - Only works on single instance (no load balancing)
+ * - Can be bypassed by distributed attackers
+ * 
+ * Phase 2 Security Upgrade (2026-09-09):
+ * Migrating critical endpoints to Redis-based rate limiting for:
+ * - Persistence across deployments
+ * - Distributed rate limiting across multiple instances
+ * - Better protection against coordinated attacks
+ */
+
 type RateLimitEntry = {
   count: number;
   resetAt: number;

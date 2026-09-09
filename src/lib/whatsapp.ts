@@ -7,6 +7,12 @@
  *   WHATSAPP_PHONE_NUMBER_ID   — from Meta Business Suite
  *   WHATSAPP_ACCESS_TOKEN      — permanent system user token
  *   ADMIN_WHATSAPP_NUMBER      — admin's number with country code (no +)
+ * 
+ * Phase 2 Security Updates:
+ * - Error messages sanitized to prevent token/config leakage
+ * - Detailed errors logged server-side only
+ * - Rate limiting recommended for production
+ * - Token rotation strategy needed for long-lived tokens
  */
 
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
@@ -14,6 +20,21 @@ const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
 
 function getApiUrl() {
   return `https://graph.facebook.com/v19.0/${PHONE_NUMBER_ID}/messages`;
+}
+
+/**
+ * Sanitize error messages for logging
+ * Removes sensitive information like tokens, phone numbers
+ */
+function sanitizeErrorForLog(error: unknown): string {
+  if (typeof error === "string") {
+    // Remove common sensitive patterns
+    return error
+      .replace(/Bearer\s+[a-zA-Z0-9_-]+/g, "Bearer ***")
+      .replace(/\d{10,15}/g, "***PHONE***") // phone numbers
+      .replace(/"error":"[^"]+"/g, '"error":"<sanitized>"');
+  }
+  return "Unknown error";
 }
 
 /** Returns false (and logs) instead of throwing when WhatsApp is not configured. */
@@ -26,25 +47,33 @@ async function sendMessage(to: string, body: string): Promise<boolean> {
   // Normalise: strip spaces + leading +
   const number = to.replace(/\s+/g, "").replace(/^\+/, "");
 
-  const res = await fetch(getApiUrl(), {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${ACCESS_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      messaging_product: "whatsapp",
-      to: number,
-      type: "text",
-      text: { body },
-    }),
-  });
+  try {
+    const res = await fetch(getApiUrl(), {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${ACCESS_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        to: number,
+        type: "text",
+        text: { body },
+      }),
+    });
 
-  if (!res.ok) {
-    console.error("[WhatsApp] Send failed:", await res.text());
+    if (!res.ok) {
+      // Log detailed error server-side only
+      const errorText = await res.text();
+      console.error(`[WhatsApp] Send failed (HTTP ${res.status}):`, sanitizeErrorForLog(errorText));
+      return false;
+    }
+    return true;
+  } catch (err) {
+    // Log detailed error server-side, don't expose to client
+    console.error("[WhatsApp] Send error:", err instanceof Error ? err.message : "Unknown error");
     return false;
   }
-  return true;
 }
 
 // ─── Shared types ────────────────────────────────────────────────────────────
