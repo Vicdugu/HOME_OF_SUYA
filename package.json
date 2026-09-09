@@ -15,7 +15,9 @@
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "db:seed": "ts-node --skip-project prisma/seed.ts"
+    "db:seed": "ts-node --skip-project prisma/seed.ts",
+    "verify:backups": "tsx scripts/verify-backups.ts",
+    "backup:s3": "tsx scripts/backup-to-s3.ts"
   },
   "prisma": {
     "seed": "ts-node --skip-project prisma/seed.ts"
@@ -24,6 +26,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.545.0",
     "@prisma/client": "^5.22.0",
     "@upstash/redis": "^1.38.4",
     "@vercel/blob": "^2.8.0",

@@ -1,0 +1,56 @@
+name: Verify Database Backups
+
+on:
+  schedule:
+    # Run daily at 01:00 UTC
+    - cron: "0 1 * * *"
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  verify-backups:
+    runs-on: ubuntu-latest
+    name: Verify Neon Backups
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔍 Verify database backups
+        run: npm run verify:backups
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+          BACKUP_THRESHOLD_DAYS: 7
+
+      - name: 📧 Send failure alert
+        if: failure()
+        run: |
+          curl -X POST ${{ secrets.BACKUP_FAILURE_WEBHOOK }} \
+            -H "Content-Type: application/json" \
+            -d '{
+              "status": "FAILED",
+              "check": "backup-verification",
+              "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",
+              "run_url": "'$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID'"
+            }' || true
+        env:
+          BACKUP_FAILURE_WEBHOOK: ${{ secrets.BACKUP_FAILURE_WEBHOOK }}
+
+      - name: 💬 Notify Slack
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: "Database backup verification: ${{ job.status }}"
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          fields: repo,message,commit,author
+        continue-on-error: true

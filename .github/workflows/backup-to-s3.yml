@@ -1,0 +1,64 @@
+name: Weekly Database Backup to S3
+
+on:
+  schedule:
+    # Run every Sunday at 02:00 UTC
+    - cron: "0 2 * * 0"
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  backup-to-s3:
+    runs-on: ubuntu-latest
+    name: Export Database to S3
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 📥 Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: ☁️ Export database to S3
+        run: npm run backup:s3
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AWS_REGION: us-east-1
+          AWS_BUCKET: home-of-suya-db-backups
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_BACKUP_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_BACKUP_SECRET_ACCESS_KEY }}
+          BACKUP_FAILURE_WEBHOOK: ${{ secrets.BACKUP_FAILURE_WEBHOOK }}
+
+      - name: 📧 Send failure alert
+        if: failure()
+        run: |
+          curl -X POST ${{ secrets.BACKUP_FAILURE_WEBHOOK }} \
+            -H "Content-Type: application/json" \
+            -d '{
+              "status": "FAILED",
+              "check": "s3-backup-export",
+              "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",
+              "run_url": "'$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID'"
+            }' || true
+        env:
+          BACKUP_FAILURE_WEBHOOK: ${{ secrets.BACKUP_FAILURE_WEBHOOK }}
+
+      - name: 💬 Notify Slack
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: "Weekly S3 database backup: ${{ job.status }}"
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          fields: repo,message,commit,author
+        continue-on-error: true
