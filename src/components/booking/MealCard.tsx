@@ -17,6 +17,9 @@ import type { MealDTO, MealVariationSelection, VariationSelectionType } from "@/
 
 interface MealCardProps {
   meal: MealDTO;
+  isCustomizing?: boolean;
+  onCustomizeStart?: () => void;
+  onCustomizeEnd?: () => void;
 }
 
 function isLocalMealPhotoUrl(imageUrl: string) {
@@ -27,7 +30,12 @@ function formatSpiceLevel(spiceLevel: MealDTO["spiceLevel"]) {
   return spiceLevel ? spiceLevel.replace(/_/g, " ").toLowerCase() : null;
 }
 
-export function MealCard({ meal }: MealCardProps) {
+export function MealCard({
+  meal,
+  isCustomizing: isCustomizingProp = false,
+  onCustomizeStart = () => {},
+  onCustomizeEnd = () => {},
+}: MealCardProps) {
   const { state, addItem, setQuantity } = useCart();
   const [customising, setCustomising] = useState(false);
   const [selection, setSelection] = useState<MealVariationSelection>(() =>
@@ -198,7 +206,10 @@ export function MealCard({ meal }: MealCardProps) {
             hasCustomisations ? (
               !customising ? (
                 <button
-                  onClick={() => setCustomising(true)}
+                  onClick={() => {
+                    setCustomising(true);
+                    onCustomizeStart();
+                  }}
                   aria-label={`Customize ${meal.name}`}
                   className="flex items-center gap-1.5 btn-primary py-1.5 px-3 text-xs sm:py-2 sm:px-4 sm:text-sm"
                 >
@@ -224,7 +235,10 @@ export function MealCard({ meal }: MealCardProps) {
                     />
                   )}
                   <button
-                    onClick={() => setCustomising(false)}
+                    onClick={() => {
+                      setCustomising(false);
+                      onCustomizeEnd();
+                    }}
                     className="text-xs text-gray-500 hover:text-white transition-colors"
                   >
                     Close

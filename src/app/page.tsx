@@ -13,6 +13,7 @@ export default function MenuPage() {
   const [cartOpen, setCartOpen] = useState(false);
   const [meals, setMeals] = useState<MealDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [customizingMealId, setCustomizingMealId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/meals")
@@ -92,24 +93,15 @@ export default function MenuPage() {
               </span>
             </div>
 
-            {/* Mobile: Time badge + 3 reversed delivery options stacked */}
-            <div className="mt-3 flex flex-col gap-2 sm:hidden">
+            {/* Mobile: Time badge + delivery options in single line */}
+            <div className="mt-3 flex flex-col gap-1.5 sm:hidden">
               <span className="flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[10px] text-white backdrop-blur-sm">
                 <Clock size={12} className="text-brand-gold shrink-0" />
                 <span>Mon-Sat</span>
               </span>
-              {/* Delivery options in reverse order: UK Postage, Cardiff Delivery, Pickup */}
               <span className="flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[10px] text-white backdrop-blur-sm">
                 <MapPin size={12} className="text-brand-gold shrink-0" />
-                <span>UK Postage</span>
-              </span>
-              <span className="flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[10px] text-white backdrop-blur-sm">
-                <MapPin size={12} className="text-brand-gold shrink-0" />
-                <span>Cardiff Delivery</span>
-              </span>
-              <span className="flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[10px] text-white backdrop-blur-sm">
-                <MapPin size={12} className="text-brand-gold shrink-0" />
-                <span>Pickup</span>
+                <span className="line-clamp-1">UK Postage · Cardiff Delivery · Pickup</span>
               </span>
             </div>
 
@@ -161,11 +153,50 @@ export default function MenuPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
-              {availableMeals.map((meal) => (
-                <MealCard key={meal.id} meal={meal} />
-              ))}
-            </div>
+            {/* On mobile with customizing meal, show only that meal in full width */}
+            {customizingMealId ? (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+                  {availableMeals
+                    .filter((meal) => meal.id === customizingMealId)
+                    .map((meal) => (
+                      <MealCard
+                        key={meal.id}
+                        meal={meal}
+                        isCustomizing={true}
+                        onCustomizeStart={() => setCustomizingMealId(meal.id)}
+                        onCustomizeEnd={() => setCustomizingMealId(null)}
+                      />
+                    ))}
+                </div>
+                {/* Show other meals on desktop only */}
+                <div className="hidden sm:grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+                  {availableMeals
+                    .filter((meal) => meal.id !== customizingMealId)
+                    .map((meal) => (
+                      <MealCard
+                        key={meal.id}
+                        meal={meal}
+                        isCustomizing={false}
+                        onCustomizeStart={() => setCustomizingMealId(meal.id)}
+                        onCustomizeEnd={() => setCustomizingMealId(null)}
+                      />
+                    ))}
+                </div>
+              </>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+                {availableMeals.map((meal) => (
+                  <MealCard
+                    key={meal.id}
+                    meal={meal}
+                    isCustomizing={false}
+                    onCustomizeStart={() => setCustomizingMealId(meal.id)}
+                    onCustomizeEnd={() => setCustomizingMealId(null)}
+                  />
+                ))}
+              </div>
+            )}
 
             {unavailableMeals.length > 0 && (
               <div className="mt-6 sm:mt-10">
@@ -174,7 +205,13 @@ export default function MenuPage() {
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                   {unavailableMeals.map((meal) => (
-                    <MealCard key={meal.id} meal={meal} />
+                    <MealCard
+                      key={meal.id}
+                      meal={meal}
+                      isCustomizing={false}
+                      onCustomizeStart={() => {}}
+                      onCustomizeEnd={() => {}}
+                    />
                   ))}
                 </div>
               </div>
