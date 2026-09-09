@@ -2,7 +2,7 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-100 py-12 mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand Section */}
           <div>
             <h3 className="text-lg font-semibold mb-2">Home of Suya</h3>
@@ -33,6 +33,23 @@ export default function Footer() {
             <h4 className="text-md font-semibold mb-4">Location</h4>
             <p className="text-gray-400 text-sm mb-2">Cardiff, United Kingdom</p>
             <p className="text-gray-400 text-sm">Nationwide next‑day delivery available</p>
+          </div>
+
+          {/* Legal & Policies Section */}
+          <div>
+            <h4 className="text-md font-semibold mb-4">Legal</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a href="/privacy-policy" className="text-gray-400 hover:text-brand-orange transition">
+                  Privacy Policy
+                </a>
+              </li>
+              <li>
+                <a href="/cookie-policy" className="text-gray-400 hover:text-brand-orange transition">
+                  Cookie Policy
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
 
