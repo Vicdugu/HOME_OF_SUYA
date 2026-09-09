@@ -43,51 +43,53 @@ export default function MenuPage() {
           <HeaderLogo size="customer" />
         </div>
 
-        <div className="relative mx-auto max-w-[68rem] px-4 pb-5 pt-12 md:px-6 md:pb-6 md:pt-16 lg:px-8 lg:pt-18">
+        <div className="relative mx-auto max-w-[68rem] px-4 pb-3 pt-8 md:px-6 md:pb-6 md:pt-16 lg:px-8 lg:pt-18">
           <div className="max-w-2xl text-center lg:text-left">
             <div className="inline-flex items-center gap-2 rounded-full border border-brand-gold/30 bg-black/25 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.24em] text-brand-gold backdrop-blur-sm">
               <Flame size={12} className="text-brand-gold" />
               Fresh off the grill
             </div>
 
-            <div className="mt-3 space-y-1.5">
-              <h1 className="text-[2.35rem] font-black leading-none tracking-[-0.04em] text-white md:text-[3.2rem] xl:text-[4rem]">
+            <div className="mt-2 space-y-1">
+              <h1 className="text-[1.75rem] font-black leading-none tracking-[-0.04em] text-white md:text-[3.2rem] xl:text-[4rem]">
                 Home of Suya,
               </h1>
-              <h2 className="bg-gold-gradient bg-clip-text text-[1.2rem] font-bold leading-tight tracking-[-0.02em] text-transparent md:text-[1.6rem] xl:text-[1.9rem]">
+              <h2 className="bg-gold-gradient bg-clip-text text-[0.9rem] font-bold leading-tight tracking-[-0.02em] text-transparent md:text-[1.6rem] xl:text-[1.9rem]">
                 layered with fire, spice and crunch
               </h2>
             </div>
 
-            <p className="mt-3 max-w-xl text-sm leading-6 text-white/78 md:text-sm">
+            <p className="mt-2 hidden text-sm leading-6 text-white/78 md:block md:max-w-xl md:text-sm">
               Nigerian barbecue built around smoky meat, pepper heat, and the fresh bite of tomatoes, onions, and sliced cabbage.
             </p>
 
-            <div className="mt-4 flex flex-col items-stretch justify-center gap-2.5 sm:flex-row lg:justify-start">
+            <div className="mt-3 flex flex-col items-stretch justify-center gap-2 sm:gap-2.5 sm:flex-row lg:justify-start">
               <Link
                 href="#menu"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-red px-6 py-3 text-sm font-black uppercase tracking-[0.12em] text-white shadow-lg shadow-brand-red/25 transition-transform transition-colors hover:-translate-y-0.5 hover:bg-brand-red-light"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-red px-5 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-white shadow-lg shadow-brand-red/25 transition-transform transition-colors hover:-translate-y-0.5 hover:bg-brand-red-light sm:px-6 sm:py-3 sm:text-sm"
               >
                 <ShoppingBag size={16} />
                 Order Now
               </Link>
               <Link
                 href="/contact"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/70 bg-[#f8f1e4] px-6 py-3 text-sm font-black uppercase tracking-[0.12em] text-[#111111] shadow-lg shadow-black/20 transition-transform transition-colors hover:-translate-y-0.5 hover:bg-white"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/70 bg-[#f8f1e4] px-5 py-2.5 text-xs font-black uppercase tracking-[0.12em] text-[#111111] shadow-lg shadow-black/20 transition-transform transition-colors hover:-translate-y-0.5 hover:bg-white sm:px-6 sm:py-3 sm:text-sm"
               >
                 <PartyPopper size={16} />
                 Catering / Contact Us
               </Link>
             </div>
 
-            <div className="mt-3.5 flex flex-wrap items-center justify-center gap-2.5 lg:justify-start">
-              <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs text-white backdrop-blur-sm">
+            <div className="mt-2.5 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+              <span className="flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[10px] text-white backdrop-blur-sm sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-xs">
                 <Clock size={12} className="text-brand-gold" />
-                Monday to Saturday
+                <span className="hidden sm:inline">Monday to Saturday</span>
+                <span className="sm:hidden">Mon-Sat</span>
               </span>
-              <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs text-white backdrop-blur-sm">
+              <span className="flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[10px] text-white backdrop-blur-sm sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-xs">
                 <MapPin size={12} className="text-brand-gold" />
-                Pickup · Cardiff Delivery · UK Postage
+                <span className="hidden sm:inline">Pickup · Cardiff Delivery · UK Postage</span>
+                <span className="sm:hidden">3 Options</span>
               </span>
             </div>
 
@@ -98,19 +100,19 @@ export default function MenuPage() {
 
       {/* ── How it works ─────────────────────────────────────────── */}
       <section className="bg-surface-dark/80 border-b border-surface-border">
-        <div className="max-w-5xl mx-auto px-4 py-3">
-          <ol className="flex flex-col sm:flex-row items-start sm:items-center justify-center gap-3 sm:gap-5 text-xs text-gray-400">
+        <div className="max-w-5xl mx-auto px-4 py-2">
+          <ol className="flex flex-row items-center justify-center gap-2 sm:gap-5 text-xs text-gray-400 overflow-x-auto sm:overflow-visible">
             {[
               { step: "1", label: "Pick your meals below" },
               { step: "2", label: "Choose date & delivery" },
               { step: "3", label: "Enter your details" },
               { step: "4", label: "Pay & get confirmed" },
             ].map(({ step, label }) => (
-              <li key={step} className="flex items-center gap-2">
+              <li key={step} className="flex items-center gap-1 sm:gap-2 shrink-0 sm:shrink">
                 <span className="h-5 w-5 rounded-full bg-brand-red text-white text-[10px] font-bold flex items-center justify-center shrink-0">
                   {step}
                 </span>
-                <span>{label}</span>
+                <span className="hidden sm:inline">{label}</span>
               </li>
             ))}
           </ol>
@@ -118,8 +120,8 @@ export default function MenuPage() {
       </section>
 
       {/* ── Menu ─────────────────────────────────────────────────── */}
-      <section id="menu" className="max-w-5xl mx-auto px-4 py-8 pb-28 scroll-mt-24">
-        <h2 className="text-white font-bold text-xl mb-6">
+      <section id="menu" className="max-w-5xl mx-auto px-4 py-6 pb-28 scroll-mt-24 sm:py-8">
+        <h2 className="text-white font-bold text-lg sm:text-xl mb-4 sm:mb-6">
           Our Menu
           <span className="ml-2 text-gray-500 text-sm font-normal">
             ({availableMeals.length} available)
@@ -127,7 +129,7 @@ export default function MenuPage() {
         </h2>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="card h-72 animate-pulse bg-surface-card" />
             ))}
@@ -139,18 +141,18 @@ export default function MenuPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
               {availableMeals.map((meal) => (
                 <MealCard key={meal.id} meal={meal} />
               ))}
             </div>
 
             {unavailableMeals.length > 0 && (
-              <div className="mt-10">
-                <h3 className="text-gray-500 text-sm font-semibold uppercase tracking-widest mb-4">
+              <div className="mt-6 sm:mt-10">
+                <h3 className="text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-widest mb-3 sm:mb-4">
                   Currently Unavailable
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                   {unavailableMeals.map((meal) => (
                     <MealCard key={meal.id} meal={meal} />
                   ))}
