@@ -54,7 +54,7 @@ export function HeaderLogo({ size = "default" }: HeaderLogoProps) {
 
   const sizeClassName =
     size === "customer"
-      ? "h-[4.375rem] w-[6.25rem] md:h-20 md:w-30"
+      ? "h-12 w-16 sm:h-16 sm:w-24 md:h-20 md:w-30"
       : "h-14 w-20 md:h-16 md:w-24";
 
   return (

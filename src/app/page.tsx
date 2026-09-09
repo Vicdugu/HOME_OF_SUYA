@@ -80,16 +80,36 @@ export default function MenuPage() {
               </Link>
             </div>
 
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-center sm:gap-3">
+            {/* Desktop: 2 badges side-by-side */}
+            <div className="mt-3 hidden sm:flex sm:flex-row sm:items-center sm:justify-center sm:gap-3">
               <span className="flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[10px] text-white backdrop-blur-sm sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-xs">
                 <Clock size={12} className="text-brand-gold shrink-0" />
-                <span className="hidden sm:inline">Monday to Saturday</span>
-                <span className="sm:hidden">Mon-Sat</span>
+                <span>Monday to Saturday</span>
               </span>
               <span className="flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[10px] text-white backdrop-blur-sm sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-xs">
                 <MapPin size={12} className="text-brand-gold shrink-0" />
-                <span className="hidden sm:inline">Pickup · Cardiff Delivery · UK Postage</span>
-                <span className="sm:hidden">3 Options</span>
+                <span>Pickup · Cardiff Delivery · UK Postage</span>
+              </span>
+            </div>
+
+            {/* Mobile: Time badge + 3 reversed delivery options stacked */}
+            <div className="mt-3 flex flex-col gap-2 sm:hidden">
+              <span className="flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[10px] text-white backdrop-blur-sm">
+                <Clock size={12} className="text-brand-gold shrink-0" />
+                <span>Mon-Sat</span>
+              </span>
+              {/* Delivery options in reverse order: UK Postage, Cardiff Delivery, Pickup */}
+              <span className="flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[10px] text-white backdrop-blur-sm">
+                <MapPin size={12} className="text-brand-gold shrink-0" />
+                <span>UK Postage</span>
+              </span>
+              <span className="flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[10px] text-white backdrop-blur-sm">
+                <MapPin size={12} className="text-brand-gold shrink-0" />
+                <span>Cardiff Delivery</span>
+              </span>
+              <span className="flex items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-1 text-[10px] text-white backdrop-blur-sm">
+                <MapPin size={12} className="text-brand-gold shrink-0" />
+                <span>Pickup</span>
               </span>
             </div>
 
