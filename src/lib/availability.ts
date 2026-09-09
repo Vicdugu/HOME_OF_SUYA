@@ -10,10 +10,10 @@ export const TIME_SLOTS = [
 
 export type TimeSlotId = (typeof TIME_SLOTS)[number]["id"];
 
-/** Tuesday = 2, Thursday = 4 */
+/** Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4, Friday = 5, Saturday = 6 */
 export function isBookableDay(date: Date): boolean {
   const d = date.getDay();
-  return d === 2 || d === 4;
+  return d >= 1 && d <= 6; // Monday to Saturday
 }
 
 /** Dates must be at least 1 full day ahead (no same-day booking) */

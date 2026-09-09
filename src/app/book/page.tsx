@@ -150,7 +150,7 @@ export default function BookPage() {
                 Date &amp; Delivery
               </h1>
               <p className="text-gray-400 text-sm">
-                We cook on Tuesdays &amp; Thursdays only.
+                We cook Monday to Saturday.
               </p>
               <div className="mt-5 h-px w-full max-w-xl bg-gradient-to-r from-brand-gold/70 via-white/20 to-transparent" />
               <Link
@@ -216,6 +216,7 @@ export default function BookPage() {
                   Select a Time Slot
                 </h2>
                 <TimeSlotPicker
+                  slots={selectedAvailability?.slots ?? []}
                   selectedSlot={state.timeSlot}
                   onSelect={setTimeSlot}
                   slotStates={slotStates}

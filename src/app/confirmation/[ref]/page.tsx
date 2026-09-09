@@ -189,8 +189,8 @@ export default function ConfirmationPage({
 
         {/* ── CTA ─────────────────────────────────────────── */}
         <div className="flex flex-col gap-3">
-          <Link href="/" className="btn-primary text-center py-3">
-            Order Again
+          <Link href="/" className="btn-primary bg-green-600 hover:bg-green-700 text-white text-center py-3 font-black rounded-2xl shadow-lg shadow-green-600/25 transition-transform hover:-translate-y-0.5">
+            Return to Home
           </Link>
           <p className="text-center text-gray-600 text-xs">
             Save your reference number: <span className="font-mono text-gray-400">{booking.reference}</span>

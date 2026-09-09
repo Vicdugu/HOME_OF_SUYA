@@ -1,7 +1,11 @@
 "use client";
 
 import { Clock } from "lucide-react";
-import { TIME_SLOTS } from "@/lib/availability";
+
+interface Slot {
+  id: string;
+  label: string;
+}
 
 interface SlotState {
   remaining: number;
@@ -9,15 +13,16 @@ interface SlotState {
 }
 
 interface TimeSlotPickerProps {
+  slots: Slot[];
   selectedSlot: string | null;
   onSelect: (slot: string) => void;
   slotStates: Record<string, SlotState>;
 }
 
-export function TimeSlotPicker({ selectedSlot, onSelect, slotStates }: TimeSlotPickerProps) {
+export function TimeSlotPicker({ slots, selectedSlot, onSelect, slotStates }: TimeSlotPickerProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl">
-      {TIME_SLOTS.map((slot) => {
+      {slots.map((slot) => {
         const isSelected = selectedSlot === slot.id;
         const state = slotStates[slot.id] ?? { remaining: 0, isAvailable: false };
         return (

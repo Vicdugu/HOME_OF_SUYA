@@ -77,14 +77,15 @@ export function isBookingCountedForCapacity(
 export function buildDayAvailability(
   date: Date,
   bookings: BookingCapacityRecord[],
-  now = new Date()
+  now = new Date(),
+  timeSlots = TIME_SLOTS
 ): DayAvailabilitySnapshot {
   const dateKey = toDateString(date);
 
   return {
     date: dateKey,
     cutoffAt: getBookingCutoff(date).toISOString(),
-    slots: TIME_SLOTS.map((slot) => {
+    slots: timeSlots.map((slot) => {
       const capacityByDelivery = SLOT_CAPACITY_BY_DELIVERY[slot.id] ?? {
         PICKUP: 0,
         CARDIFF: 0,

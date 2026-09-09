@@ -83,7 +83,7 @@ export default function MenuPage() {
             <div className="mt-3.5 flex flex-wrap items-center justify-center gap-2.5 lg:justify-start">
               <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs text-white backdrop-blur-sm">
                 <Clock size={12} className="text-brand-gold" />
-                Tuesdays &amp; Thursdays only
+                Monday to Saturday
               </span>
               <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs text-white backdrop-blur-sm">
                 <MapPin size={12} className="text-brand-gold" />

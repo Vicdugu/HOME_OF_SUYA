@@ -12,7 +12,7 @@ export function generateReference(): string {
 
 /**
  * Returns the next 8 weeks of available booking dates
- * (Tuesdays = 2, Thursdays = 4) excluding blocked dates.
+ * (Monday to Saturday = 1-6) excluding blocked dates.
  */
 export function getAvailableDates(
   blockedDates: Date[],

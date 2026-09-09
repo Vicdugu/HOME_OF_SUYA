@@ -16,6 +16,8 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     ...settings,
     logoUrl: normalizeBrandLogoUrl(settings.logoUrl),
+    timeSlots: typeof settings.timeSlots === 'string' ? JSON.parse(settings.timeSlots) : settings.timeSlots,
+    availableDays: typeof settings.availableDays === 'string' ? JSON.parse(settings.availableDays) : settings.availableDays,
   });
 }
 
@@ -36,6 +38,8 @@ export async function PUT(req: NextRequest) {
           minOrderCardiff: Number(data.minOrderCardiff ?? 0),
           minOrderPostage: Number(data.minOrderPostage ?? 0),
           logoUrl,
+          timeSlots: data.timeSlots ? JSON.stringify(data.timeSlots) : undefined,
+          availableDays: data.availableDays ? JSON.stringify(data.availableDays) : undefined,
         },
       })
     : await prisma.deliverySettings.create({
@@ -46,7 +50,14 @@ export async function PUT(req: NextRequest) {
           minOrderCardiff: Number(data.minOrderCardiff ?? 0),
           minOrderPostage: Number(data.minOrderPostage ?? 0),
           logoUrl,
+          timeSlots: data.timeSlots ? JSON.stringify(data.timeSlots) : undefined,
+          availableDays: data.availableDays ? JSON.stringify(data.availableDays) : undefined,
         },
       });
-  return NextResponse.json(settings);
+  return NextResponse.json({
+    ...settings,
+    logoUrl: normalizeBrandLogoUrl(settings.logoUrl),
+    timeSlots: typeof settings.timeSlots === 'string' ? JSON.parse(settings.timeSlots) : settings.timeSlots,
+    availableDays: typeof settings.availableDays === 'string' ? JSON.parse(settings.availableDays) : settings.availableDays,
+  });
 }

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
+import FooterWrapper from "@/components/ui/FooterWrapper";
+import GlobalHeader from "@/components/ui/GlobalHeader";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -42,7 +44,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="min-h-screen bg-brand-black">
-        <CartProvider>{children}</CartProvider>
+        <CartProvider>
+          <GlobalHeader />
+          {children}
+          <FooterWrapper />
+        </CartProvider>
       </body>
     </html>
   );

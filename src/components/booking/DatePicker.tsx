@@ -128,9 +128,8 @@ export function DatePicker({ selectedDate, onSelect, availableDates = [] }: Date
       </div>
 
       <p className="text-gray-600 text-xs mt-3 text-center">
-        Available on{" "}
-        <span className="text-brand-gold font-medium">Tuesdays</span> &amp;{" "}
-        <span className="text-brand-gold font-medium">Thursdays</span> only
+        Available{" "}
+        <span className="text-brand-gold font-medium">Monday to Saturday</span>
       </p>
     </div>
   );

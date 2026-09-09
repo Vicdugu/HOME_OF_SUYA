@@ -104,6 +104,8 @@ model DeliverySettings {
   minOrderCardiff  Float    @default(0)
   minOrderPostage  Float    @default(0)
   logoUrl          String?
+  timeSlots        Json?    @default("[{\"id\":\"14:00-16:00\",\"label\":\"2:00 PM – 4:00 PM\"},{\"id\":\"18:00-20:00\",\"label\":\"6:00 PM – 8:00 PM\"}]")
+  availableDays    Json?    @default("[1,2,3,4,5,6]")
   updatedAt        DateTime @updatedAt
 
   @@map("delivery_settings")

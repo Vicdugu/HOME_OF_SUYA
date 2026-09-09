@@ -13,6 +13,8 @@ const MAX_LOGO_SIZE_BYTES = 2 * 1024 * 1024;
 const ACCEPTED_LOGO_TYPES = new Set(["image/png", "image/jpeg", "image/svg+xml"]);
 
 interface Settings extends DeliverySettingsDTO {
+  availableDays?: number[]; // 1=Monday, 2=Tuesday, ..., 6=Saturday
+  timeSlots?: Array<{ id: string; label: string }>;
 }
 
 interface BlockedDate { id: string; date: string; reason: string | null }
@@ -147,7 +149,7 @@ export default function AdminSettingsPage() {
     const [y, m, d] = newDate.split("-").map(Number);
     const date = new Date(y, m - 1, d);
     if (!isBookableDay(date)) {
-      alert("Only Tuesdays and Thursdays can be blocked.");
+      alert("Only bookable days can be blocked.");
       return;
     }
     const res = await fetch("/api/admin/blocked-dates", {
@@ -292,12 +294,108 @@ export default function AdminSettingsPage() {
         </div>
       </section>
 
+      {/* Availability days */}
+      <section className="card p-5 space-y-5">
+        <h2 className="text-brand-gold font-semibold text-xs uppercase tracking-widest">Available Days</h2>
+        <p className="text-gray-500 text-xs">Select which days customers can book orders.</p>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { day: 1, label: "Monday" },
+            { day: 2, label: "Tuesday" },
+            { day: 3, label: "Wednesday" },
+            { day: 4, label: "Thursday" },
+            { day: 5, label: "Friday" },
+            { day: 6, label: "Saturday" },
+          ].map(({ day, label }) => (
+            <label key={day} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-surface-dark transition">
+              <input
+                type="checkbox"
+                checked={(settings.availableDays ?? [1, 2, 3, 4, 5, 6]).includes(day)}
+                onChange={(e) => {
+                  const current = settings.availableDays ?? [1, 2, 3, 4, 5, 6];
+                  const updated = e.target.checked
+                    ? [...current, day].sort((a, b) => a - b)
+                    : current.filter((d) => d !== day);
+                  setSettings((s) => s ? { ...s, availableDays: updated } : s);
+                }}
+                className="rounded"
+              />
+              <span className="text-sm text-gray-300">{label}</span>
+            </label>
+          ))}
+        </div>
+        <button
+          onClick={saveSettings}
+          disabled={saving}
+          className="btn-primary flex items-center gap-2 px-5 py-2.5 text-sm"
+        >
+          {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+          {saved ? "Saved!" : "Save Changes"}
+        </button>
+      </section>
+
+      {/* Time slots */}
+      <section className="card p-5 space-y-5">
+        <h2 className="text-brand-gold font-semibold text-xs uppercase tracking-widest">Time Slots</h2>
+        <p className="text-gray-500 text-xs">Manage available time slots for customer bookings.</p>
+        <div className="space-y-3">
+          {(settings.timeSlots ?? [
+            { id: "14:00-16:00", label: "2:00 PM – 4:00 PM" },
+            { id: "18:00-20:00", label: "6:00 PM – 8:00 PM" },
+          ]).map((slot, idx) => (
+            <div key={slot.id} className="flex gap-2 items-end">
+              <div className="flex-1">
+                <label className="block text-xs font-medium text-gray-400 mb-1">Time Slot {idx + 1}</label>
+                <input
+                  type="text"
+                  value={slot.label}
+                  onChange={(e) => {
+                    const updated = [...(settings.timeSlots ?? [])];
+                    updated[idx] = { ...slot, label: e.target.value };
+                    setSettings((s) => s ? { ...s, timeSlots: updated } : s);
+                  }}
+                  className="w-full bg-surface-dark border border-surface-border rounded-xl
+                             px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-red"
+                  placeholder="e.g. 2:00 PM – 4:00 PM"
+                />
+              </div>
+              <button
+                onClick={() => {
+                  const updated = (settings.timeSlots ?? []).filter((_, i) => i !== idx);
+                  setSettings((s) => s ? { ...s, timeSlots: updated } : s);
+                }}
+                className="text-gray-500 hover:text-brand-red transition-colors mb-1"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() => {
+            const newSlot = { id: `${Date.now()}`, label: "" };
+            setSettings((s) => s ? { ...s, timeSlots: [...(s.timeSlots ?? []), newSlot] } : s);
+          }}
+          className="flex items-center gap-2 px-4 py-2 text-sm text-brand-gold border border-brand-gold/30 rounded-lg hover:bg-brand-gold/10 transition"
+        >
+          <Plus size={14} /> Add Time Slot
+        </button>
+        <button
+          onClick={saveSettings}
+          disabled={saving}
+          className="btn-primary flex items-center gap-2 px-5 py-2.5 text-sm"
+        >
+          {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+          {saved ? "Saved!" : "Save Changes"}
+        </button>
+      </section>
+
       {/* Blocked dates */}
       <section className="card p-5 space-y-5">
         <h2 className="text-brand-gold font-semibold text-xs uppercase tracking-widest flex items-center gap-2">
           <CalendarOff size={14} /> Blocked Dates
         </h2>
-        <p className="text-gray-500 text-xs">Block specific Tuesdays or Thursdays (e.g. holidays, sold-out days).</p>
+        <p className="text-gray-500 text-xs">Block specific dates (e.g. holidays, sold-out days).</p>
 
         <div className="flex flex-wrap gap-3">
           <input
