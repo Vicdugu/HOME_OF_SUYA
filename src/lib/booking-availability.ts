@@ -1,7 +1,7 @@
 import { TIME_SLOTS, fromDateString, isBookableDay, toDateString } from "@/lib/availability";
 import type { DeliveryType, PaymentStatus } from "@/types";
 
-export const BOOKING_CUTOFF_HOUR_LOCAL = 18;
+export const BOOKING_CUTOFF_HOUR_LOCAL = 22;
 export const UNPAID_BOOKING_HOLD_MINUTES = 30;
 
 export const SLOT_CAPACITY_BY_DELIVERY: Record<string, Record<DeliveryType, number>> = {
