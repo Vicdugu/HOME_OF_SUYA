@@ -1,45 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Flame, Loader2 } from "lucide-react";
+import { Suspense } from "react";
+import { Flame } from "lucide-react";
+import { LoginForm } from "@/components/admin/LoginForm";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
-  const [form, setForm] = useState({ username: "", password: "" });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    const res = await fetch("/api/admin/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-
-    const data = await res.json().catch(() => ({} as { error?: string }));
-
-    setLoading(false);
-
-    if (res.ok) {
-      router.push("/admin");
-      router.refresh();
-    } else {
-      setError(
-        typeof data.error === "string" && data.error
-          ? data.error
-          : res.status >= 500
-            ? "Sign-in failed due to a server error. Try again shortly."
-            : "Invalid username or password"
-      );
-    }
-  }
-
   return (
     <main className="min-h-screen bg-brand-black flex items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-8">
@@ -49,62 +14,9 @@ export default function AdminLoginPage() {
           <p className="text-gray-500 text-sm">Home of Suya</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="card p-6 space-y-4">
-          <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-gray-300" htmlFor="username">
-              Username or email
-            </label>
-            <input
-              id="username"
-              type="text"
-              autoComplete="username"
-              value={form.username}
-              onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
-              placeholder="Enter username or email"
-              className="w-full bg-surface-dark border border-surface-border rounded-xl
-                         px-4 py-3 text-white placeholder-gray-600 text-sm
-                         focus:outline-none focus:ring-2 focus:ring-brand-red
-                         focus:border-transparent transition-all"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-sm font-medium text-gray-300" htmlFor="password">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              value={form.password}
-              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-              className="w-full bg-surface-dark border border-surface-border rounded-xl
-                         px-4 py-3 text-white placeholder-gray-600 text-sm
-                         focus:outline-none focus:ring-2 focus:ring-brand-red
-                         focus:border-transparent transition-all"
-            />
-          </div>
-
-          {error && <p className="text-brand-red text-xs">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full flex items-center justify-center gap-2 py-3"
-          >
-            {loading && <Loader2 size={16} className="animate-spin" />}
-            Sign In
-          </button>
-
-          <div className="text-center pt-1">
-            <Link
-              href="/admin/forgot-password"
-              className="text-gray-500 hover:text-brand-gold text-xs transition-colors"
-            >
-              Forgot password?
-            </Link>
-          </div>
-        </form>
+        <Suspense fallback={<div className="card p-6 h-64 bg-surface-dark animate-pulse" />}>
+          <LoginForm />
+        </Suspense>
       </div>
     </main>
   );

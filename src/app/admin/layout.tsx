@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 import {
   Flame,
   LayoutDashboard,
@@ -74,6 +75,9 @@ export default function AdminLayout({
   if (PUBLIC_AUTH.includes(pathname)) {
     return <>{children}</>;
   }
+
+  // Enable session timeout for authenticated pages
+  useSessionTimeout();
 
   async function handleSignOut() {
     await fetch("/api/admin/auth/logout", { method: "POST" });
