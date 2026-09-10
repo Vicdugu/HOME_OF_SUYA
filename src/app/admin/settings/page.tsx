@@ -50,8 +50,27 @@ export default function AdminSettingsPage() {
   const previewLogoUrl = getRenderableLogoUrl(settings?.logoUrl);
 
   useEffect(() => {
-    fetch("/api/admin/settings").then((r) => r.json()).then(setSettings);
-    fetch("/api/admin/blocked-dates").then((r) => r.json()).then(setBlockedDates);
+    Promise.all([
+      fetch("/api/admin/settings")
+        .then((r) => {
+          if (!r.ok) throw new Error(`Settings API error: ${r.status}`);
+          return r.json();
+        })
+        .catch((err) => { console.error("Failed to load settings:", err); return null; }),
+      fetch("/api/admin/blocked-dates")
+        .then((r) => {
+          if (!r.ok) throw new Error(`Blocked dates API error: ${r.status}`);
+          return r.json();
+        })
+        .then((data) => {
+          const datesList = Array.isArray(data) ? data : (data?.data ? data.data : []);
+          return datesList;
+        })
+        .catch((err) => { console.error("Failed to load blocked dates:", err); return []; })
+    ]).then(([settingsData, datesList]) => {
+      if (settingsData) setSettings(settingsData);
+      if (datesList) setBlockedDates(datesList);
+    });
   }, []);
 
   async function saveSettings() {

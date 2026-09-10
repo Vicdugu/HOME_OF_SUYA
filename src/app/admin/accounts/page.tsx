@@ -32,11 +32,15 @@ export default function AdminAccountsPage() {
 
   useEffect(() => {
     fetch("/api/admin/accounts")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`API error: ${r.status}`);
+        return r.json();
+      })
       .then((data) => {
         const adminsList = data?.data ? data.data : (Array.isArray(data) ? data : []);
         setAdmins(adminsList);
-      });
+      })
+      .catch((err) => console.error("Failed to load admin accounts:", err));
   }, []);
 
   async function createAdmin(e: React.FormEvent) {

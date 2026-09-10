@@ -146,16 +146,14 @@ export default function AdminMealsPage() {
 
       try {
         const mealsRes = await fetch("/api/admin/meals");
-
-        const mealsData = await mealsRes.json().catch(() => null);
-
-        if (!mealsRes.ok) {
-          throw new Error(
-            mealsData && typeof mealsData.error === "string"
-              ? mealsData.error
-              : "Could not load meals"
-          );
-        }
+      const mealsData = await mealsRes.json().catch(() => null);
+      if (!mealsRes.ok) {
+        throw new Error(
+          mealsData && typeof mealsData.error === "string"
+            ? mealsData.error
+            : `API error: ${mealsRes.status}`
+        );
+      }
 
         if (!cancelled) {
           // Handle paginated response with { data: [...], pagination: {...} }

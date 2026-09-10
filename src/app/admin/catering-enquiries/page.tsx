@@ -13,11 +13,15 @@ export default function AdminCateringEnquiriesPage() {
 
   useEffect(() => {
     fetch("/api/admin/catering-enquiries")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`API error: ${r.status}`);
+        return r.json();
+      })
       .then((data) => {
         const enquiriesList = data?.data ? data.data : (Array.isArray(data) ? data : []);
         setEnquiries(enquiriesList);
       })
+      .catch((err) => console.error("Failed to load enquiries:", err))
       .finally(() => setLoading(false));
   }, []);
 

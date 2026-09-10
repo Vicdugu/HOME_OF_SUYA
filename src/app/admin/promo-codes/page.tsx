@@ -23,11 +23,15 @@ export default function AdminPromoCodesPage() {
 
   useEffect(() => {
     fetch("/api/admin/promo-codes")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`API error: ${r.status}`);
+        return r.json();
+      })
       .then((data) => {
         const promoCodesList = data?.data ? data.data : (Array.isArray(data) ? data : []);
         setCodes(promoCodesList);
-      });
+      })
+      .catch((err) => console.error("Failed to load promo codes:", err));
   }, []);
 
   async function save() {

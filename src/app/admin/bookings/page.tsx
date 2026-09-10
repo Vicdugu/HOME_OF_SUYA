@@ -32,11 +32,15 @@ export default function AdminBookingsPage() {
 
   useEffect(() => {
     fetch("/api/admin/bookings")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error(`API error: ${r.status}`);
+        return r.json();
+      })
       .then((data) => {
         const bookingsList = data?.data ? data.data : (Array.isArray(data) ? data : []);
         setBookings(bookingsList);
-      });
+      })
+      .catch((err) => console.error("Failed to load bookings:", err));
   }, []);
 
   async function updateBooking(
