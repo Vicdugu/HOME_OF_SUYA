@@ -22,6 +22,8 @@ model Meal {
   variationGroups MealVariationGroup[]
 
   @@map("meals")
+  @@index([sortOrder])
+  @@index([createdAt])
 }
 
 model MealVariationGroup {
@@ -37,6 +39,8 @@ model MealVariationGroup {
   options MealVariationOption[]
 
   @@map("meal_variation_groups")
+  @@index([mealId])
+  @@index([sortOrder])
 }
 
 model MealVariationOption {
@@ -80,6 +84,10 @@ model Booking {
   promoCode PromoCode?    @relation(fields: [promoCodeId], references: [id])
 
   @@map("bookings")
+  @@index([createdAt])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([bookingDate])
 }
 
 model BookingItem {
@@ -135,6 +143,8 @@ model PromoCode {
   bookings Booking[]
 
   @@map("promo_codes")
+  @@index([isActive])
+  @@index([createdAt])
 }
 
 model AdminUser {
@@ -153,6 +163,8 @@ model AdminUser {
   createdAt               DateTime  @default(now())
 
   @@map("admin_users")
+  @@index([createdAt])
+  @@index([status])
 }
 
 enum DeliveryType {

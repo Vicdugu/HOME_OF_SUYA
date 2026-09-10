@@ -13,12 +13,24 @@ export async function GET(req: NextRequest) {
   const authError = await requireAdminRequest(req);
   if (authError) return authError;
 
-  const bookings = await prisma.booking.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { items: { select: { mealName: true, quantity: true } } },
-    take: 200,
+  const page = Math.max(1, parseInt(req.nextUrl.searchParams.get("page") ?? "1"));
+  const limit = Math.min(100, Math.max(1, parseInt(req.nextUrl.searchParams.get("limit") ?? "50")));
+  const skip = (page - 1) * limit;
+
+  const [bookings, total] = await Promise.all([
+    prisma.booking.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { items: { select: { mealName: true, quantity: true } } },
+      skip,
+      take: limit,
+    }),
+    prisma.booking.count(),
+  ]);
+  
+  return NextResponse.json({
+    data: await mergeBookingOps(bookings),
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
   });
-  return NextResponse.json(await mergeBookingOps(bookings));
 }
 
 export async function PUT(req: NextRequest) {
