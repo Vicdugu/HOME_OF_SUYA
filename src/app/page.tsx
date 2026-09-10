@@ -68,15 +68,15 @@ export default function MenuPage() {
 
             <div className="mt-2 space-y-1">
               <h1 className="text-[1.75rem] font-black leading-none tracking-[-0.04em] text-white md:text-[3.2rem] xl:text-[4rem]">
-                Home of Suya,
+                Home of Suya / BBQ
               </h1>
               <h2 className="bg-gold-gradient bg-clip-text text-[0.9rem] font-bold leading-tight tracking-[-0.02em] text-transparent md:text-[1.6rem] xl:text-[1.9rem]">
-                layered with fire, spice and crunch
+                layered with fire, spice and crunchy flavours
               </h2>
             </div>
 
             <p className="mt-2 hidden text-sm leading-6 text-white/78 md:block md:max-w-2xl md:text-sm md:mx-auto">
-              Nigerian barbecue built around smoky meat, pepper heat, and the fresh bite of tomatoes, onions, and sliced cabbage.
+              Nigerian barbecue built around smoky meat, pepper heat, and the fresh bite of onions, cabbage, drinks and other delicacies.
             </p>
 
             <div className="mt-3 flex flex-col items-stretch justify-center gap-2 sm:gap-2.5">
