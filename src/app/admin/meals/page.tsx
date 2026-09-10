@@ -158,7 +158,9 @@ export default function AdminMealsPage() {
         }
 
         if (!cancelled) {
-          setMeals(Array.isArray(mealsData) ? mealsData : []);
+          // Handle paginated response with { data: [...], pagination: {...} }
+          const mealsList = mealsData?.data ? mealsData.data : (Array.isArray(mealsData) ? mealsData : []);
+          setMeals(mealsList);
         }
       } catch (loadError) {
         if (!cancelled) {
