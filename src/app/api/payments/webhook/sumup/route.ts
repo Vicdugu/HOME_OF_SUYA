@@ -46,11 +46,15 @@ export async function POST(req: NextRequest) {
   const signature = req.headers.get("x-signature");
   const body = await req.text();
 
+  console.log("[SumUp webhook] Received webhook request");
+
   // Verify webhook signature
   if (!verifySumUpSignature(body, signature)) {
     console.error("[SumUp webhook] Signature verification failed");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  console.log("[SumUp webhook] Signature verified");
 
   let webhookData;
   try {
@@ -92,7 +96,10 @@ export async function POST(req: NextRequest) {
     include: { items: true },
   });
 
+  console.log("[SumUp webhook] Booking lookup", { found: !!booking, checkoutId: checkout.id, checkoutRef: checkout.checkout_reference });
+
   if (booking && Math.abs(booking.total - checkout.amount) < 0.01) {
+    console.log("[SumUp webhook] Booking matched and amount verified, updating status...", { bookingId: booking.id });
     const updatedBooking = await prisma.booking.update({
       where: { id: booking.id },
       data: { status: "CONFIRMED", paymentStatus: "PAID" },
@@ -130,7 +137,15 @@ export async function POST(req: NextRequest) {
         // Email notifications
         sendCustomerConfirmationEmail(notifData),
         sendAdminBookingAlert(notifData),
-      ]);
+      ]).then((results) => {
+        console.log("[SumUp webhook] Notification results:", {
+          results: results.map((r, i) => ({
+            index: i,
+            status: r.status,
+            error: r.status === "rejected" ? r.reason?.message : undefined,
+          })),
+        });
+      });
     } catch (err) {
       console.error("[SumUp webhook] Notification error:", err);
     }
