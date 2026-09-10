@@ -60,6 +60,14 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-surface-border">
+          <button
+            onClick={onClose}
+            aria-label="Back to menu"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-surface-border transition-colors duration-150 sm:hidden"
+          >
+            <ArrowRight size={16} className="rotate-180" />
+            <span className="text-sm font-semibold">Back</span>
+          </button>
           <div className="flex items-center gap-2">
             <ShoppingBag size={20} className="text-brand-gold" />
             <h2 className="text-white font-bold text-lg">Your Order</h2>
