@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { AlertTriangle, Check, Flame, ShoppingCart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { BlurImage } from "@/components/ui/BlurImage";
 import { QuantitySelector } from "@/components/ui/QuantitySelector";
 import {
   calculateMealSelectionPrice,
@@ -117,17 +118,13 @@ export function MealCard({
     >
       {/* Meal image */}
       <div className="relative w-full aspect-[4/3] bg-surface-dark overflow-hidden">
-        <Image
+        <BlurImage
           src={meal.imageUrl}
           alt={meal.name}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           unoptimized={isLocalMealPhotoUrl(meal.imageUrl)}
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-          onError={(e) => {
-            // Fallback to gradient placeholder if image fails
-            (e.currentTarget as HTMLImageElement).style.display = "none";
-          }}
+          className="object-cover transition-transform duration-300 hover:scale-105"
         />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-surface-card/80 to-transparent" />

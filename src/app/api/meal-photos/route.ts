@@ -13,6 +13,7 @@ export async function GET(req: Request) {
     : "http://localhost:3000";
   const { searchParams } = new URL(req.url, baseUrl);
   const fileName = searchParams.get("name")?.trim();
+  const quality = searchParams.get("quality") || "80"; // Quality 0-100, default 80
 
   if (!fileName || !isAllowedMealPhoto(fileName)) {
     return NextResponse.json({ error: "Photo not found" }, { status: 404 });
@@ -29,7 +30,8 @@ export async function GET(req: Request) {
       status: 200,
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "public, max-age=3600",
+        "Cache-Control": "public, max-age=86400, immutable",
+        "Content-Length": data.length.toString(),
       },
     });
   } catch {

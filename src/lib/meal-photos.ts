@@ -33,6 +33,10 @@ export function getMealPhotoUrl(fileName: string) {
   return `/api/meal-photos?name=${encodeURIComponent(fileName)}`;
 }
 
+export function getOptimizedMealPhotoUrl(fileName: string, quality: number = 80) {
+  return `/api/meal-photos?name=${encodeURIComponent(fileName)}&quality=${Math.min(100, Math.max(10, quality))}`;
+}
+
 export function getDefaultMealPhotoUrl() {
   return getMealPhotoUrl(DEFAULT_MEAL_PHOTO_NAME);
 }
