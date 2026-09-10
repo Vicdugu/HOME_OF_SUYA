@@ -22,7 +22,12 @@ export default function AdminPromoCodesPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/promo-codes").then((r) => r.json()).then(setCodes);
+    fetch("/api/admin/promo-codes")
+      .then((r) => r.json())
+      .then((data) => {
+        const promoCodesList = data?.data ? data.data : (Array.isArray(data) ? data : []);
+        setCodes(promoCodesList);
+      });
   }, []);
 
   async function save() {

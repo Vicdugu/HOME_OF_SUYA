@@ -31,7 +31,12 @@ export default function AdminBookingsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/bookings").then((r) => r.json()).then(setBookings);
+    fetch("/api/admin/bookings")
+      .then((r) => r.json())
+      .then((data) => {
+        const bookingsList = data?.data ? data.data : (Array.isArray(data) ? data : []);
+        setBookings(bookingsList);
+      });
   }, []);
 
   async function updateBooking(

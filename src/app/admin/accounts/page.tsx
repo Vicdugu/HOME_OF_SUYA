@@ -31,7 +31,12 @@ export default function AdminAccountsPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/admin/accounts").then((r) => r.json()).then(setAdmins);
+    fetch("/api/admin/accounts")
+      .then((r) => r.json())
+      .then((data) => {
+        const adminsList = data?.data ? data.data : (Array.isArray(data) ? data : []);
+        setAdmins(adminsList);
+      });
   }, []);
 
   async function createAdmin(e: React.FormEvent) {

@@ -14,7 +14,10 @@ export default function AdminCateringEnquiriesPage() {
   useEffect(() => {
     fetch("/api/admin/catering-enquiries")
       .then((r) => r.json())
-      .then((data) => setEnquiries(Array.isArray(data) ? data : []))
+      .then((data) => {
+        const enquiriesList = data?.data ? data.data : (Array.isArray(data) ? data : []);
+        setEnquiries(enquiriesList);
+      })
       .finally(() => setLoading(false));
   }, []);
 
