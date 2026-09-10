@@ -15,6 +15,16 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
   ),
+  icons: {
+    icon: [
+      {
+        url: "/api/meal-photos?name=Logo.jpeg",
+        type: "image/jpeg",
+        sizes: "any",
+      },
+    ],
+    apple: "/api/meal-photos?name=Logo.jpeg",
+  },
   openGraph: {
     title: "Home of Suya",
     description: "Authentic BBQ booking — Cardiff & UK Postage",
