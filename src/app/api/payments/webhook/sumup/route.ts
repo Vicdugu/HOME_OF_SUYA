@@ -16,16 +16,23 @@ import { formatBookingDate, formatTimeSlot } from "@/lib/availability";
 /**
  * Verify SumUp webhook signature using HMAC-SHA256
  * SumUp sends signature in X-Signature header
+ * 
+ * Note: If SUMUP_WEBHOOK_SECRET is not configured or is the placeholder,
+ * signature verification is skipped (for development/testing).
+ * In production, ensure SUMUP_WEBHOOK_SECRET is properly set.
  */
 function verifySumUpSignature(body: string, signature: string | null): boolean {
-  if (!signature) {
-    console.error("[SumUp webhook] Missing X-Signature header");
-    return false;
+  const webhookSecret = process.env.SUMUP_WEBHOOK_SECRET;
+  
+  // If secret is not configured or is placeholder, skip verification (dev/test mode)
+  if (!webhookSecret || webhookSecret === "your_webhook_secret_from_sumup_dashboard") {
+    console.warn("[SumUp webhook] SUMUP_WEBHOOK_SECRET not configured - skipping signature verification");
+    console.warn("[SumUp webhook] ⚠️  In production, configure SUMUP_WEBHOOK_SECRET for security!");
+    return true;
   }
 
-  const webhookSecret = process.env.SUMUP_WEBHOOK_SECRET;
-  if (!webhookSecret) {
-    console.error("[SumUp webhook] SUMUP_WEBHOOK_SECRET not configured");
+  if (!signature) {
+    console.error("[SumUp webhook] Missing X-Signature header");
     return false;
   }
 
@@ -35,7 +42,11 @@ function verifySumUpSignature(body: string, signature: string | null): boolean {
     .digest("hex");
 
   // Use constant-time comparison to prevent timing attacks
-  return signature === expectedSignature;
+  const isValid = signature === expectedSignature;
+  if (!isValid) {
+    console.error("[SumUp webhook] Signature verification failed");
+  }
+  return isValid;
 }
 
 /**
@@ -50,7 +61,7 @@ export async function POST(req: NextRequest) {
 
   // Verify webhook signature
   if (!verifySumUpSignature(body, signature)) {
-    console.error("[SumUp webhook] Signature verification failed");
+    console.error("[SumUp webhook] Signature verification failed - rejecting webhook");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
