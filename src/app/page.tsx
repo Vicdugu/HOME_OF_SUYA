@@ -27,7 +27,7 @@ export default function MenuPage() {
   const unavailableMeals = meals.filter((m) => !m.isAvailable);
 
   return (
-    <main className="min-h-screen bg-brand-black">
+    <main className="min-h-screen bg-brand-black pt-[280px] sm:pt-0">
       <button
         type="button"
         onClick={() => setCartOpen(true)}
@@ -43,7 +43,7 @@ export default function MenuPage() {
       </button>
 
       {/* ── Hero ─────────────────────────────────────────────────── */}
-      <header className="relative isolate overflow-hidden border-b border-brand-gold/15 bg-brand-gradient">
+      <header className="fixed sm:relative top-0 left-0 right-0 isolate overflow-hidden border-b border-brand-gold/15 bg-brand-gradient sm:z-auto z-30 w-full">
         <div
           className="absolute inset-0 opacity-80"
           style={{

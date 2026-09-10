@@ -84,19 +84,6 @@ export default function GlobalHeader() {
               >
                 <Phone size={16} />
               </a>
-              <button
-                type="button"
-                aria-label={`Open cart with ${totalItems} item${totalItems === 1 ? "" : "s"}`}
-                onClick={() => setCartOpen(true)}
-                className="relative inline-flex items-center justify-center rounded-full border border-brand-gold/30 bg-brand-black/70 p-2 text-brand-gold transition hover:border-brand-gold/60 hover:bg-brand-black"
-              >
-                <ShoppingCart size={16} />
-                {totalItems > 0 && (
-                  <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-red px-1 text-[10px] font-black text-white">
-                    {totalItems > 9 ? "9+" : totalItems}
-                  </span>
-                )}
-              </button>
             </div>
           </div>
         </div>
