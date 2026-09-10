@@ -20,8 +20,33 @@ export async function GET(req: NextRequest) {
   if (!(await checkAuth(req)))
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const admins = await listAllAdmins();
-  return NextResponse.json(admins);
+  const page = Math.max(1, parseInt(req.nextUrl.searchParams.get("page") ?? "1"));
+  const limit = Math.min(100, Math.max(1, parseInt(req.nextUrl.searchParams.get("limit") ?? "50")));
+  const skip = (page - 1) * limit;
+
+  const [admins, total] = await Promise.all([
+    prisma.adminUser.findMany({
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+      select: {
+        id: true,
+        username: true,
+        fullName: true,
+        email: true,
+        role: true,
+        status: true,
+        isVerified: true,
+        createdAt: true,
+      },
+    }),
+    prisma.adminUser.count(),
+  ]);
+  
+  return NextResponse.json({
+    data: admins,
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+  });
 }
 
 export async function POST(req: NextRequest) {

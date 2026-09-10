@@ -6,12 +6,31 @@ import {
   normalizeCateringStatus,
   updateCateringEnquiry,
 } from "@/lib/catering-enquiries";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   const authError = await requireAdminRequest(req);
   if (authError) return authError;
 
-  return NextResponse.json(await listCateringEnquiries());
+  const page = Math.max(1, parseInt(req.nextUrl.searchParams.get("page") ?? "1"));
+  const limit = Math.min(100, Math.max(1, parseInt(req.nextUrl.searchParams.get("limit") ?? "50")));
+  const skip = (page - 1) * limit;
+
+  try {
+    const [enquiries, totalResult] = await Promise.all([
+      listCateringEnquiries(skip, limit),
+      prisma.$queryRaw`SELECT COUNT(*) as count FROM "CateringEnquiries"`,
+    ]);
+    
+    const total = (totalResult as any[])?.[0]?.count ?? 0;
+    
+    return NextResponse.json({
+      data: enquiries,
+      pagination: { page, limit, total: parseInt(total), pages: Math.ceil(parseInt(total) / limit) },
+    });
+  } catch {
+    return NextResponse.json(await listCateringEnquiries());
+  }
 }
 
 export async function PUT(req: NextRequest) {

@@ -139,28 +139,40 @@ export async function GET(req: NextRequest) {
   const authError = await requireAdminRequest(req);
   if (authError) return authError;
 
-  const meals = await prisma.meal.findMany({
-    orderBy: { sortOrder: "asc" },
-    include: {
-      variationGroups: {
-        orderBy: { sortOrder: "asc" },
-        include: {
-          options: {
-            orderBy: { sortOrder: "asc" },
+  const page = Math.max(1, parseInt(req.nextUrl.searchParams.get("page") ?? "1"));
+  const limit = Math.min(100, Math.max(1, parseInt(req.nextUrl.searchParams.get("limit") ?? "50")));
+  const skip = (page - 1) * limit;
+
+  const [meals, total] = await Promise.all([
+    prisma.meal.findMany({
+      orderBy: { sortOrder: "asc" },
+      include: {
+        variationGroups: {
+          orderBy: { sortOrder: "asc" },
+          include: {
+            options: {
+              orderBy: { sortOrder: "asc" },
+            },
           },
         },
       },
-    },
-  });
+      skip,
+      take: limit,
+    }),
+    prisma.meal.count(),
+  ]);
+
   const mealsWithMetadata = await mergeMealMetadata(
     meals.filter((meal) => !HIDDEN_LEGACY_MEAL_NAMES.has(meal.name))
   );
-  return NextResponse.json(
-    mealsWithMetadata.map((meal) => ({
+  
+  return NextResponse.json({
+    data: mealsWithMetadata.map((meal) => ({
       ...meal,
       imageUrl: normalizeMealImageUrl(meal.imageUrl),
-    }))
-  );
+    })),
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+  });
 }
 
 export async function POST(req: NextRequest) {

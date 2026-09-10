@@ -8,8 +8,24 @@ export async function GET(req: NextRequest) {
   const authError = await requireAdminRequest(req);
   if (authError) return authError;
 
-  const codes = await prisma.promoCode.findMany({ orderBy: { createdAt: "desc" } });
-  return NextResponse.json(await mergePromoCodeVisibility(codes));
+  const page = Math.max(1, parseInt(req.nextUrl.searchParams.get("page") ?? "1"));
+  const limit = Math.min(100, Math.max(1, parseInt(req.nextUrl.searchParams.get("limit") ?? "50")));
+  const skip = (page - 1) * limit;
+
+  const [codes, total] = await Promise.all([
+    prisma.promoCode.findMany({
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.promoCode.count(),
+  ]);
+  
+  const codesWithVisibility = await mergePromoCodeVisibility(codes);
+  return NextResponse.json({
+    data: codesWithVisibility,
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+  });
 }
 
 export async function POST(req: NextRequest) {

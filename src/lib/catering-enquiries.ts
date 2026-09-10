@@ -163,10 +163,12 @@ export async function createCateringEnquiry(data: {
   return toRecord(rows[0]);
 }
 
-export async function listCateringEnquiries() {
+export async function listCateringEnquiries(skip: number = 0, limit: number = 9999) {
   await ensureCateringEnquiriesTable();
   const rows = await prisma.$queryRawUnsafe<CateringEnquiryRow[]>(
-    `SELECT * FROM ${TABLE} ORDER BY "createdAt" DESC`
+    `SELECT * FROM ${TABLE} ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2`,
+    limit,
+    skip
   );
   return rows.map(toRecord);
 }
