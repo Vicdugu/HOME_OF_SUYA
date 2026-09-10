@@ -129,7 +129,9 @@ export async function sendAdminBookingAlert(
     )
     .join("");
 
-  const { error } = await resend.emails.send({
+  console.log("[Email] Sending admin booking alert", { reference: data.reference, to: ADMIN_EMAIL });
+  
+  const { error, data: result } = await resend.emails.send({
     from: FROM,
     to: ADMIN_EMAIL,
     subject: `New Booking — ${data.reference}`,
@@ -158,6 +160,8 @@ export async function sendAdminBookingAlert(
     console.error("[Email] Admin alert failed:", error);
     return false;
   }
+  
+  console.log("[Email] Admin alert sent successfully", { reference: data.reference, result });
 
   return true;
 }
@@ -185,7 +189,9 @@ export async function sendCustomerConfirmationEmail(
     )
     .join("");
 
-  const { error } = await resend.emails.send({
+  console.log("[Email] Sending customer confirmation", { reference: data.reference, to: data.email });
+  
+  const { error, data: result } = await resend.emails.send({
     from: FROM,
     to: data.email || "noreply@homeofsuya.com",
     subject: `Your Booking Confirmed — ${data.reference}`,
@@ -215,6 +221,8 @@ export async function sendCustomerConfirmationEmail(
     console.error("[Email] Customer confirmation failed:", error);
     return false;
   }
+  
+  console.log("[Email] Customer confirmation sent successfully", { reference: data.reference, result });
 
   return true;
 }
