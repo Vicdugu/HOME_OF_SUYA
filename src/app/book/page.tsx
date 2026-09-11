@@ -9,6 +9,8 @@ import { DatePicker } from "@/components/booking/DatePicker";
 import { TimeSlotPicker } from "@/components/booking/TimeSlotPicker";
 import { DeliverySelector } from "@/components/booking/DeliverySelector";
 import { BookingOrderSummary } from "@/components/booking/BookingOrderSummary";
+import { CartDrawer } from "@/components/booking/CartDrawer";
+import { FloatingCartButton } from "@/components/booking/FloatingCartButton";
 import { trackClientEvent } from "@/lib/client-analytics";
 import { DEFAULT_DELIVERY_SETTINGS } from "@/lib/delivery-settings";
 import { getDeliveryFee } from "@/lib/delivery-pricing";
@@ -39,7 +41,7 @@ interface AvailabilityDay {
 
 export default function BookPage() {
   const router = useRouter();
-  const { state, setDate, setTimeSlot, setDelivery, subtotal, totalItems } =
+  const { state, setDate, setTimeSlot, setDelivery, subtotal, totalItems, cartOpen, setCartOpen } =
     useCart();
 
   const [settings, setSettings] = useState<DeliverySettings>(DEFAULT_DELIVERY_SETTINGS);
@@ -265,6 +267,12 @@ export default function BookPage() {
           </aside>
         </div>
       </div>
+
+      {/* ── Cart drawer ────────────────────────────────────────── */}
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+
+      {/* ── Floating cart button ────────────────────────────────── */}
+      <FloatingCartButton onClick={() => setCartOpen(true)} />
     </main>
   );
 }

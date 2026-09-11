@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { X, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { X, Trash2, ShoppingBag, ArrowRight, ChevronLeft } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { QuantitySelector } from "@/components/ui/QuantitySelector";
 import { formatMealVariationSummary } from "@/lib/meal-variations";
@@ -16,6 +16,7 @@ interface CartDrawerProps {
 export function CartDrawer({ open, onClose }: CartDrawerProps) {
   const { state, setQuantity, removeItem, subtotal, totalItems } = useCart();
   const router = useRouter();
+  const pathname = usePathname();
   const drawerRef = useRef<HTMLDivElement>(null);
 
   // Close on Escape key
@@ -33,9 +34,16 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
+  const isOnBookingPage = pathname === "/book";
+
   const handleProceed = () => {
     onClose();
     router.push("/book");
+  };
+
+  const handleContinueShopping = () => {
+    onClose();
+    router.push("/");
   };
 
   return (
@@ -151,13 +159,23 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
             <p className="text-gray-500 text-xs">
               Delivery fee calculated at checkout
             </p>
-            <button
-              onClick={handleProceed}
-              className="btn-primary w-full flex items-center justify-center gap-2"
-            >
-              Choose Date & Delivery
-              <ArrowRight size={16} />
-            </button>
+            {isOnBookingPage ? (
+              <button
+                onClick={handleContinueShopping}
+                className="btn-outline w-full flex items-center justify-center gap-2"
+              >
+                <ChevronLeft size={16} />
+                Continue Shopping
+              </button>
+            ) : (
+              <button
+                onClick={handleProceed}
+                className="btn-primary w-full flex items-center justify-center gap-2"
+              >
+                Choose Date & Delivery
+                <ArrowRight size={16} />
+              </button>
+            )}
           </div>
         )}
       </div>
