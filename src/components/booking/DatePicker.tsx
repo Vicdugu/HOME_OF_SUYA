@@ -112,7 +112,7 @@ export function DatePicker({ selectedDate, onSelect, availableDates = [], delive
                   isTooEarly
                     ? deliveryType === "POSTAGE"
                       ? "Postage orders require 24-hour processing time"
-                      : "Same-day orders closed after 2:00 PM"
+                      : "Same-day orders closed after 2:00 PM — select a later date or choose Pickup/Delivery before 2:00 PM"
                     : isBlocked
                     ? "Not available"
                     : !isBookable

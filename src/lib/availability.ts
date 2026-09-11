@@ -136,6 +136,7 @@ export function canOrderSameDay(deliveryType: DeliveryType | null, now = new Dat
 /**
  * Get the earliest selectable date for a given delivery type
  * 
+ * - If no delivery type selected yet: Allow today (no filtering)
  * - If same-day is allowed (before 2:00 PM for PICKUP/CARDIFF):
  *   Return today's date
  * - If same-day is NOT allowed:
@@ -146,6 +147,11 @@ export function canOrderSameDay(deliveryType: DeliveryType | null, now = new Dat
 export function getEarliestSelectableDate(deliveryType: DeliveryType | null, now = new Date()): Date {
   const today = new Date(now);
   today.setHours(0, 0, 0, 0);
+  
+  // If no delivery type selected yet, allow same-day (full calendar available)
+  if (!deliveryType) {
+    return new Date(today);
+  }
   
   if (canOrderSameDay(deliveryType, now)) {
     return new Date(today);
