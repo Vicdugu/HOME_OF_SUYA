@@ -79,8 +79,9 @@ export function formatTimeSlot(slotId: string): string {
 }
 
 /**
- * Returns the next `weeksAhead` weeks of available Tue/Thu dates,
- * excluding any in the blockedDates array.
+ * Returns available bookable dates (Mon-Sat), starting from today.
+ * The caller (client-side) handles time-based filtering (2:00 PM cutoff).
+ * Excludes any dates in the blockedDates array.
  */
 export function getAvailableDates(
   blockedDates: Date[],
@@ -93,14 +94,13 @@ export function getAvailableDates(
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const start = new Date(today);
-  start.setDate(start.getDate() + 1);
+  const start = new Date(today); // Include today
   const end = new Date(today);
   end.setDate(end.getDate() + weeksAhead * 7);
 
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     const day = d.getDay();
-    if (day === 2 || day === 4) {
+    if (isBookableDay(d)) {  // Mon-Sat (1-6)
       const copy = new Date(d.getFullYear(), d.getMonth(), d.getDate());
       if (!blockedMs.has(copy.getTime())) dates.push(copy);
     }
