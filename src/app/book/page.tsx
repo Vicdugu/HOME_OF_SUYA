@@ -251,7 +251,8 @@ export default function BookPage() {
             <section className="card max-w-xl p-5 space-y-3">
               <h2 className="text-brand-gold font-semibold text-xs uppercase tracking-widest">Before You Book</h2>
               <ul className="space-y-2 text-sm text-gray-300">
-                <li>Orders close at 6:00 PM on the day before your selected booking date.</li>
+                <li>Orders close at 2:00 PM on the day of your selected booking date for same-day pickup or delivery.</li>
+                <li>Postal orders require 24-hour advance notice and cannot be placed same-day.</li>
                 <li>Slots remain live and can sell out while unpaid bookings expire.</li>
                 <li>If you need a larger catering order, use the Contact Us tab for a custom arrangement.</li>
               </ul>
