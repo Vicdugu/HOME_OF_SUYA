@@ -79,6 +79,30 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Enforce fulfillment rules: Same-day cutoff and postage requirements
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const isSameDay = parsedBookingDate.getTime() === today.getTime();
+
+  if (isSameDay && (deliveryType === "PICKUP" || deliveryType === "CARDIFF")) {
+    // Same-day pickup/delivery must be ordered by 2:00 PM (14:00)
+    const hour = new Date().getHours();
+    if (hour >= 14) {
+      return NextResponse.json(
+        { error: "Same-day pickup/delivery orders close at 2:00 PM. Please select a later date." },
+        { status: 409 }
+      );
+    }
+  }
+
+  if (isSameDay && deliveryType === "POSTAGE") {
+    // Postage requires 24-hour processing time
+    return NextResponse.json(
+      { error: "Postal orders require 24-hour processing time. Please select a future date." },
+      { status: 409 }
+    );
+  }
+
   const blocked = await prisma.blockedDate.findFirst({ where: { date: parsedBookingDate } });
   if (blocked) {
     return NextResponse.json(

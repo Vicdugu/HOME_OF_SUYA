@@ -11,8 +11,11 @@ export function generateReference(): string {
 }
 
 /**
- * Returns the next 8 weeks of available booking dates
- * (Monday to Saturday = 1-6) excluding blocked dates.
+ * Returns available booking dates (Monday to Saturday) starting from today,
+ * excluding blocked dates.
+ * 
+ * Note: Time-based filtering (2:00 PM cutoff) is handled client-side.
+ * This function provides all potential bookable dates to the frontend.
  */
 export function getAvailableDates(
   blockedDates: Date[],
@@ -23,16 +26,16 @@ export function getAvailableDates(
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Start from tomorrow
+  // Start from today (not tomorrow)
   const start = new Date(today);
-  start.setDate(start.getDate() + 1);
 
   const end = new Date(today);
   end.setDate(end.getDate() + weeksAhead * 7);
 
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     const day = d.getDay();
-    if (day === 2 || day === 4) {
+    // Monday=1 to Saturday=6 (include all weekdays Mon-Sat)
+    if (day >= 1 && day <= 6) {
       const copy = new Date(d);
       if (!blockedMs.has(toDateOnly(copy).getTime())) {
         dates.push(copy);

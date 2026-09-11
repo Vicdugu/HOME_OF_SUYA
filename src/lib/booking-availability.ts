@@ -52,11 +52,14 @@ export function isBookingWindowOpen(date: Date, now = new Date()) {
 
   const today = new Date(now);
   today.setHours(0, 0, 0, 0);
-  if (bookingDate <= today) {
+  
+  // Allow today and future dates
+  // Time-based filtering (2:00 PM cutoff, 24-hour postage rule) is handled client-side
+  if (bookingDate < today) {
     return false;
   }
 
-  return now < getBookingCutoff(bookingDate);
+  return true;
 }
 
 export function isBookingCountedForCapacity(
