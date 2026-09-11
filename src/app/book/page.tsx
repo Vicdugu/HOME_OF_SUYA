@@ -184,6 +184,7 @@ export default function BookPage() {
                 selectedDate={state.bookingDate}
                 onSelect={setDate}
                 availableDates={availableDates}
+                deliveryType={state.deliveryType}
               />
             </section>
 

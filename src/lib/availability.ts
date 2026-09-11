@@ -3,12 +3,17 @@
  * No Prisma imports — safe to use in "use client" component trees.
  */
 
+import type { DeliveryType } from "@/types";
+
 export const TIME_SLOTS = [
   { id: "14:00-16:00", label: "2:00 PM – 4:00 PM" },
   { id: "18:00-20:00", label: "6:00 PM – 8:00 PM" },
 ] as const;
 
 export type TimeSlotId = (typeof TIME_SLOTS)[number]["id"];
+
+// Fulfillment Rule: Same-day pickup/delivery cutoff time (14:00 = 2:00 PM)
+const SAME_DAY_CUTOFF_HOUR = 14;
 
 /** Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4, Friday = 5, Saturday = 6 */
 export function isBookableDay(date: Date): boolean {
@@ -101,4 +106,52 @@ export function getAvailableDates(
     }
   }
   return dates;
+}
+
+/**
+ * Check if same-day orders are allowed for a given delivery type at the current time
+ * 
+ * FULFILLMENT RULES:
+ * - PICKUP and CARDIFF: Same-day cutoff is 2:00 PM (14:00)
+ *   - If current time is before 2:00 PM, same-day is allowed
+ *   - If current time is 2:00 PM or later, same-day is NOT allowed
+ * - POSTAGE: Requires 24-hour advance processing time
+ *   - Same-day is never allowed for postal orders
+ */
+export function canOrderSameDay(deliveryType: DeliveryType | null, now = new Date()): boolean {
+  if (!deliveryType) return false;
+  
+  // POSTAGE never allows same-day (24-hour processing requirement)
+  if (deliveryType === "POSTAGE") return false;
+  
+  // PICKUP and CARDIFF: check 2:00 PM cutoff
+  if (deliveryType === "PICKUP" || deliveryType === "CARDIFF") {
+    const currentHour = now.getHours();
+    return currentHour < SAME_DAY_CUTOFF_HOUR;
+  }
+  
+  return false;
+}
+
+/**
+ * Get the earliest selectable date for a given delivery type
+ * 
+ * - If same-day is allowed (before 2:00 PM for PICKUP/CARDIFF):
+ *   Return today's date
+ * - If same-day is NOT allowed:
+ *   Return tomorrow's date
+ * - For POSTAGE (24-hour rule):
+ *   Return tomorrow's date (minimum 1 full day ahead)
+ */
+export function getEarliestSelectableDate(deliveryType: DeliveryType | null, now = new Date()): Date {
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  
+  if (canOrderSameDay(deliveryType, now)) {
+    return new Date(today);
+  }
+  
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow;
 }

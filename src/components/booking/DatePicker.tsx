@@ -7,7 +7,9 @@ import {
   isBookableDay,
   isTooSoon,
   toDateString,
+  getEarliestSelectableDate,
 } from "@/lib/availability";
+import type { DeliveryType } from "@/types";
 
 const MONTH_NAMES = [
   "January","February","March","April","May","June",
@@ -19,15 +21,19 @@ interface DatePickerProps {
   selectedDate: string | null;
   onSelect: (date: string) => void;
   availableDates?: string[];
+  deliveryType?: DeliveryType | null;
 }
 
-export function DatePicker({ selectedDate, onSelect, availableDates = [] }: DatePickerProps) {
+export function DatePicker({ selectedDate, onSelect, availableDates = [], deliveryType = null }: DatePickerProps) {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
 
   const days = getCalendarDays(viewYear, viewMonth);
   const availableSet = new Set(availableDates);
+  
+  // Get the earliest selectable date based on delivery type and current time
+  const earliestSelectableDate = getEarliestSelectableDate(deliveryType);
 
   const canGoPrev =
     viewYear > today.getFullYear() || viewMonth > today.getMonth();
@@ -92,10 +98,10 @@ export function DatePicker({ selectedDate, onSelect, availableDates = [] }: Date
           const dateStr = toDateString(date);
           const isSelected = selectedDate === dateStr;
           const isBookable = isBookableDay(date);
-          const isPast = isTooSoon(date);
+          const isTooEarly = date < earliestSelectableDate;
           const isAvailable = availableSet.has(dateStr);
-          const isBlocked = isBookable && !isPast && !isAvailable;
-          const isSelectable = isBookable && !isPast && isAvailable;
+          const isBlocked = isBookable && !isTooEarly && !isAvailable;
+          const isSelectable = isBookable && !isTooEarly && isAvailable;
 
           return (
             <div key={dateStr} className="flex items-center justify-center py-0.5">
@@ -103,7 +109,11 @@ export function DatePicker({ selectedDate, onSelect, availableDates = [] }: Date
                 onClick={() => isSelectable && onSelect(dateStr)}
                 disabled={!isSelectable}
                 title={
-                  isBlocked
+                  isTooEarly
+                    ? deliveryType === "POSTAGE"
+                      ? "Postage orders require 24-hour processing time"
+                      : "Same-day orders closed after 2:00 PM"
+                    : isBlocked
                     ? "Not available"
                     : !isBookable
                     ? "Bookings on Tue & Thu only"
@@ -115,7 +125,7 @@ export function DatePicker({ selectedDate, onSelect, availableDates = [] }: Date
                     ? "bg-brand-red text-white font-bold shadow-lg shadow-brand-red/30"
                     : isSelectable
                     ? "text-white font-semibold hover:bg-brand-red/20 hover:text-brand-gold cursor-pointer"
-                    : isBlocked
+                    : isBlocked || isTooEarly
                     ? "text-gray-600 line-through cursor-not-allowed"
                     : "text-gray-700 cursor-default",
                 ].join(" ")}
