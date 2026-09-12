@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { formatCurrency } from "@/lib/utils";
 import { formatBookingDate, formatTimeSlot } from "@/lib/availability";
+import { OrderDetailsModal } from "@/components/admin/OrderDetailsModal";
 import { Download, Trash2 } from "lucide-react";
 
 interface BookingItem { mealName: string; quantity: number }
@@ -29,6 +30,7 @@ export default function AdminBookingsPage() {
   const [filter, setFilter] = useState<string>("ALL");
   const [search, setSearch] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/bookings")
@@ -153,7 +155,14 @@ export default function AdminBookingsPage() {
             <tbody className="divide-y divide-surface-border">
               {filtered.map((b) => (
                 <tr key={b.id} className="hover:bg-surface-dark/50 transition-colors">
-                  <td className="px-4 py-3 font-mono text-xs text-brand-gold">{b.reference}</td>
+                  <td className="px-4 py-3 font-mono text-xs">
+                    <button
+                      onClick={() => setSelectedBooking(b)}
+                      className="text-brand-gold hover:text-brand-gold-light hover:underline cursor-pointer transition-colors font-semibold"
+                    >
+                      {b.reference}
+                    </button>
+                  </td>
                   <td className="px-4 py-3">
                     <p className="text-white font-medium">{b.customerName}</p>
                     <p className="text-gray-500 text-xs">{b.whatsapp}</p>
@@ -233,6 +242,15 @@ export default function AdminBookingsPage() {
           </table>
         </div>
       </div>
+
+      {/* Order Details Modal */}
+      {selectedBooking && (
+        <OrderDetailsModal
+          open={!!selectedBooking}
+          onClose={() => setSelectedBooking(null)}
+          order={selectedBooking}
+        />
+      )}
     </div>
   );
 }
