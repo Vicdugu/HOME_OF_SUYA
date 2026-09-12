@@ -47,15 +47,24 @@ function StatCard({
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/stats")
       .then((r) => {
-        if (!r.ok) throw new Error(`API error: ${r.status}`);
+        if (!r.ok) {
+          setLoadError(`Failed to load statistics (${r.status}). Please log in again.`);
+          return null;
+        }
         return r.json();
       })
-      .then((data) => setStats(data))
-      .catch((err) => console.error("Failed to load stats:", err));
+      .then((data) => {
+        if (data) setStats(data);
+      })
+      .catch((err) => {
+        console.error("Failed to load stats:", err);
+        setLoadError("Failed to load statistics. Please try again.");
+      });
   }, []);
 
   return (
@@ -64,6 +73,13 @@ export default function AdminDashboard() {
         <h1 className="text-white font-black text-2xl">Dashboard</h1>
         <p className="text-gray-500 text-sm mt-1">Overview of your bookings and meals</p>
       </div>
+
+      {/* Error message */}
+      {loadError && (
+        <div className="p-4 bg-brand-red/10 border border-brand-red/50 rounded-xl text-brand-red text-sm">
+          {loadError}
+        </div>
+      )}
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
