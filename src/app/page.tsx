@@ -23,6 +23,19 @@ export default function MenuPage() {
       .catch(() => setLoading(false));
   }, []);
 
+  const handleCustomizeStart = (mealId: string) => {
+    setCustomizingMealId(mealId);
+    // Scroll to menu section smoothly
+    const menuSection = document.getElementById("menu");
+    if (menuSection) {
+      menuSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleCustomizeEnd = () => {
+    setCustomizingMealId(null);
+  };
+
   const availableMeals = meals.filter((m) => m.isAvailable);
   const unavailableMeals = meals.filter((m) => !m.isAvailable);
 
@@ -179,8 +192,8 @@ export default function MenuPage() {
                         key={meal.id}
                         meal={meal}
                         isCustomizing={true}
-                        onCustomizeStart={() => setCustomizingMealId(meal.id)}
-                        onCustomizeEnd={() => setCustomizingMealId(null)}
+                        onCustomizeStart={() => handleCustomizeStart(meal.id)}
+                        onCustomizeEnd={handleCustomizeEnd}
                       />
                     ))}
                 </div>
@@ -193,8 +206,8 @@ export default function MenuPage() {
                         key={meal.id}
                         meal={meal}
                         isCustomizing={false}
-                        onCustomizeStart={() => setCustomizingMealId(meal.id)}
-                        onCustomizeEnd={() => setCustomizingMealId(null)}
+                        onCustomizeStart={() => handleCustomizeStart(meal.id)}
+                        onCustomizeEnd={handleCustomizeEnd}
                       />
                     ))}
                 </div>
@@ -206,8 +219,8 @@ export default function MenuPage() {
                     key={meal.id}
                     meal={meal}
                     isCustomizing={false}
-                    onCustomizeStart={() => setCustomizingMealId(meal.id)}
-                    onCustomizeEnd={() => setCustomizingMealId(null)}
+                    onCustomizeStart={() => handleCustomizeStart(meal.id)}
+                    onCustomizeEnd={handleCustomizeEnd}
                   />
                 ))}
               </div>

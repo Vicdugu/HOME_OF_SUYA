@@ -24,6 +24,7 @@ interface OrderDetailsModalProps {
     address?: string | null;
     items: OrderItem[];
     total: number;
+    deliveryFee: number;
   };
 }
 
@@ -31,7 +32,6 @@ export function OrderDetailsModal({ open, onClose, order }: OrderDetailsModalPro
   if (!open) return null;
 
   const subtotal = order.items.reduce((sum, item) => sum + ((item.unitPrice ?? 0) * item.quantity), 0);
-  const deliveryFee = order.total - subtotal;
 
   return (
     <>
@@ -159,10 +159,10 @@ export function OrderDetailsModal({ open, onClose, order }: OrderDetailsModalPro
                 <span className="text-gray-400">Subtotal</span>
                 <span className="text-white font-semibold">{formatCurrency(subtotal)}</span>
               </div>
-              {deliveryFee > 0 && (
+              {order.deliveryFee > 0 && (
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Delivery Fee</span>
-                  <span className="text-white font-semibold">{formatCurrency(deliveryFee)}</span>
+                  <span className="text-white font-semibold">{formatCurrency(order.deliveryFee)}</span>
                 </div>
               )}
               <div className="border-t border-surface-border pt-2 flex justify-between items-center">

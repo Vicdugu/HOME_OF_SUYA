@@ -30,8 +30,7 @@ export function createInitialMealSelection(
   meal: Pick<MealDTO, "variationGroups">
 ): MealVariationSelection {
   return meal.variationGroups.reduce<MealVariationSelection>((selection, group) => {
-    selection[group.id] =
-      group.selectionType === "SINGLE" && group.options[0] ? [group.options[0].id] : [];
+    selection[group.id] = [];
     return selection;
   }, {});
 }

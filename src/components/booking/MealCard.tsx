@@ -73,7 +73,17 @@ export function MealCard({
     onCustomizeStart();
   };
 
+  const isSelectionComplete = () => {
+    return meal.variationGroups.every((group) => {
+      if (group.selectionType === "SINGLE") {
+        return (selection[group.id] ?? []).length > 0;
+      }
+      return true;
+    });
+  };
+
   const handleAddSelection = () => {
+    if (!isSelectionComplete()) return;
     addItem(createCustomisedCartItem(meal, selection));
     setCustomising(false);
     onCustomizeEnd();
@@ -189,6 +199,8 @@ export function MealCard({
                 <div className="flex flex-wrap gap-2">
                   {group.options.map((option) => {
                     const selected = (selection[group.id] ?? []).includes(option.id);
+                    const isMultiple = group.selectionType === "MULTIPLE";
+                    const isSize = group.name === "SIZE";
 
                     return (
                       <button
@@ -200,7 +212,7 @@ export function MealCard({
                         className={[
                           "rounded-full border px-3 py-1.5 text-xs transition-colors",
                           selected
-                            ? group.selectionType === "MULTIPLE"
+                            ? isMultiple && !isSize
                               ? "border-brand-gold bg-brand-gold/20 text-brand-gold"
                               : "border-brand-red bg-brand-red text-white"
                             : "border-surface-border text-gray-300 hover:border-brand-red/40",
@@ -249,8 +261,9 @@ export function MealCard({
                         event.stopPropagation();
                         handleAddSelection();
                       }}
+                      disabled={!isSelectionComplete()}
                       aria-label={`Add ${meal.name} with selected options to cart`}
-                      className="flex items-center gap-1.5 btn-primary py-1.5 px-3 text-xs sm:py-2 sm:px-4 sm:text-sm"
+                      className="flex items-center gap-1.5 btn-primary py-1.5 px-3 text-xs sm:py-2 sm:px-4 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Check size={14} className="sm:size-4" />
                       Add to Order

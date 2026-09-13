@@ -6,12 +6,12 @@ import { formatBookingDate, formatTimeSlot } from "@/lib/availability";
 import { OrderDetailsModal } from "@/components/admin/OrderDetailsModal";
 import { Download, Trash2 } from "lucide-react";
 
-interface BookingItem { mealName: string; quantity: number }
+interface BookingItem { mealName: string; quantity: number; unitPrice: number }
 interface Booking {
   id: string; reference: string; customerName: string; whatsapp: string;
-  email: string | null; deliveryType: string; bookingDate: string;
+  email: string | null; address: string | null; deliveryType: string; bookingDate: string;
   timeSlot: string; status: string; paymentStatus: string;
-  fulfilmentStage: string;
+  fulfilmentStage: string; deliveryFee: number;
   customerRequestType: string | null;
   customerRequestMessage: string | null;
   customerRequestStatus: string | null;

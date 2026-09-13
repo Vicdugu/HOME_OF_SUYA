@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   const [bookings, total] = await Promise.all([
     prisma.booking.findMany({
       orderBy: { createdAt: "desc" },
-      include: { items: { select: { mealName: true, quantity: true } } },
+      include: { items: { select: { mealName: true, quantity: true, unitPrice: true } } },
       skip,
       take: limit,
     }),
