@@ -137,13 +137,31 @@ export async function createSumUpCheckout(params: {
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
+    const text = await res.text().catch(() => "");
+    let err: any = {};
+    if (text) {
+      try {
+        err = JSON.parse(text);
+      } catch {
+        err = { message: text };
+      }
+    }
     throw new Error(
-      (err as { message?: string }).message ?? `SumUp error ${res.status}`
+      (err as { message?: string }).message ?? `SumUp API error ${res.status}`
     );
   }
 
-  const checkout: SumUpCheckout = await res.json();
+  const text = await res.text();
+  if (!text) {
+    throw new Error("SumUp API returned an empty response");
+  }
+
+  let checkout: SumUpCheckout;
+  try {
+    checkout = JSON.parse(text);
+  } catch {
+    throw new Error("SumUp API returned invalid JSON response");
+  }
 
   if (!checkout.hosted_checkout_url) {
     throw new Error("SumUp hosted checkout URL was not returned");
@@ -168,11 +186,28 @@ export async function getSumUpCheckout(checkoutId: string): Promise<SumUpCheckou
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
+    const text = await res.text().catch(() => "");
+    let err: any = {};
+    if (text) {
+      try {
+        err = JSON.parse(text);
+      } catch {
+        err = { message: text };
+      }
+    }
     throw new Error(
-      (err as { message?: string }).message ?? `SumUp error ${res.status}`
+      (err as { message?: string }).message ?? `SumUp API error ${res.status}`
     );
   }
 
-  return res.json();
+  const text = await res.text();
+  if (!text) {
+    throw new Error("SumUp API returned an empty response");
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error("SumUp API returned invalid JSON response");
+  }
 }
