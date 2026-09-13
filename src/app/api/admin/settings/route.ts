@@ -40,6 +40,7 @@ export async function PUT(req: NextRequest) {
           logoUrl,
           timeSlots: data.timeSlots ? JSON.stringify(data.timeSlots) : undefined,
           availableDays: data.availableDays ? JSON.stringify(data.availableDays) : undefined,
+          isMaintenanceMode: typeof data.isMaintenanceMode === 'boolean' ? data.isMaintenanceMode : undefined,
         },
       })
     : await prisma.deliverySettings.create({
@@ -52,6 +53,7 @@ export async function PUT(req: NextRequest) {
           logoUrl,
           timeSlots: data.timeSlots ? JSON.stringify(data.timeSlots) : undefined,
           availableDays: data.availableDays ? JSON.stringify(data.availableDays) : undefined,
+          isMaintenanceMode: Boolean(data.isMaintenanceMode ?? false),
         },
       });
   return NextResponse.json({

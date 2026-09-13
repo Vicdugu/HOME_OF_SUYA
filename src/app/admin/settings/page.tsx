@@ -15,6 +15,7 @@ const ACCEPTED_LOGO_TYPES = new Set(["image/png", "image/jpeg", "image/svg+xml"]
 interface Settings extends DeliverySettingsDTO {
   availableDays?: number[]; // 1=Monday, 2=Tuesday, ..., 6=Saturday
   timeSlots?: Array<{ id: string; label: string }>;
+  isMaintenanceMode?: boolean;
 }
 
 interface BlockedDate { id: string; date: string; reason: string | null }
@@ -459,6 +460,41 @@ export default function AdminSettingsPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Maintenance Mode */}
+      <section className="card p-5 space-y-5">
+        <h2 className="text-brand-gold font-semibold text-xs uppercase tracking-widest">Maintenance Mode</h2>
+        <p className="text-gray-500 text-xs">Enable maintenance mode to show customers a maintenance page and prevent new bookings.</p>
+        
+        <div className="flex items-center justify-between p-4 bg-surface-dark rounded-xl border border-surface-border">
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col">
+              <span className="text-white font-medium">Maintenance in Progress</span>
+              <span className="text-gray-500 text-xs">
+                {settings.isMaintenanceMode ? "Enabled - customers see maintenance page" : "Disabled - site is operational"}
+              </span>
+            </div>
+          </div>
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={settings.isMaintenanceMode || false}
+              onChange={(e) => setSettings((s) => s ? { ...s, isMaintenanceMode: e.target.checked } : s)}
+              className="sr-only peer"
+            />
+            <div className="relative w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-brand-red rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-red"></div>
+          </label>
+        </div>
+
+        <button
+          onClick={saveSettings}
+          disabled={saving}
+          className="btn-primary flex items-center gap-2 px-5 py-2.5 text-sm"
+        >
+          {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+          {saved ? "Saved!" : "Save Changes"}
+        </button>
       </section>
     </div>
   );

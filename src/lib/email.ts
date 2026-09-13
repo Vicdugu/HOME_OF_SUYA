@@ -324,3 +324,124 @@ export async function sendPasswordResetEmail(
   if (error) { console.error("[Email] Reset send failed:", error); return false; }
   return true;
 }
+
+// ─── Booking Reminder Emails ────────────────────────────────────────────────
+
+/**
+ * Sends a booking reminder email to the customer.
+ * Reminds them to complete payment to lock in their booking slot.
+ */
+export async function sendBookingReminderEmail(
+  data: BookingNotificationData & { paymentLink: string }
+): Promise<boolean> {
+  const resend = getResend();
+  if (!resend || !data.email) return false;
+
+  const itemsHtml = data.items
+    .map(
+      (i) =>
+        `<tr>
+          <td style="padding:3px 6px;font-size:13px">${i.mealName}</td>
+          <td style="padding:3px 6px;text-align:center;font-size:13px">${i.quantity}</td>
+          <td style="padding:3px 6px;text-align:right;font-size:13px">£${(i.unitPrice * i.quantity).toFixed(2)}</td>
+        </tr>`
+    )
+    .join("");
+
+  const addressLine = data.address ? ` → ${data.address}` : "";
+
+  console.log("[Email] Sending booking reminder", { reference: data.reference, to: data.email });
+
+  const { error, data: result } = await resend.emails.send({
+    from: FROM,
+    to: data.email,
+    subject: `Reminder: Complete your payment for booking ${data.reference}`,
+    html: `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+      </head>
+      <body style="margin:0;padding:0;background:#0A0A0A;font-family:system-ui,sans-serif">
+        <div style="max-width:520px;margin:40px auto;background:#1A1A1A;border-radius:12px;overflow:hidden;border:1px solid #2A2A2A">
+          <!-- Header -->
+          <div style="background:linear-gradient(135deg,#C41E3A,#8B0000);padding:24px;text-align:center">
+            <h1 style="color:#D4AF37;margin:0;font-size:22px;font-weight:900;letter-spacing:-0.5px">Home of Suya</h1>
+          </div>
+
+          <!-- Body -->
+          <div style="padding:32px 28px;color:#E0E0E0">
+            <h2 style="color:#fff;margin-top:0;font-size:18px">Don't miss out on your booking!</h2>
+
+            <p>Hi <strong style="color:#D4AF37">${data.customerName}</strong>,</p>
+
+            <p>You have a pending booking with us that needs payment to be confirmed. Your reservation will only be locked in once payment is complete.</p>
+
+            <!-- Booking Details -->
+            <div style="background:#111827;border-radius:8px;padding:16px;margin:24px 0;border-left:4px solid #C41E3A">
+              <p style="margin:8px 0;font-size:14px">
+                <strong>Booking Reference:</strong><br>
+                <span style="color:#D4AF37;font-size:16px;font-weight:bold">${data.reference}</span>
+              </p>
+              <p style="margin:8px 0;font-size:14px">
+                <strong>Booking Date & Time:</strong><br>
+                ${data.bookingDate} — ${data.timeSlot}
+              </p>
+              <p style="margin:8px 0;font-size:14px">
+                <strong>Delivery Type:</strong><br>
+                ${data.deliveryType}${addressLine}
+              </p>
+              <p style="margin:8px 0;font-size:14px">
+                <strong>Amount to Pay:</strong><br>
+                <span style="color:#D4AF37;font-size:16px;font-weight:bold">£${data.total.toFixed(2)}</span>
+              </p>
+            </div>
+
+            <!-- Items Summary -->
+            <table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:16px 0;font-size:13px">
+              <thead>
+                <tr style="background:#C41E3A;color:#fff">
+                  <th style="padding:8px 12px;text-align:left;font-weight:bold">Item</th>
+                  <th style="padding:8px 12px;text-align:center;font-weight:bold">Qty</th>
+                  <th style="padding:8px 12px;text-align:right;font-weight:bold">Price</th>
+                </tr>
+              </thead>
+              <tbody>${itemsHtml}</tbody>
+            </table>
+
+            <!-- CTA Button -->
+            <div style="text-align:center;margin:28px 0">
+              <a href="${data.paymentLink}" style="background:#C41E3A;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:700;font-size:15px;display:inline-block">Complete Payment</a>
+            </div>
+
+            <!-- Additional Info -->
+            <p style="font-size:13px;color:#888;margin-top:24px">
+              <strong>Why complete payment now?</strong><br>
+              Completing your payment within the next 30 minutes ensures your booking is locked in and your delivery slot is reserved. Without payment, your booking may become available for other customers.
+            </p>
+
+            <p style="font-size:13px;color:#888">
+              <strong>Need help?</strong><br>
+              Contact us on WhatsApp or reply to this email if you have any questions about your booking.
+            </p>
+          </div>
+
+          <!-- Footer -->
+          <div style="padding:16px 28px;border-top:1px solid #2A2A2A;text-align:center">
+            <p style="color:#555;font-size:11px;margin:0">This is a reminder for your pending booking.<br>Please complete payment to confirm your reservation.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  });
+
+  if (error) {
+    console.error("[Email] Booking reminder failed:", error);
+    return false;
+  }
+
+  console.log("[Email] Booking reminder sent successfully", { reference: data.reference, result });
+  return true;
+}

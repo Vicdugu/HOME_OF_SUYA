@@ -5,6 +5,7 @@ import { CartProvider } from "@/context/CartContext";
 import FooterWrapper from "@/components/ui/FooterWrapper";
 import GlobalHeader from "@/components/ui/GlobalHeader";
 import CookieConsent from "@/components/ui/CookieConsent";
+import { MaintenanceModechecker } from "@/components/MaintenanceModeChecker";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -56,10 +57,12 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body className="min-h-screen bg-brand-black">
         <CartProvider>
-          <GlobalHeader />
-          {children}
-          <FooterWrapper />
-          <CookieConsent />
+          <MaintenanceModechecker>
+            <GlobalHeader />
+            {children}
+            <FooterWrapper />
+            <CookieConsent />
+          </MaintenanceModechecker>
         </CartProvider>
       </body>
     </html>
