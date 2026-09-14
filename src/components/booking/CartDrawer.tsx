@@ -159,23 +159,24 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
             <p className="text-gray-500 text-xs">
               Delivery fee calculated at checkout
             </p>
-            {isOnBookingPage ? (
-              <button
-                onClick={handleContinueShopping}
-                className="btn-outline w-full flex items-center justify-center gap-2"
-              >
-                <ChevronLeft size={16} />
-                Continue Shopping
-              </button>
-            ) : (
-              <button
-                onClick={handleProceed}
-                className="btn-primary w-full flex items-center justify-center gap-2"
-              >
-                Choose Date & Delivery
-                <ArrowRight size={16} />
-              </button>
-            )}
+            
+            {/* Continue Shopping Button */}
+            <button
+              onClick={handleContinueShopping}
+              className="btn-outline w-full flex items-center justify-center gap-2"
+            >
+              <ChevronLeft size={16} />
+              Continue Shopping
+            </button>
+
+            {/* Choose Date & Delivery Button */}
+            <button
+              onClick={handleProceed}
+              className="btn-primary w-full flex items-center justify-center gap-2"
+            >
+              Choose Date & Delivery
+              <ArrowRight size={16} />
+            </button>
           </div>
         )}
       </div>
