@@ -2,7 +2,7 @@
 
 import { ShoppingBag, Calendar, Clock, Truck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import { formatMealVariationSummary } from "@/lib/meal-variations";
+import { formatMealVariationSummary, getMealVariationLines } from "@/lib/meal-variations";
 import { formatCurrency } from "@/lib/utils";
 import { formatBookingDate, formatTimeSlot } from "@/lib/availability";
 
@@ -38,7 +38,11 @@ export function BookingOrderSummary({
             <div className="max-w-[70%]">
               <span className="text-gray-400 truncate">{item.mealName} </span>
               <span className="text-gray-600">×{item.quantity}</span>
-              <p className="text-[11px] text-gray-600 mt-0.5">{formatMealVariationSummary(item)}</p>
+              <div className="text-[11px] text-gray-600 mt-0.5 space-y-0.5">
+                {getMealVariationLines(item).map((line, idx) => (
+                  <p key={idx}>{line}</p>
+                ))}
+              </div>
             </div>
             <span className="text-white shrink-0">
               {formatCurrency(item.unitPrice * item.quantity)}

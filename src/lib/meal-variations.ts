@@ -109,6 +109,37 @@ export function formatMealVariationSummary(
     .join(" · ");
 }
 
+export function getMealVariationLines(
+  source: Pick<CartItem, "selections"> | { selections: CartItemSelection[] }
+): string[] {
+  if (source.selections.length === 0) {
+    return ["Standard"];
+  }
+
+  const lines: string[] = [];
+
+  for (const group of source.selections) {
+    // Check if this is a drinks/types group with multiple selections
+    if (
+      (group.groupName.toLowerCase() === "drink" ||
+        group.groupName.toLowerCase() === "type") &&
+      group.optionNames.length > 1
+    ) {
+      // For drinks/types with multiple selections, each on its own line with format "DrinkName - 1"
+      for (const optionName of group.optionNames) {
+        // Remove size info in parentheses (e.g., "Fura (340ml)" -> "Fura")
+        const drinkName = optionName.replace(/\s*\([^)]*\)\s*/g, "").trim();
+        lines.push(`${drinkName} - 1`);
+      }
+    } else {
+      // For other selections, use the original format
+      lines.push(`${group.groupName}: ${group.optionNames.join(", ")}`);
+    }
+  }
+
+  return lines;
+}
+
 export function formatPendingMealVariationSummary(
   meal: Pick<MealDTO, "variationGroups">,
   selection: MealVariationSelection

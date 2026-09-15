@@ -5,7 +5,7 @@ import { X, Trash2, ShoppingBag, ArrowRight, ChevronLeft } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { QuantitySelector } from "@/components/ui/QuantitySelector";
-import { formatMealVariationSummary } from "@/lib/meal-variations";
+import { formatMealVariationSummary, getMealVariationLines } from "@/lib/meal-variations";
 import { formatCurrency } from "@/lib/utils";
 
 interface CartDrawerProps {
@@ -117,9 +117,11 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                   <p className="text-white text-sm font-medium truncate">
                     {item.mealName}
                   </p>
-                  <p className="text-gray-500 text-[11px] mt-0.5">
-                    {formatMealVariationSummary(item)}
-                  </p>
+                  <div className="text-gray-500 text-[11px] mt-0.5 space-y-0.5">
+                    {getMealVariationLines(item).map((line, idx) => (
+                      <p key={idx}>{line}</p>
+                    ))}
+                  </div>
                   <p className="text-brand-gold text-sm font-semibold mt-0.5">
                     {formatCurrency(item.unitPrice * item.quantity)}
                   </p>

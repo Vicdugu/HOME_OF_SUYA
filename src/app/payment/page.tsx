@@ -15,7 +15,7 @@ import { useCart } from "@/context/CartContext";
 import { trackClientEvent } from "@/lib/client-analytics";
 import { DEFAULT_DELIVERY_SETTINGS } from "@/lib/delivery-settings";
 import { getDeliveryFee } from "@/lib/delivery-pricing";
-import { formatMealVariationSummary } from "@/lib/meal-variations";
+import { formatMealVariationSummary, getMealVariationLines } from "@/lib/meal-variations";
 import { formatCurrency } from "@/lib/utils";
 import { formatBookingDate, formatTimeSlot } from "@/lib/availability";
 
@@ -208,7 +208,11 @@ export default function PaymentPage() {
                   <span>
                     {item.mealName} <span className="text-gray-600">×{item.quantity}</span>
                   </span>
-                  <p className="text-[11px] text-gray-600 mt-0.5">{formatMealVariationSummary(item)}</p>
+                  <div className="text-[11px] text-gray-600 mt-0.5 space-y-0.5">
+                    {getMealVariationLines(item).map((line, idx) => (
+                      <p key={idx}>{line}</p>
+                    ))}
+                  </div>
                 </div>
                 <span className="text-white">
                   {formatCurrency(item.unitPrice * item.quantity)}
