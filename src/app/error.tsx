@@ -15,11 +15,11 @@ export default function Error({
   }, [error]);
 
   return (
-    <main className="min-h-screen bg-brand-black flex flex-col items-center justify-center px-4 text-center gap-6">
+    <main className="min-h-screen bg-white flex flex-col items-center justify-center px-4 text-center gap-6">
       <AlertTriangle size={48} className="text-brand-red opacity-70" />
       <div>
-        <h1 className="text-white font-black text-2xl mb-2">Something went wrong</h1>
-        <p className="text-gray-400 text-sm">
+        <h1 className="text-gray-900 font-black text-2xl mb-2">Something went wrong</h1>
+        <p className="text-gray-600 text-sm">
           An unexpected error occurred. Please try again.
         </p>
       </div>

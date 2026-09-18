@@ -139,7 +139,7 @@ export default function ContactPage() {
   }
 
   return (
-    <main className="min-h-screen bg-brand-black">
+    <main className="min-h-screen bg-white">
       <div className="bg-surface-dark border-b border-surface-border sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <Link

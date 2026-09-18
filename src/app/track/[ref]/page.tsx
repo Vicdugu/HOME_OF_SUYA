@@ -109,7 +109,7 @@ export default function TrackRefPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-brand-black flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <Loader2 size={32} className="animate-spin text-brand-gold" />
       </div>
     );
@@ -117,10 +117,10 @@ export default function TrackRefPage({
 
   if (!booking) {
     return (
-      <main className="min-h-screen bg-brand-black flex flex-col items-center justify-center gap-6 px-4 text-center">
+      <main className="min-h-screen bg-white flex flex-col items-center justify-center gap-6 px-4 text-center">
         <Flame size={40} className="text-gray-600" />
         <div>
-          <p className="text-white font-bold text-xl mb-1">Booking not found</p>
+          <p className="text-gray-900 font-bold text-xl mb-1">Booking not found</p>
           <p className="text-gray-400 text-sm">
             Reference <span className="font-mono text-gray-300">{ref}</span> doesn't exist.
           </p>
@@ -201,11 +201,11 @@ export default function TrackRefPage({
   }
 
   return (
-    <main className="min-h-screen bg-brand-black">
+    <main className="min-h-screen bg-white">
       <div className="max-w-lg mx-auto px-4 py-10 space-y-6">
 
         {/* Back */}
-        <Link href="/track" className="flex items-center gap-1.5 text-gray-400 hover:text-white text-sm transition-colors">
+        <Link href="/track" className="flex items-center gap-1.5 text-gray-600 hover:text-gray-900 text-sm transition-colors">
           <ArrowLeft size={14} />
           Track another order
         </Link>

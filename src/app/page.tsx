@@ -25,7 +25,7 @@ export default async function MenuPage() {
   const meals = await getMeals();
 
   return (
-    <main className="min-h-screen bg-brand-black pt-16 sm:pt-0">
+    <main className="min-h-screen bg-white pt-16 sm:pt-0">
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <header className="relative isolate overflow-hidden border-b border-brand-gold/15 bg-brand-gradient">
         <div
@@ -59,7 +59,7 @@ export default async function MenuPage() {
               </h2>
             </div>
 
-            <p className="mt-2 hidden text-sm leading-6 text-white/78 md:block md:max-w-2xl md:text-sm md:mx-auto">
+            <p className="mt-2 hidden text-sm leading-6 text-white md:block md:max-w-2xl md:text-sm md:mx-auto">
               Nigerian barbecue built around smoky meat, pepper heat, and the fresh bite of onions, cabbage, drinks and other delicacies.
             </p>
 
@@ -110,16 +110,17 @@ export default async function MenuPage() {
       </header>
 
       {/* ── How it works ─────────────────────────────────────────── */}
-      <section className="bg-surface-dark/80 border-b border-surface-border">
+      <section className="bg-black border-b border-surface-border">
         <div className="max-w-5xl mx-auto px-4 py-2">
-          <ol className="flex flex-row items-center justify-center gap-2 sm:gap-5 text-xs text-gray-400 overflow-x-auto sm:overflow-visible">
+          <ol className="flex flex-row items-center justify-center gap-2 sm:gap-5 text-xs text-white overflow-x-auto sm:overflow-visible">
             {[
               { step: "1", label: "Pick your meals below" },
               { step: "2", label: "Choose date & delivery" },
               { step: "3", label: "Enter your details" },
               { step: "4", label: "Pay & get confirmed" },
-            ].map(({ step, label }) => (
+            ].map(({ step, label }, idx) => (
               <li key={step} className="flex items-center gap-1 sm:gap-2 shrink-0 sm:shrink">
+                {idx === 0 && <span className="hidden sm:inline mr-2">Steps to order</span>}
                 <span className="h-5 w-5 rounded-full bg-brand-red text-white text-[10px] font-bold flex items-center justify-center shrink-0">
                   {step}
                 </span>

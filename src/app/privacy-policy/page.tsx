@@ -11,10 +11,10 @@ export default function PrivacyPolicy() {
       <h1 className="text-4xl font-bold text-brand-orange mb-2">Privacy Policy</h1>
       <p className="text-gray-500 mb-8">Last updated: September 9, 2026</p>
 
-      <div className="space-y-8 text-gray-300">
+      <div className="space-y-8 text-black">
         {/* Introduction */}
         <section>
-          <h2 className="text-2xl font-bold text-white mb-4">1. Introduction</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Introduction</h2>
           <p>
             Home of Suya ("we," "us," "our," or "Company") is committed to protecting your
             privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard
@@ -24,7 +24,7 @@ export default function PrivacyPolicy() {
 
         {/* Information We Collect */}
         <section>
-          <h2 className="text-2xl font-bold text-white mb-4">2. Information We Collect</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Information We Collect</h2>
           
           <h3 className="text-lg font-semibold text-brand-orange mb-2">2.1 Information You Provide</h3>
           <ul className="list-disc list-inside space-y-2 ml-4">

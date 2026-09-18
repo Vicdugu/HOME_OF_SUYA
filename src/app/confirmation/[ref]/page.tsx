@@ -65,7 +65,7 @@ export default function ConfirmationPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-brand-black flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <Loader2 size={32} className="animate-spin text-brand-gold" />
       </div>
     );
@@ -73,9 +73,9 @@ export default function ConfirmationPage({
 
   if (notFound || !booking) {
     return (
-      <div className="min-h-screen bg-brand-black flex flex-col items-center justify-center gap-4 px-4 text-center">
-        <p className="text-white font-bold text-xl">Booking not found</p>
-        <p className="text-gray-400 text-sm">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 px-4 text-center">
+        <p className="text-gray-900 font-bold text-xl">Booking not found</p>
+        <p className="text-gray-600 text-sm">
           Reference: <span className="font-mono">{ref}</span>
         </p>
         <Link href="/" className="btn-primary px-6 py-3">
@@ -88,7 +88,7 @@ export default function ConfirmationPage({
   const isPaid = booking.paymentStatus === "PAID";
 
   return (
-    <main className="min-h-screen bg-brand-black">
+    <main className="min-h-screen bg-white">
       <div className="max-w-xl mx-auto px-4 py-12 space-y-6">
         {/* ── Status banner ──────────────────────────────── */}
         <div className="text-center space-y-3">
@@ -99,7 +99,7 @@ export default function ConfirmationPage({
               <Clock size={56} className="text-brand-gold" />
             )}
           </div>
-          <h1 className="text-white font-black text-2xl md:text-3xl">
+          <h1 className="text-gray-900 font-black text-2xl md:text-3xl">
             {isPaid ? "Booking Confirmed!" : "Booking Received"}
           </h1>
           <p className="text-gray-400 text-sm">
@@ -119,7 +119,7 @@ export default function ConfirmationPage({
 
         {/* ── Order details ───────────────────────────────── */}
         <div className="card p-5 space-y-4">
-          <h2 className="text-white font-bold text-sm flex items-center gap-2">
+          <h2 className="text-gray-900 font-bold text-sm flex items-center gap-2">
             <Flame size={15} className="text-brand-gold" />
             Order Details
           </h2>
@@ -132,7 +132,7 @@ export default function ConfirmationPage({
                   {item.mealName}{" "}
                   <span className="text-gray-600">×{item.quantity}</span>
                 </span>
-                <span className="text-white">
+                <span className="text-gray-900">
                   {formatCurrency(item.unitPrice * item.quantity)}
                 </span>
               </div>
@@ -143,7 +143,7 @@ export default function ConfirmationPage({
           <div className="border-t border-surface-border pt-3 space-y-1.5 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-400">Subtotal</span>
-              <span className="text-white">
+              <span className="text-gray-900">
                 {formatCurrency(booking.subtotal)}
               </span>
             </div>

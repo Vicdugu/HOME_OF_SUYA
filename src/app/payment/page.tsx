@@ -132,7 +132,7 @@ export default function PaymentPage() {
   if (totalItems === 0) return null;
 
   return (
-    <main className="min-h-screen bg-brand-black">
+    <main className="min-h-screen bg-white">
       {/* ── Header ───────────────────────────────────────────── */}
       <div className="bg-surface-dark border-b border-surface-border sticky top-0 z-20">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
@@ -181,7 +181,7 @@ export default function PaymentPage() {
       {/* ── Body ─────────────────────────────────────────────── */}
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
         <div>
-          <h1 className="text-white font-black text-2xl md:text-3xl mb-1">
+          <h1 className="text-black font-black text-2xl md:text-3xl mb-1">
             Payment
           </h1>
           <p className="text-gray-400 text-sm flex items-center gap-1.5">
@@ -204,11 +204,11 @@ export default function PaymentPage() {
                 key={item.cartItemId}
                 className="flex justify-between gap-3 text-sm"
               >
-                <div className="text-gray-400 max-w-[70%]">
+                <div className="text-white max-w-[70%]">
                   <span>
-                    {item.mealName} <span className="text-gray-600">×{item.quantity}</span>
+                    {item.mealName} <span className="text-gray-200">×{item.quantity}</span>
                   </span>
-                  <div className="text-[11px] text-gray-600 mt-0.5 space-y-0.5">
+                  <div className="text-[11px] text-gray-200 mt-0.5 space-y-0.5">
                     {getMealVariationLines(item).map((line, idx) => (
                       <p key={idx}>{line}</p>
                     ))}
@@ -222,7 +222,7 @@ export default function PaymentPage() {
           </div>
 
           {/* Booking details */}
-          <div className="pt-3 border-t border-surface-border space-y-1 text-xs text-gray-500">
+          <div className="pt-3 border-t border-surface-border space-y-1 text-xs text-white">
             {state.bookingDate && (
               <p>{formatBookingDate(state.bookingDate)}</p>
             )}
@@ -241,12 +241,12 @@ export default function PaymentPage() {
           {/* Totals */}
           <div className="pt-3 border-t border-surface-border space-y-1.5 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-400">Subtotal</span>
+              <span className="text-white">Subtotal</span>
               <span className="text-white">{formatCurrency(subtotal)}</span>
             </div>
             {deliveryFee > 0 && (
               <div className="flex justify-between">
-                <span className="text-gray-400">Delivery</span>
+                <span className="text-white">Delivery</span>
                 <span className="text-white">{formatCurrency(deliveryFee)}</span>
               </div>
             )}

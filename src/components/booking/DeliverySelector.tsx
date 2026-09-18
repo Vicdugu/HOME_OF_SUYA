@@ -76,14 +76,14 @@ export function DeliverySelector({
               !opt.available
                 ? "opacity-40 cursor-not-allowed border-surface-border bg-surface-dark"
                 : isSelected
-                ? "border-brand-red bg-brand-red/10 ring-1 ring-brand-red"
+                ? "border-brand-red bg-brand-red text-white ring-1 ring-brand-red"
                 : "border-surface-border bg-surface-dark hover:border-brand-red/40 cursor-pointer",
             ].join(" ")}
           >
             {/* Icon */}
             <div
               className={`shrink-0 ${
-                isSelected ? "text-brand-red" : "text-brand-gold"
+                isSelected ? "text-white" : "text-brand-gold"
               }`}
             >
               {opt.icon}
@@ -99,7 +99,7 @@ export function DeliverySelector({
                   </span>
                 )}
               </p>
-              <p className="text-gray-400 text-xs mt-0.5">{opt.description}</p>
+              <p className={`text-xs mt-0.5 ${isSelected ? "text-white/80" : "text-gray-400"}`}>{opt.description}</p>
             </div>
 
             {/* Fee */}
@@ -118,7 +118,7 @@ export function DeliverySelector({
               className={[
                 "w-4 h-4 rounded-full border-2 shrink-0 transition-all",
                 isSelected
-                  ? "border-brand-red bg-brand-red"
+                  ? "border-white bg-white"
                   : "border-gray-600",
               ].join(" ")}
             />

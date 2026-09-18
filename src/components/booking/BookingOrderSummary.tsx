@@ -36,9 +36,9 @@ export function BookingOrderSummary({
         {state.items.map((item) => (
           <div key={item.cartItemId} className="flex justify-between gap-3 text-sm">
             <div className="max-w-[70%]">
-              <span className="text-gray-400 truncate">{item.mealName} </span>
-              <span className="text-gray-600">×{item.quantity}</span>
-              <div className="text-[11px] text-gray-600 mt-0.5 space-y-0.5">
+              <span className="text-white truncate">{item.mealName} </span>
+              <span className="text-gray-200">×{item.quantity}</span>
+              <div className="text-[11px] text-gray-200 mt-0.5 space-y-0.5">
                 {getMealVariationLines(item).map((line, idx) => (
                   <p key={idx}>{line}</p>
                 ))}
@@ -54,12 +54,12 @@ export function BookingOrderSummary({
       {/* Subtotal + delivery */}
       <div className="border-t border-surface-border pt-3 space-y-2 text-sm">
         <div className="flex justify-between">
-          <span className="text-gray-400">Subtotal</span>
+          <span className="text-white">Subtotal</span>
           <span className="text-white">{formatCurrency(subtotal)}</span>
         </div>
 
         <div className="flex justify-between">
-          <span className="text-gray-400">Delivery</span>
+          <span className="text-white">Delivery</span>
           <span className="text-white">
             {state.deliveryType
               ? deliveryFee === 0
@@ -95,7 +95,7 @@ export function BookingOrderSummary({
           {state.bookingDate && (
             <div className="flex items-start gap-2 text-xs">
               <Calendar size={13} className="text-brand-gold mt-0.5 shrink-0" />
-              <span className="text-gray-300">
+              <span className="text-white">
                 {formatBookingDate(state.bookingDate)}
               </span>
             </div>
@@ -103,7 +103,7 @@ export function BookingOrderSummary({
           {state.timeSlot && (
             <div className="flex items-center gap-2 text-xs">
               <Clock size={13} className="text-brand-gold shrink-0" />
-              <span className="text-gray-300">
+              <span className="text-white">
                 {formatTimeSlot(state.timeSlot)}
               </span>
             </div>
@@ -111,7 +111,7 @@ export function BookingOrderSummary({
           {state.deliveryType && (
             <div className="flex items-center gap-2 text-xs">
               <Truck size={13} className="text-brand-gold shrink-0" />
-              <span className="text-gray-300">
+              <span className="text-white">
                 {DELIVERY_LABELS[state.deliveryType]}
               </span>
             </div>

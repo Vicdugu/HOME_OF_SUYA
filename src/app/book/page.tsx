@@ -91,7 +91,7 @@ export default function BookPage() {
   if (totalItems === 0) return null;
 
   return (
-    <main className="min-h-screen bg-brand-black">
+    <main className="min-h-screen bg-white">
       {/* ── Sticky header ───────────────────────────────────────── */}
       <div className="bg-surface-dark border-b border-surface-border sticky top-0 z-20">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
@@ -148,7 +148,7 @@ export default function BookPage() {
           {/* ── Main flow ──────────────────────────────────────── */}
           <div className="flex-1 space-y-10 min-w-0">
             <div>
-              <h1 className="text-white font-black text-2xl md:text-3xl mb-1">
+              <h1 className="text-black font-black text-2xl md:text-3xl mb-1">
                 Date &amp; Delivery
               </h1>
               <p className="text-gray-400 text-sm">

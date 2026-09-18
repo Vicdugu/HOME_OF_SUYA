@@ -11,10 +11,10 @@ export default function CookiePolicy() {
       <h1 className="text-4xl font-bold text-brand-orange mb-2">Cookie Policy</h1>
       <p className="text-gray-500 mb-8">Last updated: September 9, 2026</p>
 
-      <div className="space-y-8 text-gray-300">
+      <div className="space-y-8 text-black">
         {/* What Are Cookies */}
         <section>
-          <h2 className="text-2xl font-bold text-white mb-4">1. What Are Cookies?</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">1. What Are Cookies?</h2>
           <p>
             Cookies are small text files stored on your device when you visit our website. They
             contain information about your browsing activity and preferences. Most websites use
@@ -24,7 +24,7 @@ export default function CookiePolicy() {
 
         {/* Types of Cookies */}
         <section>
-          <h2 className="text-2xl font-bold text-white mb-4">2. Types of Cookies We Use</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Types of Cookies We Use</h2>
 
           <div className="space-y-6">
             {/* Essential */}

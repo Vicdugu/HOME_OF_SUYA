@@ -11,10 +11,10 @@ export default function TermsAndConditions() {
       <h1 className="text-4xl font-bold text-brand-orange mb-2">Terms & Conditions</h1>
       <p className="text-gray-500 mb-8">Last updated: September 2026</p>
 
-      <div className="space-y-8 text-gray-300">
+      <div className="space-y-8 text-black">
         {/* Section 1 */}
         <section>
-          <h2 className="text-2xl font-bold text-white mb-4">1. Introduction</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Introduction</h2>
           <p>
             Welcome to Home of Suya. By placing an order through our website or any of our sales 
             channels, you agree to the terms and conditions outlined below. Please read them carefully 
@@ -24,7 +24,7 @@ export default function TermsAndConditions() {
 
         {/* Section 2 */}
         <section>
-          <h2 className="text-2xl font-bold text-white mb-4">2. Products & Orders</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Products & Orders</h2>
           <p className="mb-4">
             All our Suya products are freshly prepared. Once an order is placed and payment is confirmed, 
             you will receive an email confirmation with your order details.
@@ -37,7 +37,7 @@ export default function TermsAndConditions() {
 
         {/* Section 3 */}
         <section>
-          <h2 className="text-2xl font-bold text-white mb-4">3. Delivery Terms</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">3. Delivery Terms</h2>
 
           <h3 className="text-lg font-semibold text-brand-orange mb-3">3.1 UK Nationwide Delivery (Royal Mail Next Day)</h3>
           <ul className="list-disc list-inside space-y-2 ml-4 mb-4">

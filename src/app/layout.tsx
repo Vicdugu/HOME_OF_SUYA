@@ -55,7 +55,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="min-h-screen bg-brand-black">
+      <body className="min-h-screen bg-white">
         <CartProvider>
           <MaintenanceModechecker>
             <GlobalHeader />

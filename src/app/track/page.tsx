@@ -22,12 +22,12 @@ export default function TrackPage() {
   }
 
   return (
-    <main className="min-h-screen bg-brand-black flex flex-col items-center justify-center px-4">
+    <main className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-md space-y-8">
         {/* Brand */}
         <div className="text-center space-y-2">
           <Flame size={36} className="text-brand-gold mx-auto" />
-          <h1 className="text-white font-black text-2xl">Track Your Order</h1>
+          <h1 className="text-gray-900 font-black text-2xl">Track Your Order</h1>
           <p className="text-gray-400 text-sm">
             Enter the reference from your booking confirmation
           </p>
@@ -35,7 +35,7 @@ export default function TrackPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="card p-6 space-y-4">
-          <label htmlFor="ref" className="block text-sm font-medium text-gray-300">
+          <label htmlFor="ref" className="block text-sm font-medium text-gray-700">
             Booking Reference
           </label>
           <input
