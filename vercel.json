@@ -1,11 +1,5 @@
 {
   "framework": "nextjs",
   "buildCommand": "npx prisma generate && next build",
-  "regions": ["lhr1"],
-  "crons": [
-    {
-      "path": "/api/bookings/reminders/send",
-      "schedule": "*/5 * * * *"
-    }
-  ]
+  "regions": ["lhr1"]
 }
