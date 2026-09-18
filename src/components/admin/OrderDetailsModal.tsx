@@ -1,8 +1,10 @@
 "use client";
 
-import { X } from "lucide-react";
+import { useState } from "react";
+import { X, Mail } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { formatBookingDate, formatTimeSlot } from "@/lib/availability";
+import { EmailPreviewModal } from "./EmailPreviewModal";
 
 interface OrderItem {
   mealName: string;
@@ -34,6 +36,7 @@ interface OrderDetailsModalProps {
   open: boolean;
   onClose: () => void;
   order: {
+    id: string;
     reference: string;
     customerName: string;
     whatsapp: string;
@@ -45,13 +48,17 @@ interface OrderDetailsModalProps {
     items: OrderItem[];
     total: number;
     deliveryFee: number;
+    paymentStatus?: string;
   };
 }
 
 export function OrderDetailsModal({ open, onClose, order }: OrderDetailsModalProps) {
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
+
   if (!open) return null;
 
   const subtotal = order.items.reduce((sum, item) => sum + ((item.unitPrice ?? 0) * item.quantity), 0);
+  const isUnpaid = order.paymentStatus === "UNPAID";
 
   return (
     <>
@@ -221,7 +228,16 @@ export function OrderDetailsModal({ open, onClose, order }: OrderDetailsModalPro
             </div>
 
             {/* Close Button */}
-            <div className="border-t border-surface-border pt-4">
+            <div className="border-t border-surface-border pt-4 space-y-2">
+              {isUnpaid && order.email && (
+                <button
+                  onClick={() => setShowEmailPreview(true)}
+                  className="w-full py-2 px-4 bg-brand-red text-white rounded-lg hover:bg-red-700 transition-colors font-semibold text-sm flex items-center justify-center gap-2"
+                >
+                  <Mail size={16} />
+                  Send Reminder
+                </button>
+              )}
               <button
                 onClick={onClose}
                 className="w-full py-2 px-4 bg-surface-dark border border-surface-border rounded-lg text-white hover:bg-surface-dark/80 transition-colors font-semibold text-sm"
@@ -232,6 +248,18 @@ export function OrderDetailsModal({ open, onClose, order }: OrderDetailsModalPro
           </div>
         </div>
       </div>
+
+      {/* Email Preview Modal */}
+      <EmailPreviewModal
+        open={showEmailPreview}
+        onClose={() => setShowEmailPreview(false)}
+        bookingId={order.id}
+        customerEmail={order.email || ""}
+        onConfirm={() => {
+          setShowEmailPreview(false);
+          onClose();
+        }}
+      />
     </>
   );
 }
