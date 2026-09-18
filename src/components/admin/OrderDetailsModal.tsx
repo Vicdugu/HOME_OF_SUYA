@@ -10,6 +10,26 @@ interface OrderItem {
   unitPrice?: number;
 }
 
+// Parse drinks from mealName format: "Drinks (Drink: Fura (340ml), Kunu Aya (500ml), ...)"
+function parseDrinksFromMealName(mealName: string): string[] | null {
+  const drinkMatch = mealName.match(/^Drinks\s*\((.*?)\)$/);
+  if (!drinkMatch) return null;
+
+  const drinksStr = drinkMatch[1];
+  const drinks = drinksStr
+    .split(",")
+    .map((item) => {
+      // Remove "Drink: " prefix if present
+      let drink = item.replace(/^.*?:\s*/, "").trim();
+      // Remove size info in parentheses (e.g., "(340ml)")
+      drink = drink.replace(/\s*\([^)]*\)\s*/g, "").trim();
+      return drink;
+    })
+    .filter((drink) => drink.length > 0);
+
+  return drinks.length > 0 ? drinks : null;
+}
+
 interface OrderDetailsModalProps {
   open: boolean;
   onClose: () => void;
@@ -134,20 +154,49 @@ export function OrderDetailsModal({ open, onClose, order }: OrderDetailsModalPro
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-surface-border">
-                    {order.items.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-surface-dark/50 transition-colors">
-                        <td className="py-2 px-3 text-white">{item.mealName}</td>
-                        <td className="py-2 px-3 text-white text-center font-semibold">
-                          {item.quantity}
-                        </td>
-                        <td className="py-2 px-3 text-white text-right">
-                          {item.unitPrice ? formatCurrency(item.unitPrice) : "—"}
-                        </td>
-                        <td className="py-2 px-3 text-white text-right font-semibold">
-                          {item.unitPrice ? formatCurrency(item.unitPrice * item.quantity) : "—"}
-                        </td>
-                      </tr>
-                    ))}
+                    {order.items.map((item, idx) => {
+                      const drinks = parseDrinksFromMealName(item.mealName);
+                      
+                      // If this is a drinks item with multiple drinks, display each drink separately
+                      if (drinks && drinks.length > 0) {
+                        return (
+                          <tr key={idx} className="hover:bg-surface-dark/50 transition-colors">
+                            <td className="py-2 px-3 text-white">
+                              <div className="space-y-1">
+                                {drinks.map((drink, drinkIdx) => (
+                                  <div key={drinkIdx}>{drink} - 1</div>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="py-2 px-3 text-white text-center font-semibold">
+                              {item.quantity}
+                            </td>
+                            <td className="py-2 px-3 text-white text-right">
+                              {item.unitPrice ? formatCurrency(item.unitPrice) : "—"}
+                            </td>
+                            <td className="py-2 px-3 text-white text-right font-semibold">
+                              {item.unitPrice ? formatCurrency(item.unitPrice * item.quantity) : "—"}
+                            </td>
+                          </tr>
+                        );
+                      }
+                      
+                      // For non-drink items, display normally
+                      return (
+                        <tr key={idx} className="hover:bg-surface-dark/50 transition-colors">
+                          <td className="py-2 px-3 text-white">{item.mealName}</td>
+                          <td className="py-2 px-3 text-white text-center font-semibold">
+                            {item.quantity}
+                          </td>
+                          <td className="py-2 px-3 text-white text-right">
+                            {item.unitPrice ? formatCurrency(item.unitPrice) : "—"}
+                          </td>
+                          <td className="py-2 px-3 text-white text-right font-semibold">
+                            {item.unitPrice ? formatCurrency(item.unitPrice * item.quantity) : "—"}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
