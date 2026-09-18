@@ -58,14 +58,18 @@ export function EmailPreviewModal({
       );
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to load preview");
+        const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        throw new Error(typeof data?.error === "string" ? data.error : "Failed to load preview");
       }
 
       const data = await res.json();
+      if (!data?.emailData) {
+        throw new Error("No email data returned from server");
+      }
       setEmailData(data.emailData);
       setPreviewShown(true);
     } catch (err) {
+      console.error("[EmailPreview] Error loading preview:", err);
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
@@ -88,13 +92,14 @@ export function EmailPreviewModal({
       );
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to send reminder");
+        const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        throw new Error(typeof data?.error === "string" ? data.error : "Failed to send reminder");
       }
 
       onConfirm?.();
       onClose();
     } catch (err) {
+      console.error("[EmailPreview] Error sending reminder:", err);
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);

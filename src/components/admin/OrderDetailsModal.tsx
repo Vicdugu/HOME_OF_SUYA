@@ -57,7 +57,13 @@ export function OrderDetailsModal({ open, onClose, order }: OrderDetailsModalPro
 
   if (!open) return null;
 
-  const subtotal = order.items.reduce((sum, item) => sum + ((item.unitPrice ?? 0) * item.quantity), 0);
+  // Ensure required fields exist
+  if (!order || !order.id || !order.reference) {
+    console.error("OrderDetailsModal: Missing required order fields", { order });
+    return null;
+  }
+
+  const subtotal = order.items?.reduce((sum, item) => sum + ((item.unitPrice ?? 0) * item.quantity), 0) ?? 0;
   const isUnpaid = order.paymentStatus === "UNPAID";
 
   return (

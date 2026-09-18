@@ -18,6 +18,7 @@ export async function POST(
   const { previewOnly } = await req.json().catch(() => ({}));
 
   if (!id || typeof id !== "string") {
+    console.error("[Reminder API] Invalid booking ID:", { id });
     return NextResponse.json({ error: "Booking ID is required" }, { status: 400 });
   }
 
@@ -28,8 +29,16 @@ export async function POST(
   });
 
   if (!booking) {
+    console.error("[Reminder API] Booking not found:", { id });
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
   }
+
+  console.log("[Reminder API] Booking found:", {
+    id: booking.id,
+    reference: booking.reference,
+    paymentStatus: booking.paymentStatus,
+    hasEmail: !!booking.email,
+  });
 
   // Only allow reminders for pending payments
   if (booking.paymentStatus === "PAID") {
