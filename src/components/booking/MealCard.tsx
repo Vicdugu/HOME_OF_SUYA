@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { AlertTriangle, Check, Flame, ShoppingCart, AlertCircle } from "lucide-react";
+import { AlertTriangle, Check, Flame, ShoppingCart, AlertCircle, Plus } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { BlurImage } from "@/components/ui/BlurImage";
 import { QuantitySelector } from "@/components/ui/QuantitySelector";
@@ -12,6 +12,10 @@ import {
   createCustomisedCartItem,
   createInitialMealSelection,
   formatPendingMealVariationSummary,
+  isDrinksMeal,
+  createIndividualDrinkItems,
+  isToppingsMeal,
+  createIndividualToppingItems,
 } from "@/lib/meal-variations";
 import { formatCurrency } from "@/lib/utils";
 import type { MealDTO, MealVariationSelection, VariationSelectionType } from "@/types";
@@ -51,12 +55,25 @@ export function MealCard({
   }, [meal]);
 
   const hasCustomisations = meal.variationGroups.length > 0;
+  const isMultiItemMeal = isDrinksMeal(meal) || isToppingsMeal(meal);
 
   const mealItems = state.items.filter((i) => i.mealId === meal.id);
   const quantity = mealItems.reduce((sum, item) => sum + item.quantity, 0);
-  const selectedCartItemId = createCartItemId(meal.id, meal.variationGroups, selection);
-  const selectedCartItem = state.items.find((item) => item.cartItemId === selectedCartItemId);
-  const selectedQuantity = selectedCartItem?.quantity ?? 0;
+  
+  // For multi-item meals (drinks/toppings), quantity is sum of all items; for other meals, track single CartItemId
+  let selectedQuantity = 0;
+  let selectedCartItemId = "";
+  let selectedCartItem = undefined;
+  
+  if (isMultiItemMeal) {
+    // For multi-item meals, selectedQuantity is the total of all items currently in cart
+    selectedQuantity = quantity;
+  } else {
+    selectedCartItemId = createCartItemId(meal.id, meal.variationGroups, selection);
+    selectedCartItem = state.items.find((item) => item.cartItemId === selectedCartItemId);
+    selectedQuantity = selectedCartItem?.quantity ?? 0;
+  }
+
   const displayedPrice = hasCustomisations
     ? calculateMealSelectionPrice(meal, selection)
     : meal.price;
@@ -121,14 +138,40 @@ export function MealCard({
       return;
     }
     setValidationError(null);
-    addItem(createCustomisedCartItem(meal, selection));
+    
+    // For multi-item meals (drinks/toppings), add each item as an individual cart item
+    if (isDrinksMeal(meal)) {
+      const drinkItems = createIndividualDrinkItems(meal, selection);
+      drinkItems.forEach((item) => addItem(item));
+    } else if (isToppingsMeal(meal)) {
+      const toppingItems = createIndividualToppingItems(meal, selection);
+      toppingItems.forEach((item) => addItem(item));
+    } else {
+      addItem(createCustomisedCartItem(meal, selection));
+    }
   };
 
-  const handleDecrease = () => setQuantity(selectedCartItemId, selectedQuantity - 1);
-  const handleIncrease = () =>
-    selectedQuantity === 0
-      ? handleAddSelection()
-      : setQuantity(selectedCartItemId, selectedQuantity + 1);
+  const handleDecrease = () => {
+    if (isMultiItemMeal) {
+      // For multi-item meals with items in cart, don't allow decrease from MealCard
+      // Users should manage individual item quantities from CartDrawer
+      // This prevents ambiguity about which item to decrease
+      return;
+    } else {
+      setQuantity(selectedCartItemId, selectedQuantity - 1);
+    }
+  };
+
+  const handleIncrease = () => {
+    if (selectedQuantity === 0) {
+      handleAddSelection();
+    } else if (isMultiItemMeal) {
+      // For multi-item meals, clicking + re-opens selection to add more items
+      handleAddSelection();
+    } else {
+      setQuantity(selectedCartItemId, selectedQuantity + 1);
+    }
+  };
 
   function toggleOption(groupId: string, optionId: string, selectionType: VariationSelectionType) {
     setValidationError(null); // Clear error when user makes a selection
@@ -323,6 +366,16 @@ export function MealCard({
                 >
                   <Check size={14} className="sm:size-4" />
                   Add to Order
+                </button>
+              ) : isMultiItemMeal ? (
+                // For multi-item meals already in cart, only show "Add More" button
+                <button
+                  onClick={handleIncrease}
+                  aria-label={`Add more ${meal.name} to cart`}
+                  className="flex items-center gap-1.5 btn-primary py-1.5 px-3 text-xs sm:py-2 sm:px-4 sm:text-sm"
+                >
+                  <Plus size={14} className="sm:size-4" />
+                  Add More
                 </button>
               ) : (
                 <QuantitySelector

@@ -154,6 +154,198 @@ export function formatCartItemName(item: Pick<CartItem, "mealName" | "selections
   return summary === "Standard" ? item.mealName : `${item.mealName} (${summary})`;
 }
 
+// ─── Detect if meal is drinks ─────────────────────────────────────────────
+
+export function isDrinksMeal(meal: Pick<MealDTO, "name" | "variationGroups">): boolean {
+  return (
+    meal.name.toLowerCase() === "drinks" &&
+    meal.variationGroups.length > 0 &&
+    meal.variationGroups.some(
+      (group) =>
+        group.name.toLowerCase() === "drink" ||
+        group.name.toLowerCase() === "type"
+    )
+  );
+}
+
+// ─── Get drink group ──────────────────────────────────────────────────────
+
+function getDrinkGroup(
+  meal: Pick<MealDTO, "variationGroups">
+): MealVariationGroupDTO | undefined {
+  return meal.variationGroups.find(
+    (group) =>
+      group.name.toLowerCase() === "drink" ||
+      group.name.toLowerCase() === "type"
+  );
+}
+
+// ─── Create individual cart items for drinks ──────────────────────────────
+
+/**
+ * For drinks meals, creates individual CartItems for each selected drink.
+ * This replaces createCustomisedCartItem for drinks.
+ */
+export function createIndividualDrinkItems(
+  meal: MealDTO,
+  selection: MealVariationSelection
+): CartItem[] {
+  const drinkGroup = getDrinkGroup(meal);
+  if (!drinkGroup) return [];
+
+  const selectedDrinkIds = selection[drinkGroup.id] || [];
+  if (selectedDrinkIds.length === 0) return [];
+
+  // Get other groups (like size) that apply to all drinks
+  const otherGroupSelections = meal.variationGroups
+    .filter((g) => g.id !== drinkGroup.id)
+    .reduce<CartItemSelection[]>((acc, group) => {
+      const optionIds = getNormalizedOptionIds(group, selection);
+      if (optionIds.length === 0) return acc;
+
+      const optionNames = group.options
+        .filter((option) => optionIds.includes(option.id))
+        .map((option) => option.name);
+
+      acc.push({
+        groupId: group.id,
+        groupName: group.name,
+        selectionType: group.selectionType,
+        optionIds,
+        optionNames,
+      });
+      return acc;
+    }, []);
+
+  // Calculate the price modifier from other groups (e.g., size upcharge)
+  const otherGroupsPrice = meal.variationGroups
+    .filter((g) => g.id !== drinkGroup.id)
+    .reduce((total, group) => {
+      const optionIds = getNormalizedOptionIds(group, selection);
+      return (
+        total +
+        group.options
+          .filter((option) => optionIds.includes(option.id))
+          .reduce((sum, option) => sum + option.price, 0)
+      );
+    }, 0);
+
+  // Create individual CartItems for each selected drink
+  return selectedDrinkIds
+    .map((drinkOptionId) => {
+      const drinkOption = drinkGroup.options.find((o) => o.id === drinkOptionId);
+      if (!drinkOption) return null;
+
+      const drinkPrice = drinkOption.price + otherGroupsPrice;
+
+      return {
+        cartItemId: `${meal.id}__drink_${drinkOptionId}`,
+        mealId: meal.id,
+        mealName: drinkOption.name,
+        quantity: 1,
+        unitPrice: drinkPrice,
+        selections: otherGroupSelections,
+      };
+    })
+    .filter((item): item is CartItem => item !== null);
+}
+
+// ─── Detect if meal is extra topping ──────────────────────────────────────
+
+export function isToppingsMeal(meal: Pick<MealDTO, "name" | "variationGroups">): boolean {
+  return (
+    meal.name.toLowerCase() === "extra topping" &&
+    meal.variationGroups.length > 0 &&
+    meal.variationGroups.some(
+      (group) =>
+        group.name.toLowerCase() === "type" ||
+        group.name.toLowerCase() === "topping"
+    )
+  );
+}
+
+// ─── Get topping group ────────────────────────────────────────────────────
+
+function getToppingGroup(
+  meal: Pick<MealDTO, "variationGroups">
+): MealVariationGroupDTO | undefined {
+  return meal.variationGroups.find(
+    (group) =>
+      group.name.toLowerCase() === "type" ||
+      group.name.toLowerCase() === "topping"
+  );
+}
+
+// ─── Create individual cart items for toppings ────────────────────────────
+
+/**
+ * For topping meals, creates individual CartItems for each selected topping.
+ * This replaces createCustomisedCartItem for toppings.
+ */
+export function createIndividualToppingItems(
+  meal: MealDTO,
+  selection: MealVariationSelection
+): CartItem[] {
+  const toppingGroup = getToppingGroup(meal);
+  if (!toppingGroup) return [];
+
+  const selectedToppingIds = selection[toppingGroup.id] || [];
+  if (selectedToppingIds.length === 0) return [];
+
+  // Get other groups that apply to all toppings
+  const otherGroupSelections = meal.variationGroups
+    .filter((g) => g.id !== toppingGroup.id)
+    .reduce<CartItemSelection[]>((acc, group) => {
+      const optionIds = getNormalizedOptionIds(group, selection);
+      if (optionIds.length === 0) return acc;
+
+      const optionNames = group.options
+        .filter((option) => optionIds.includes(option.id))
+        .map((option) => option.name);
+
+      acc.push({
+        groupId: group.id,
+        groupName: group.name,
+        selectionType: group.selectionType,
+        optionIds,
+        optionNames,
+      });
+      return acc;
+    }, []);
+
+  // Calculate the price modifier from other groups
+  const otherGroupsPrice = meal.variationGroups
+    .filter((g) => g.id !== toppingGroup.id)
+    .reduce((total, group) => {
+      const optionIds = getNormalizedOptionIds(group, selection);
+      return (
+        total +
+        group.options
+          .filter((option) => optionIds.includes(option.id))
+          .reduce((sum, option) => sum + option.price, 0)
+      );
+    }, 0);
+
+  // Create individual CartItems for each selected topping
+  return selectedToppingIds
+    .map((toppingOptionId) => {
+      const toppingOption = toppingGroup.options.find((o) => o.id === toppingOptionId);
+      if (!toppingOption) return null;
+
+      const toppingPrice = toppingOption.price + otherGroupsPrice;
+
+      return {
+        cartItemId: `${meal.id}__topping_${toppingOptionId}`,
+        mealId: meal.id,
+        mealName: toppingOption.name,
+        quantity: 1,
+        unitPrice: toppingPrice,
+        selections: otherGroupSelections,
+      };
+    })
+    .filter((item): item is CartItem => item !== null);
+}
+
 export function createCustomisedCartItem(
   meal: MealDTO,
   selection: MealVariationSelection
