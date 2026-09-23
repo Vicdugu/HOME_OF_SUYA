@@ -129,6 +129,15 @@ export async function sendAdminBookingAlert(
     )
     .join("");
 
+  // Add delivery fee as a line item if it exists
+  const deliveryFeeRow = data.deliveryFee > 0
+    ? `<tr style="border-top:2px solid #C41E3A">
+        <td style="padding:3px 6px;font-size:13px"><strong>Delivery Fee</strong></td>
+        <td style="padding:3px 6px;text-align:center;font-size:13px">1</td>
+        <td style="padding:3px 6px;text-align:right;font-size:13px"><strong>£${data.deliveryFee.toFixed(2)}</strong></td>
+      </tr>`
+    : "";
+
   console.log("[Email] Sending admin booking alert", { reference: data.reference, to: ADMIN_EMAIL });
   
   const { error, data: result } = await resend.emails.send({
@@ -150,9 +159,9 @@ export async function sendAdminBookingAlert(
             <th style="padding:4px 6px;text-align:right;font-size:12px;font-weight:bold">Price</th>
           </tr>
         </thead>
-        <tbody>${itemsHtml}</tbody>
+        <tbody>${itemsHtml}${deliveryFeeRow}</tbody>
       </table>
-      <p><strong>Total: £${data.total.toFixed(2)}</strong></p>
+      <p><strong>Order Total: £${data.total.toFixed(2)}</strong></p>
     `,
   });
 
@@ -189,6 +198,15 @@ export async function sendCustomerConfirmationEmail(
     )
     .join("");
 
+  // Add delivery fee as a line item if it exists
+  const deliveryFeeRow = data.deliveryFee > 0
+    ? `<tr style="border-top:2px solid #C41E3A">
+        <td style="padding:3px 6px;font-size:13px"><strong>Delivery Fee</strong></td>
+        <td style="padding:3px 6px;text-align:center;font-size:13px">1</td>
+        <td style="padding:3px 6px;text-align:right;font-size:13px"><strong>£${data.deliveryFee.toFixed(2)}</strong></td>
+      </tr>`
+    : "";
+
   console.log("[Email] Sending customer confirmation", { reference: data.reference, to: data.email });
   
   const { error, data: result } = await resend.emails.send({
@@ -210,9 +228,9 @@ export async function sendCustomerConfirmationEmail(
             <th style="padding:4px 6px;text-align:right;font-size:12px;font-weight:bold">Price</th>
           </tr>
         </thead>
-        <tbody>${itemsHtml}</tbody>
+        <tbody>${itemsHtml}${deliveryFeeRow}</tbody>
       </table>
-      <p><strong>Total: £${data.total.toFixed(2)}</strong></p>
+      <p><strong>Order Total: £${data.total.toFixed(2)}</strong></p>
       <p style="color:#888;font-size:13px">We'll send you a message on WhatsApp when your order is ready!</p>
     `,
   });
