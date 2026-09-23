@@ -346,6 +346,102 @@ export function createIndividualToppingItems(
     .filter((item): item is CartItem => item !== null);
 }
 
+// ─── Detect if meal is masa ───────────────────────────────────────────────
+
+export function isMasaMeal(meal: Pick<MealDTO, "name" | "variationGroups">): boolean {
+  return (
+    meal.name.toLowerCase() === "masa" &&
+    meal.variationGroups.length > 0 &&
+    meal.variationGroups.some(
+      (group) =>
+        group.name.toLowerCase() === "size" ||
+        group.name.toLowerCase() === "type"
+    )
+  );
+}
+
+// ─── Get masa group ───────────────────────────────────────────────────────
+
+function getMasaGroup(
+  meal: Pick<MealDTO, "variationGroups">
+): MealVariationGroupDTO | undefined {
+  return meal.variationGroups.find(
+    (group) =>
+      group.name.toLowerCase() === "size" ||
+      group.name.toLowerCase() === "type"
+  );
+}
+
+// ─── Create individual cart items for masa ────────────────────────────────
+
+/**
+ * For masa meals, creates individual CartItems for each selected masa variant.
+ * This replaces createCustomisedCartItem for masa.
+ */
+export function createIndividualMasaItems(
+  meal: MealDTO,
+  selection: MealVariationSelection
+): CartItem[] {
+  const masaGroup = getMasaGroup(meal);
+  if (!masaGroup) return [];
+
+  const selectedMasaIds = selection[masaGroup.id] || [];
+  if (selectedMasaIds.length === 0) return [];
+
+  // Get other groups that apply to all masa variants
+  const otherGroupSelections = meal.variationGroups
+    .filter((g) => g.id !== masaGroup.id)
+    .reduce<CartItemSelection[]>((acc, group) => {
+      const optionIds = getNormalizedOptionIds(group, selection);
+      if (optionIds.length === 0) return acc;
+
+      const optionNames = group.options
+        .filter((option) => optionIds.includes(option.id))
+        .map((option) => option.name);
+
+      acc.push({
+        groupId: group.id,
+        groupName: group.name,
+        selectionType: group.selectionType,
+        optionIds,
+        optionNames,
+      });
+      return acc;
+    }, []);
+
+  // Calculate the price modifier from other groups
+  const otherGroupsPrice = meal.variationGroups
+    .filter((g) => g.id !== masaGroup.id)
+    .reduce((total, group) => {
+      const optionIds = getNormalizedOptionIds(group, selection);
+      return (
+        total +
+        group.options
+          .filter((option) => optionIds.includes(option.id))
+          .reduce((sum, option) => sum + option.price, 0)
+      );
+    }, 0);
+
+  // Create individual CartItems for each selected masa variant
+  return selectedMasaIds
+    .map((masaOptionId) => {
+      const masaOption = masaGroup.options.find((o) => o.id === masaOptionId);
+      if (!masaOption) return null;
+
+      const masaPrice = masaOption.price + otherGroupsPrice;
+
+      return {
+        cartItemId: `${meal.id}__masa_${masaOptionId}`,
+        mealId: meal.id,
+        mealName: masaOption.name,
+        quantity: 1,
+        unitPrice: masaPrice,
+        selections: otherGroupSelections,
+      };
+    })
+    .filter((item): item is CartItem => item !== null);
+}
+
 export function createCustomisedCartItem(
   meal: MealDTO,
   selection: MealVariationSelection

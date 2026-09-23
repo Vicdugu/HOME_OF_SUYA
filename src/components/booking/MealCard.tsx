@@ -16,6 +16,8 @@ import {
   createIndividualDrinkItems,
   isToppingsMeal,
   createIndividualToppingItems,
+  isMasaMeal,
+  createIndividualMasaItems,
 } from "@/lib/meal-variations";
 import { formatCurrency } from "@/lib/utils";
 import type { MealDTO, MealVariationSelection, VariationSelectionType } from "@/types";
@@ -55,7 +57,7 @@ export function MealCard({
   }, [meal]);
 
   const hasCustomisations = meal.variationGroups.length > 0;
-  const isMultiItemMeal = isDrinksMeal(meal) || isToppingsMeal(meal);
+  const isMultiItemMeal = isDrinksMeal(meal) || isToppingsMeal(meal) || isMasaMeal(meal);
 
   const mealItems = state.items.filter((i) => i.mealId === meal.id);
   const quantity = mealItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -139,13 +141,16 @@ export function MealCard({
     }
     setValidationError(null);
     
-    // For multi-item meals (drinks/toppings), add each item as an individual cart item
+    // For multi-item meals (drinks/toppings/masa), add each item as an individual cart item
     if (isDrinksMeal(meal)) {
       const drinkItems = createIndividualDrinkItems(meal, selection);
       drinkItems.forEach((item) => addItem(item));
     } else if (isToppingsMeal(meal)) {
       const toppingItems = createIndividualToppingItems(meal, selection);
       toppingItems.forEach((item) => addItem(item));
+    } else if (isMasaMeal(meal)) {
+      const masaItems = createIndividualMasaItems(meal, selection);
+      masaItems.forEach((item) => addItem(item));
     } else {
       addItem(createCustomisedCartItem(meal, selection));
     }
