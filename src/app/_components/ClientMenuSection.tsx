@@ -81,7 +81,7 @@ export function ClientMenuSection({ meals }: ClientMenuSectionProps) {
                     ))}
                 </div>
                 {/* Show other meals on desktop only */}
-                <div className="hidden sm:grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                   {availableMeals
                     .filter((meal) => meal.id !== customizingMealId)
                     .map((meal) => (
@@ -96,7 +96,7 @@ export function ClientMenuSection({ meals }: ClientMenuSectionProps) {
                 </div>
               </>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                 {availableMeals.map((meal) => (
                   <MealCard
                     key={meal.id}
@@ -114,7 +114,7 @@ export function ClientMenuSection({ meals }: ClientMenuSectionProps) {
                 <h3 className="text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-widest mb-3 sm:mb-4">
                   Currently Unavailable
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                   {unavailableMeals.map((meal) => (
                     <MealCard
                       key={meal.id}
