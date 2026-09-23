@@ -209,7 +209,7 @@ export function MealCard({
 
         {/* Inline Customization Options - Always Visible */}
         {hasCustomisations && meal.isAvailable && (
-          <div className="space-y-3 rounded-xl border border-surface-border bg-surface-dark/60 p-3">
+          <div className="space-y-3 rounded-xl border border-white bg-surface-dark/60 p-3">
             {meal.variationGroups.map((group, groupIndex) => {
               const isLocked = isGroupLocked(groupIndex);
               const isComplete = getGroupCompletionStatus(group.id);
@@ -218,12 +218,12 @@ export function MealCard({
               return (
                 <div
                   key={group.id}
-                  className={`space-y-1.5 rounded-lg p-2 transition-all ${
+                  className={`space-y-1.5 rounded-lg border p-2 transition-all ${
                     isLocked
-                      ? "opacity-50 bg-surface-border/20"
+                      ? "opacity-50 bg-surface-border/20 border-white/40"
                       : isFocused
-                      ? "bg-surface-border/40 border border-brand-red/30"
-                      : ""
+                      ? "bg-surface-border/40 border border-white"
+                      : "border-white/60"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-3">
@@ -271,12 +271,12 @@ export function MealCard({
                           className={[
                             "rounded-full border px-3 py-1.5 text-xs transition-all",
                             isLocked
-                              ? "opacity-50 cursor-not-allowed"
+                              ? "opacity-50 cursor-not-allowed border-white/30"
                               : selected
                               ? isMultiple && !isSize
                                 ? "border-brand-gold bg-brand-gold/20 text-brand-gold"
                                 : "border-brand-red bg-brand-red text-white shadow-lg shadow-brand-red/20"
-                              : "border-surface-border text-gray-300 hover:border-brand-red/40 hover:text-gray-100",
+                              : "border-white text-gray-300 hover:border-white hover:text-gray-100",
                           ].join(" ")}
                         >
                           {option.name}
@@ -305,7 +305,7 @@ export function MealCard({
         )}
 
         {/* Price + quantity row */}
-        <div className="flex items-center justify-between mt-auto pt-2 border-t border-surface-border">
+        <div className="flex items-center justify-between mt-auto pt-2 border-t border-white">
           <span className="text-brand-gold font-bold text-lg">
             {formatCurrency(displayedPrice)}
           </span>
