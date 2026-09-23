@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { AlertTriangle, Check, Flame, ShoppingCart } from "lucide-react";
+import { AlertTriangle, Check, Flame, ShoppingCart, AlertCircle } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { BlurImage } from "@/components/ui/BlurImage";
 import { QuantitySelector } from "@/components/ui/QuantitySelector";
@@ -38,13 +38,16 @@ export function MealCard({
   onCustomizeEnd = () => {},
 }: MealCardProps) {
   const { state, addItem, setQuantity } = useCart();
-  const [customising, setCustomising] = useState(false);
   const [selection, setSelection] = useState<MealVariationSelection>(() =>
     createInitialMealSelection(meal)
   );
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null);
 
   useEffect(() => {
     setSelection(createInitialMealSelection(meal));
+    setValidationError(null);
+    setFocusedGroupId(null);
   }, [meal]);
 
   const hasCustomisations = meal.variationGroups.length > 0;
@@ -67,13 +70,18 @@ export function MealCard({
     : "Unavailable";
   const spiceLabel = formatSpiceLevel(meal.spiceLevel);
 
-  const handleOpenCustomization = () => {
-    if (!meal.isAvailable || !hasCustomisations) return;
-    setCustomising(true);
-    onCustomizeStart();
+  // Check which groups are complete
+  const getGroupCompletionStatus = (groupId: string): boolean => {
+    const group = meal.variationGroups.find((g) => g.id === groupId);
+    if (!group) return false;
+    if (group.selectionType === "SINGLE") {
+      return (selection[groupId] ?? []).length > 0;
+    }
+    return true; // MULTIPLE is always "complete" (optional)
   };
 
-  const isSelectionComplete = () => {
+  // Check if all required groups are complete
+  const isSelectionComplete = (): boolean => {
     return meal.variationGroups.every((group) => {
       if (group.selectionType === "SINGLE") {
         return (selection[group.id] ?? []).length > 0;
@@ -82,12 +90,40 @@ export function MealCard({
     });
   };
 
-  const handleAddSelection = () => {
-    if (!isSelectionComplete()) return;
-    addItem(createCustomisedCartItem(meal, selection));
-    setCustomising(false);
-    onCustomizeEnd();
+  // Get the first incomplete SINGLE selection group
+  const getFirstIncompleteGroup = (): string | null => {
+    for (const group of meal.variationGroups) {
+      if (group.selectionType === "SINGLE" && (selection[group.id] ?? []).length === 0) {
+        return group.name;
+      }
+    }
+    return null;
   };
+
+  // Determine if a group should be locked based on sequential order
+  const isGroupLocked = (groupIndex: number): boolean => {
+    // A group is locked if any previous required group is incomplete
+    for (let i = 0; i < groupIndex; i++) {
+      const prevGroup = meal.variationGroups[i];
+      if (prevGroup.selectionType === "SINGLE") {
+        if (!getGroupCompletionStatus(prevGroup.id)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  const handleAddSelection = () => {
+    if (!isSelectionComplete()) {
+      const missingGroup = getFirstIncompleteGroup();
+      setValidationError(missingGroup ? `Please select a ${missingGroup} to complete your order` : "Please complete all required selections");
+      return;
+    }
+    setValidationError(null);
+    addItem(createCustomisedCartItem(meal, selection));
+  };
+
   const handleDecrease = () => setQuantity(selectedCartItemId, selectedQuantity - 1);
   const handleIncrease = () =>
     selectedQuantity === 0
@@ -95,6 +131,7 @@ export function MealCard({
       : setQuantity(selectedCartItemId, selectedQuantity + 1);
 
   function toggleOption(groupId: string, optionId: string, selectionType: VariationSelectionType) {
+    setValidationError(null); // Clear error when user makes a selection
     setSelection((current) => ({
       ...current,
       [groupId]:
@@ -108,23 +145,9 @@ export function MealCard({
 
   return (
     <article
-      role="button"
-      tabIndex={meal.isAvailable && hasCustomisations ? 0 : -1}
-      aria-label={meal.isAvailable && hasCustomisations ? `Customize ${meal.name}` : meal.name}
-      onClick={(event) => {
-        if (event.target instanceof HTMLElement && event.target.closest("button")) return;
-        if (!customising && meal.isAvailable && hasCustomisations) {
-          handleOpenCustomization();
-        }
-      }}
-      onKeyDown={(event) => {
-        if ((event.key === "Enter" || event.key === " ") && meal.isAvailable && hasCustomisations) {
-          event.preventDefault();
-          handleOpenCustomization();
-        }
-      }}
-      className={`card flex flex-col overflow-hidden transition-all duration-200 cursor-pointer
-        ${!meal.isAvailable ? "opacity-50" : "hover:border-brand-red/40"}`}
+      role="article"
+      className={`card flex flex-col overflow-hidden transition-all duration-200
+        ${!meal.isAvailable ? "opacity-50" : ""}`}
     >
       {/* Meal image */}
       <div className="relative w-full aspect-[4/3] bg-surface-dark overflow-hidden">
@@ -184,52 +207,100 @@ export function MealCard({
           ) : null}
         </div>
 
-        {customising && meal.isAvailable && hasCustomisations && (
-          <div className="space-y-3 rounded-xl border border-surface-border bg-surface-dark/60 p-3" onClick={(event) => event.stopPropagation()}>
-            {meal.variationGroups.map((group) => (
-              <div key={group.id} className="space-y-1.5">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                    {group.name}
-                  </p>
-                  <span className="text-[10px] uppercase tracking-[0.16em] text-gray-600">
-                    {group.selectionType === "SINGLE" ? "Choose one" : "Choose any"}
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {group.options.map((option) => {
-                    const selected = (selection[group.id] ?? []).includes(option.id);
-                    const isMultiple = group.selectionType === "MULTIPLE";
-                    const isSize = group.name === "SIZE";
+        {/* Inline Customization Options - Always Visible */}
+        {hasCustomisations && meal.isAvailable && (
+          <div className="space-y-3 rounded-xl border border-surface-border bg-surface-dark/60 p-3">
+            {meal.variationGroups.map((group, groupIndex) => {
+              const isLocked = isGroupLocked(groupIndex);
+              const isComplete = getGroupCompletionStatus(group.id);
+              const isFocused = focusedGroupId === group.id || (groupIndex === 0 && !focusedGroupId);
 
-                    return (
-                      <button
-                        key={option.id}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          toggleOption(group.id, option.id, group.selectionType);
-                        }}
-                        className={[
-                          "rounded-full border px-3 py-1.5 text-xs transition-colors",
-                          selected
-                            ? isMultiple && !isSize
-                              ? "border-brand-gold bg-brand-gold/20 text-brand-gold"
-                              : "border-brand-red bg-brand-red text-white"
-                            : "border-surface-border text-gray-300 hover:border-brand-red/40",
-                        ].join(" ")}
-                      >
-                        {option.name}
-                        {option.price > 0 ? ` (${formatCurrency(option.price)})` : ""}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+              return (
+                <div
+                  key={group.id}
+                  className={`space-y-1.5 rounded-lg p-2 transition-all ${
+                    isLocked
+                      ? "opacity-50 bg-surface-border/20"
+                      : isFocused
+                      ? "bg-surface-border/40 border border-brand-red/30"
+                      : ""
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
+                        {group.name}
+                      </p>
+                      {isComplete && (
+                        <Check size={14} className="text-green-400" />
+                      )}
+                    </div>
+                    <span className="text-[10px] uppercase tracking-[0.16em] text-gray-600">
+                      {group.selectionType === "SINGLE" ? "Choose one" : "Choose any"}
+                    </span>
+                  </div>
 
-            <p className="text-xs text-gray-500">
+                  {isLocked && (
+                    <p className="text-[10px] text-amber-300/70 italic">
+                      Complete previous selection to unlock
+                    </p>
+                  )}
+
+                  <div className="flex flex-wrap gap-2">
+                    {group.options.map((option) => {
+                      const selected = (selection[group.id] ?? []).includes(option.id);
+                      const isMultiple = group.selectionType === "MULTIPLE";
+                      const isSize = group.name === "SIZE";
+
+                      return (
+                        <button
+                          key={option.id}
+                          onClick={() => {
+                            if (!isLocked) {
+                              toggleOption(group.id, option.id, group.selectionType);
+                              // Auto-focus next group after selection
+                              if (group.selectionType === "SINGLE") {
+                                const nextGroup = meal.variationGroups[groupIndex + 1];
+                                if (nextGroup) {
+                                  setFocusedGroupId(nextGroup.id);
+                                }
+                              }
+                            }
+                          }}
+                          disabled={isLocked}
+                          className={[
+                            "rounded-full border px-3 py-1.5 text-xs transition-all",
+                            isLocked
+                              ? "opacity-50 cursor-not-allowed"
+                              : selected
+                              ? isMultiple && !isSize
+                                ? "border-brand-gold bg-brand-gold/20 text-brand-gold"
+                                : "border-brand-red bg-brand-red text-white shadow-lg shadow-brand-red/20"
+                              : "border-surface-border text-gray-300 hover:border-brand-red/40 hover:text-gray-100",
+                          ].join(" ")}
+                        >
+                          {option.name}
+                          {option.price > 0 ? ` (${formatCurrency(option.price)})` : ""}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Selection Summary */}
+            <p className="text-xs text-gray-500 pt-1">
               {formatPendingMealVariationSummary(meal, selection)}
             </p>
+
+            {/* Validation Error Message */}
+            {validationError && (
+              <div className="flex gap-2 items-start text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-lg p-2">
+                <AlertCircle size={14} className="shrink-0 mt-0.5" />
+                <span>{validationError}</span>
+              </div>
+            )}
           </div>
         )}
 
@@ -241,56 +312,28 @@ export function MealCard({
 
           {meal.isAvailable ? (
             hasCustomisations ? (
-              !customising ? (
+              selectedQuantity === 0 ? (
                 <button
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleOpenCustomization();
+                  onClick={() => {
+                    handleAddSelection();
                   }}
-                  aria-label={`Customize ${meal.name}`}
-                  className="flex items-center gap-1.5 btn-primary py-1.5 px-3 text-xs sm:py-2 sm:px-4 sm:text-sm"
+                  disabled={!isSelectionComplete()}
+                  aria-label={`Add ${meal.name} with selected options to cart`}
+                  className="flex items-center gap-1.5 btn-primary py-1.5 px-3 text-xs sm:py-2 sm:px-4 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <ShoppingCart size={14} className="sm:size-4" />
-                  Customize
+                  <Check size={14} className="sm:size-4" />
+                  Add to Order
                 </button>
               ) : (
-                <div className="flex flex-col items-end gap-2">
-                  {selectedQuantity === 0 ? (
-                    <button
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleAddSelection();
-                      }}
-                      disabled={!isSelectionComplete()}
-                      aria-label={`Add ${meal.name} with selected options to cart`}
-                      className="flex items-center gap-1.5 btn-primary py-1.5 px-3 text-xs sm:py-2 sm:px-4 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Check size={14} className="sm:size-4" />
-                      Add to Order
-                    </button>
-                  ) : (
-                    <QuantitySelector
-                      quantity={selectedQuantity}
-                      onDecrease={handleDecrease}
-                      onIncrease={handleIncrease}
-                    />
-                  )}
-                  <button
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setCustomising(false);
-                      onCustomizeEnd();
-                    }}
-                    className="text-xs text-gray-500 hover:text-white transition-colors"
-                  >
-                    Close
-                  </button>
-                </div>
+                <QuantitySelector
+                  quantity={selectedQuantity}
+                  onDecrease={handleDecrease}
+                  onIncrease={handleIncrease}
+                />
               )
             ) : quantity === 0 ? (
               <button
-                onClick={(event) => {
-                  event.stopPropagation();
+                onClick={() => {
                   handleAddSelection();
                 }}
                 aria-label={`Add ${meal.name} to cart`}
