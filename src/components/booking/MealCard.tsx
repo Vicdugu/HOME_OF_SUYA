@@ -346,7 +346,13 @@ export function MealCard({
                   {/* Selection Type Hint */}
                   {!isLocked && (
                     <p className="text-[10px] uppercase tracking-[0.16em] text-gray-500 pl-8">
-                      {group.selectionType === "SINGLE"
+                      {groupIndex === 0
+                        ? "Choose size"
+                        : groupIndex === 1
+                        ? "Choose Topping"
+                        : groupIndex === 2
+                        ? "Add Veggies"
+                        : group.selectionType === "SINGLE"
                         ? "Choose one option"
                         : "Choose any options"}
                     </p>
