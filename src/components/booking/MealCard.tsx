@@ -255,50 +255,108 @@ export function MealCard({
           ) : null}
         </div>
 
-        {/* Inline Customization Options - Always Visible */}
+        {/* Customization Section - 3-Step Sequential Flow */}
         {hasCustomisations && meal.isAvailable && (
-          <div className="space-y-3 rounded-xl border border-white bg-surface-dark/60 p-3">
+          <div className="space-y-4 rounded-xl border border-brand-gold/30 bg-surface-dark/60 p-4">
+            {/* Progress indicator */}
+            <div className="flex gap-2 items-center justify-between">
+              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-brand-gold">
+                Customize Your Order
+              </p>
+              <div className="flex gap-1.5">
+                {meal.variationGroups.map((group, idx) => {
+                  const isComplete = getGroupCompletionStatus(group.id);
+                  const isRequired = group.selectionType === "SINGLE";
+                  return (
+                    <div
+                      key={group.id}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        isComplete
+                          ? "bg-green-400"
+                          : isRequired
+                          ? "bg-brand-red/50"
+                          : "bg-gray-600"
+                      }`}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Steps */}
             {meal.variationGroups.map((group, groupIndex) => {
               const isLocked = isGroupLocked(groupIndex);
               const isComplete = getGroupCompletionStatus(group.id);
               const isFocused = focusedGroupId === group.id || (groupIndex === 0 && !focusedGroupId);
+              const isRequired = group.selectionType === "SINGLE";
+              const stepNumber = groupIndex + 1;
 
               return (
                 <div
                   key={group.id}
-                  className={`space-y-1.5 rounded-lg border p-2 transition-all ${
+                  className={`space-y-2.5 rounded-lg border-2 p-3.5 transition-all duration-200 ${
                     isLocked
-                      ? "opacity-50 bg-surface-border/20 border-white/40"
+                      ? "opacity-40 bg-surface-border/10 border-white/20"
                       : isFocused
-                      ? "bg-surface-border/40 border border-white"
-                      : "border-white/60"
+                      ? "bg-brand-red/5 border-brand-red/60 shadow-sm shadow-brand-red/10"
+                      : isComplete
+                      ? "bg-green-500/5 border-green-500/30"
+                      : "bg-surface-border/20 border-white/40"
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">
-                        {group.name}
-                      </p>
-                      {isComplete && (
-                        <Check size={14} className="text-green-400" />
-                      )}
+                  {/* Step Header */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                      <div
+                        className={`flex items-center justify-center w-6 h-6 rounded-full font-bold text-xs shrink-0 transition-all ${
+                          isComplete
+                            ? "bg-green-500 text-white"
+                            : isLocked
+                            ? "bg-white/20 text-gray-500"
+                            : isFocused
+                            ? "bg-brand-red text-white"
+                            : isRequired
+                            ? "bg-brand-red/60 text-white"
+                            : "bg-gray-600 text-white"
+                        }`}
+                      >
+                        {isComplete ? <Check size={14} /> : stepNumber}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-black uppercase tracking-[0.12em] text-white leading-tight">
+                          Step {stepNumber}: {group.name}
+                        </p>
+                        <p className="text-[10px] text-gray-400 mt-0.5">
+                          {isRequired ? "Required" : "Optional"}
+                        </p>
+                      </div>
                     </div>
-                    <span className="text-[10px] uppercase tracking-[0.16em] text-gray-600">
-                      {group.selectionType === "SINGLE" ? "Choose one" : "Choose any"}
-                    </span>
+                    {isComplete && !isLocked && (
+                      <Check size={16} className="text-green-400 shrink-0 mt-0.5" />
+                    )}
                   </div>
 
+                  {/* Lock Message */}
                   {isLocked && (
-                    <p className="text-[10px] text-amber-300/70 italic">
-                      Complete previous selection to unlock
+                    <p className="text-[10px] text-amber-300/70 italic pl-8">
+                      Complete Step {groupIndex} to unlock
                     </p>
                   )}
 
-                  <div className="flex flex-wrap gap-2">
+                  {/* Selection Type Hint */}
+                  {!isLocked && (
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-gray-500 pl-8">
+                      {group.selectionType === "SINGLE"
+                        ? "Choose one option"
+                        : "Choose any options"}
+                    </p>
+                  )}
+
+                  {/* Options Grid */}
+                  <div className="flex flex-wrap gap-2 pl-8">
                     {group.options.map((option) => {
                       const selected = (selection[group.id] ?? []).includes(option.id);
                       const isMultiple = group.selectionType === "MULTIPLE";
-                      const isSize = group.name === "SIZE";
 
                       return (
                         <button
@@ -317,18 +375,23 @@ export function MealCard({
                           }}
                           disabled={isLocked}
                           className={[
-                            "rounded-full border px-3 py-1.5 text-xs transition-all",
+                            "rounded-full border px-3 py-2 text-xs font-medium transition-all whitespace-nowrap",
                             isLocked
-                              ? "opacity-50 cursor-not-allowed border-white/30"
+                              ? "opacity-30 cursor-not-allowed border-white/20 text-gray-600"
                               : selected
-                              ? isMultiple && !isSize
-                                ? "border-brand-gold bg-brand-gold/20 text-brand-gold"
-                                : "border-brand-red bg-brand-red text-white shadow-lg shadow-brand-red/20"
-                              : "border-white text-gray-300 hover:border-white hover:text-gray-100",
+                              ? isMultiple
+                                ? "border-brand-gold bg-brand-gold/20 text-brand-gold shadow-sm shadow-brand-gold/20"
+                                : "border-brand-red bg-brand-red text-white shadow-lg shadow-brand-red/30"
+                              : "border-white/60 text-gray-300 hover:border-white hover:text-white hover:bg-white/5",
                           ].join(" ")}
                         >
                           {option.name}
-                          {option.price > 0 ? ` (${formatCurrency(option.price)})` : ""}
+                          {option.price > 0 ? (
+                            <span className="text-[10px] opacity-80">
+                              {" "}
+                              +{formatCurrency(option.price)}
+                            </span>
+                          ) : null}
                         </button>
                       );
                     })}
@@ -337,18 +400,22 @@ export function MealCard({
               );
             })}
 
-            {/* Selection Summary */}
-            <p className="text-xs text-gray-500 pt-1">
-              {formatPendingMealVariationSummary(meal, selection)}
-            </p>
+            {/* Selection Summary & Error */}
+            <div className="space-y-2 border-t border-white/20 pt-3">
+              <p className="text-xs text-gray-400">
+                Selected:{" "}
+                <span className="text-white font-medium">
+                  {formatPendingMealVariationSummary(meal, selection) || "None"}
+                </span>
+              </p>
 
-            {/* Validation Error Message */}
-            {validationError && (
-              <div className="flex gap-2 items-start text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-lg p-2">
-                <AlertCircle size={14} className="shrink-0 mt-0.5" />
-                <span>{validationError}</span>
-              </div>
-            )}
+              {validationError && (
+                <div className="flex gap-2 items-start text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-lg p-2.5">
+                  <AlertCircle size={14} className="shrink-0 mt-0.5" />
+                  <span>{validationError}</span>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
