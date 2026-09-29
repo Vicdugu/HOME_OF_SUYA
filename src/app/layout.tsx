@@ -6,6 +6,7 @@ import FooterWrapper from "@/components/ui/FooterWrapper";
 import GlobalHeader from "@/components/ui/GlobalHeader";
 import CookieConsent from "@/components/ui/CookieConsent";
 import { MaintenanceModechecker } from "@/components/MaintenanceModeChecker";
+import { ToastContainer } from "@/components/ToastContainer";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -62,6 +63,7 @@ export default function RootLayout({
             {children}
             <FooterWrapper />
             <CookieConsent />
+            <ToastContainer />
           </MaintenanceModechecker>
         </CartProvider>
       </body>

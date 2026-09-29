@@ -165,6 +165,9 @@ interface CartContextValue {
   totalItems: number;
   cartOpen: boolean;
   setCartOpen: (open: boolean) => void;
+  toastMessage: string | null;
+  showToast: (message: string, duration?: number) => void;
+  clearToast: () => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -174,6 +177,7 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState);
   const [cartOpen, setCartOpenState] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const subtotal = state.items.reduce(
     (sum, item) => sum + item.unitPrice * item.quantity,
@@ -181,7 +185,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   );
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
 
-  const addItem = useCallback((item: CartItem) => dispatch({ type: "ADD_ITEM", item }), []);
+  const addItem = useCallback((item: CartItem) => {
+    dispatch({ type: "ADD_ITEM", item });
+    showToast("Item added to Cart");
+  }, []);
+
+  const showToast = useCallback((message: string, duration?: number) => {
+    setToastMessage(message);
+  }, []);
+
+  const clearToast = useCallback(() => {
+    setToastMessage(null);
+  }, []);
+
   const removeItem = useCallback(
     (cartItemId: string) => dispatch({ type: "REMOVE_ITEM", cartItemId }),
     []
@@ -241,6 +257,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         totalItems,
         cartOpen,
         setCartOpen,
+        toastMessage,
+        showToast,
+        clearToast,
       }}
     >
       {children}

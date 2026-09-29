@@ -33,9 +33,25 @@ const config: Config = {
         "gold-gradient":
           "linear-gradient(90deg, #D4AF37 0%, #F0D060 50%, #D4AF37 100%)",
       },
+      keyframes: {
+        "slide-up": {
+          from: {
+            opacity: "0",
+            transform: "translateY(20px)",
+          },
+          to: {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+        },
+      },
+      animation: {
+        "slide-up": "slide-up 0.3s ease-out",
+      },
     },
   },
   plugins: [require("@tailwindcss/forms")],
 };
 
 export default config;
+
