@@ -56,26 +56,24 @@ export function MealCard({
     setExpandedGroupIndex(0); // Reset to Step 1 on meal change
   }, [meal]);
 
-  // Auto-expand next group when current SINGLE group selection is completed
+  // Auto-expand next group when current group selection is completed
   useEffect(() => {
     if (!meal.variationGroups.length) return;
     
     const currentGroup = meal.variationGroups[expandedGroupIndex];
     if (!currentGroup) return;
     
-    // Only auto-expand for SINGLE selection groups
-    if (currentGroup.selectionType === "SINGLE") {
-      const isCurrentGroupComplete = (selection[currentGroup.id] ?? []).length > 0;
-      
-      // If current group is now complete, expand next group
-      if (isCurrentGroupComplete) {
-        const nextIndex = expandedGroupIndex + 1;
-        if (nextIndex < meal.variationGroups.length) {
-          const timeoutId = setTimeout(() => {
-            setExpandedGroupIndex(nextIndex);
-          }, 50);
-          return () => clearTimeout(timeoutId);
-        }
+    // Check if current group is complete (has at least one selection)
+    const isCurrentGroupComplete = (selection[currentGroup.id] ?? []).length > 0;
+    
+    // If current group is now complete, expand next group
+    if (isCurrentGroupComplete) {
+      const nextIndex = expandedGroupIndex + 1;
+      if (nextIndex < meal.variationGroups.length) {
+        const timeoutId = setTimeout(() => {
+          setExpandedGroupIndex(nextIndex);
+        }, 50);
+        return () => clearTimeout(timeoutId);
       }
     }
   }, [selection, expandedGroupIndex, meal.variationGroups.length, meal.id]);
@@ -327,7 +325,7 @@ export function MealCard({
               // For single-step items, always show content without accordion header
               if (hasSingleStep) {
                 return (
-                  <div key={group.id} className="space-y-2.5 rounded-lg border-2 border-white/40 bg-surface-border/20 p-3.5">
+                  <div key={group.id} className="border-t-2 border-white/60 pt-3.5 mt-4">
                     {/* Selection Type Hint */}
                     <p className="text-[10px] uppercase tracking-[0.16em] text-gray-500">
                       {group.selectionType === "SINGLE"
@@ -379,7 +377,7 @@ export function MealCard({
 
               // Multi-step accordion version
               return (
-                <div key={group.id} className="overflow-hidden">
+                <div key={group.id} className="overflow-hidden border-t-2 border-white/60 pt-3.5 mt-4">
                   {/* Accordion Header - Clickable to toggle expand/collapse */}
                   <button
                     onClick={() => {
@@ -389,14 +387,14 @@ export function MealCard({
                       }
                     }}
                     disabled={isLocked}
-                    className={`w-full text-left space-y-2.5 rounded-lg border-2 p-3.5 transition-all duration-300 ${
+                    className={`w-full text-left space-y-2.5 p-0 transition-all duration-300 ${
                       isLocked
-                        ? "opacity-50 bg-surface-border/10 border-white/20 cursor-not-allowed"
+                        ? "opacity-50 cursor-not-allowed"
                         : isExpanded
-                        ? "bg-brand-red/5 border-brand-red/60 shadow-sm shadow-brand-red/10"
+                        ? ""
                         : isComplete
-                        ? "bg-green-500/5 border-green-500/30 hover:border-green-500/50"
-                        : "bg-surface-border/20 border-white/40 hover:border-white/60"
+                        ? ""
+                        : ""
                     }`}
                   >
                     {/* Step Header */}
@@ -445,7 +443,7 @@ export function MealCard({
                       shouldShowContent ? "max-h-96" : "max-h-0"
                     }`}
                   >
-                    <div className="space-y-2.5 rounded-b-lg border-2 border-t-0 border-inherit bg-surface-border/10 p-3.5">
+                    <div className="space-y-2.5 pt-3.5">
                       {/* Selection Type Hint */}
                       <p className="text-[10px] uppercase tracking-[0.16em] text-gray-500 pl-8">
                         {groupIndex === 0
