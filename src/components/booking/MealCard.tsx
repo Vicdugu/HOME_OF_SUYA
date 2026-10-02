@@ -48,13 +48,37 @@ export function MealCard({
     createInitialMealSelection(meal)
   );
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null);
+  const [expandedGroupIndex, setExpandedGroupIndex] = useState<number>(0); // 0 = Step 1 expanded by default
 
   useEffect(() => {
     setSelection(createInitialMealSelection(meal));
     setValidationError(null);
-    setFocusedGroupId(null);
+    setExpandedGroupIndex(0); // Reset to Step 1 on meal change
   }, [meal]);
+
+  // Auto-expand next group when current SINGLE group selection is completed
+  useEffect(() => {
+    if (!meal.variationGroups.length) return;
+    
+    const currentGroup = meal.variationGroups[expandedGroupIndex];
+    if (!currentGroup) return;
+    
+    // Only auto-expand for SINGLE selection groups
+    if (currentGroup.selectionType === "SINGLE") {
+      const isCurrentGroupComplete = (selection[currentGroup.id] ?? []).length > 0;
+      
+      // If current group is now complete, expand next group
+      if (isCurrentGroupComplete) {
+        const nextIndex = expandedGroupIndex + 1;
+        if (nextIndex < meal.variationGroups.length) {
+          const timeoutId = setTimeout(() => {
+            setExpandedGroupIndex(nextIndex);
+          }, 50);
+          return () => clearTimeout(timeoutId);
+        }
+      }
+    }
+  }, [selection, expandedGroupIndex, meal.variationGroups.length, meal.id]);
 
   const hasCustomisations = meal.variationGroups.length > 0;
   const isMultiItemMeal = isDrinksMeal(meal) || isToppingsMeal(meal) || isMasaMeal(meal);
@@ -154,6 +178,11 @@ export function MealCard({
     } else {
       addItem(createCustomisedCartItem(meal, selection));
     }
+    
+    // Clear selections after adding to cart
+    setSelection(createInitialMealSelection(meal));
+    setValidationError(null);
+    setExpandedGroupIndex(0);
   };
 
   const handleDecrease = () => {
@@ -287,120 +316,188 @@ export function MealCard({
             {meal.variationGroups.map((group, groupIndex) => {
               const isLocked = isGroupLocked(groupIndex);
               const isComplete = getGroupCompletionStatus(group.id);
-              const isFocused = focusedGroupId === group.id || (groupIndex === 0 && !focusedGroupId);
               const isRequired = group.selectionType === "SINGLE";
               const stepNumber = groupIndex + 1;
+              const hasSingleStep = meal.variationGroups.length === 1;
+              
+              // Only the step matching expandedGroupIndex shows its content
+              const isExpanded = groupIndex === expandedGroupIndex;
+              const shouldShowContent = isExpanded && !isLocked;
 
-              return (
-                <div
-                  key={group.id}
-                  className={`space-y-2.5 rounded-lg border-2 p-3.5 transition-all duration-200 ${
-                    isLocked
-                      ? "opacity-40 bg-surface-border/10 border-white/20"
-                      : isFocused
-                      ? "bg-brand-red/5 border-brand-red/60 shadow-sm shadow-brand-red/10"
-                      : isComplete
-                      ? "bg-green-500/5 border-green-500/30"
-                      : "bg-surface-border/20 border-white/40"
-                  }`}
-                >
-                  {/* Step Header */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                      <div
-                        className={`flex items-center justify-center w-6 h-6 rounded-full font-bold text-xs shrink-0 transition-all ${
-                          isComplete
-                            ? "bg-green-500 text-white"
-                            : isLocked
-                            ? "bg-white/20 text-gray-500"
-                            : isFocused
-                            ? "bg-brand-red text-white"
-                            : isRequired
-                            ? "bg-brand-red/60 text-white"
-                            : "bg-gray-600 text-white"
-                        }`}
-                      >
-                        {isComplete ? <Check size={14} /> : stepNumber}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-black uppercase tracking-[0.12em] text-white leading-tight">
-                          Step {stepNumber}: {group.name}
-                        </p>
-                        <p className="text-[10px] text-gray-400 mt-0.5">
-                          {isRequired ? "Required" : "Optional"}
-                        </p>
-                      </div>
-                    </div>
-                    {isComplete && !isLocked && (
-                      <Check size={16} className="text-green-400 shrink-0 mt-0.5" />
-                    )}
-                  </div>
-
-                  {/* Lock Message */}
-                  {isLocked && (
-                    <p className="text-[10px] text-amber-300/70 italic pl-8">
-                      Complete Step {groupIndex} to unlock
-                    </p>
-                  )}
-
-                  {/* Selection Type Hint */}
-                  {!isLocked && (
-                    <p className="text-[10px] uppercase tracking-[0.16em] text-gray-500 pl-8">
-                      {groupIndex === 0
-                        ? "Choose size"
-                        : groupIndex === 1
-                        ? "Choose Topping"
-                        : groupIndex === 2
-                        ? "Add Veggies"
-                        : group.selectionType === "SINGLE"
+              // For single-step items, always show content without accordion header
+              if (hasSingleStep) {
+                return (
+                  <div key={group.id} className="space-y-2.5 rounded-lg border-2 border-white/40 bg-surface-border/20 p-3.5">
+                    {/* Selection Type Hint */}
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-gray-500">
+                      {group.selectionType === "SINGLE"
                         ? "Choose one option"
                         : "Choose any options"}
                     </p>
-                  )}
 
-                  {/* Options Grid */}
-                  <div className="flex flex-wrap gap-2 pl-8">
-                    {group.options.map((option) => {
-                      const selected = (selection[group.id] ?? []).includes(option.id);
-                      const isMultiple = group.selectionType === "MULTIPLE";
+                    {/* Options Grid */}
+                    <div className="flex flex-wrap gap-2">
+                      {group.options.map((option) => {
+                        const selected = (selection[group.id] ?? []).includes(option.id);
+                        const isMultiple = group.selectionType === "MULTIPLE";
 
-                      return (
-                        <button
-                          key={option.id}
-                          onClick={() => {
-                            if (!isLocked) {
-                              toggleOption(group.id, option.id, group.selectionType);
-                              // Auto-focus next group after selection
-                              if (group.selectionType === "SINGLE") {
-                                const nextGroup = meal.variationGroups[groupIndex + 1];
-                                if (nextGroup) {
-                                  setFocusedGroupId(nextGroup.id);
-                                }
+                        return (
+                          <button
+                            key={option.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!isLocked) {
+                                toggleOption(group.id, option.id, group.selectionType);
                               }
-                            }
-                          }}
-                          disabled={isLocked}
-                          className={[
-                            "rounded-full border px-3 py-2 text-xs font-medium transition-all whitespace-nowrap",
-                            isLocked
-                              ? "opacity-30 cursor-not-allowed border-white/20 text-gray-600"
-                              : selected
-                              ? isMultiple
-                                ? "border-brand-gold bg-brand-gold/20 text-brand-gold shadow-sm shadow-brand-gold/20"
-                                : "border-brand-red bg-brand-red text-white shadow-lg shadow-brand-red/30"
-                              : "border-white/60 text-gray-300 hover:border-white hover:text-white hover:bg-white/5",
-                          ].join(" ")}
+                            }}
+                            disabled={isLocked}
+                            className={[
+                              "rounded-full border px-3 py-2 text-xs font-medium transition-all whitespace-nowrap",
+                              isLocked
+                                ? "opacity-30 cursor-not-allowed border-white/20 text-gray-600"
+                                : selected
+                                ? isMultiple
+                                  ? "border-brand-gold bg-brand-gold/20 text-brand-gold shadow-sm shadow-brand-gold/20"
+                                  : "border-brand-red bg-brand-red text-white shadow-lg shadow-brand-red/30"
+                                : "border-white/60 text-gray-300 hover:border-white hover:text-white hover:bg-white/5",
+                            ].join(" ")}
+                          >
+                            {option.name}
+                            {option.price > 0 ? (
+                              <span className="text-[10px] opacity-80">
+                                {" "}
+                                +{formatCurrency(option.price)}
+                              </span>
+                            ) : null}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              }
+
+              // Multi-step accordion version
+              return (
+                <div key={group.id} className="overflow-hidden">
+                  {/* Accordion Header - Clickable to toggle expand/collapse */}
+                  <button
+                    onClick={() => {
+                      if (!isLocked) {
+                        // Toggle: if already expanded, collapse; otherwise expand
+                        setExpandedGroupIndex(expandedGroupIndex === groupIndex ? -1 : groupIndex);
+                      }
+                    }}
+                    disabled={isLocked}
+                    className={`w-full text-left space-y-2.5 rounded-lg border-2 p-3.5 transition-all duration-300 ${
+                      isLocked
+                        ? "opacity-50 bg-surface-border/10 border-white/20 cursor-not-allowed"
+                        : isExpanded
+                        ? "bg-brand-red/5 border-brand-red/60 shadow-sm shadow-brand-red/10"
+                        : isComplete
+                        ? "bg-green-500/5 border-green-500/30 hover:border-green-500/50"
+                        : "bg-surface-border/20 border-white/40 hover:border-white/60"
+                    }`}
+                  >
+                    {/* Step Header */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                        <div
+                          className={`flex items-center justify-center w-6 h-6 rounded-full font-bold text-xs shrink-0 transition-all ${
+                            isComplete
+                              ? "bg-green-500 text-white"
+                              : isLocked
+                              ? "bg-white/20 text-gray-500"
+                              : isExpanded
+                              ? "bg-brand-red text-white"
+                              : isRequired
+                              ? "bg-brand-red/60 text-white"
+                              : "bg-gray-600 text-white"
+                          }`}
                         >
-                          {option.name}
-                          {option.price > 0 ? (
-                            <span className="text-[10px] opacity-80">
-                              {" "}
-                              +{formatCurrency(option.price)}
-                            </span>
-                          ) : null}
-                        </button>
-                      );
-                    })}
+                          {isComplete ? <Check size={14} /> : stepNumber}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-black uppercase tracking-[0.12em] text-white leading-tight">
+                            Step {stepNumber}: {group.name}
+                          </p>
+                          <p className="text-[10px] text-gray-400 mt-0.5">
+                            {isRequired ? "Required" : "Optional"}
+                          </p>
+                        </div>
+                      </div>
+                      {isComplete && !isLocked && (
+                        <Check size={16} className="text-green-400 shrink-0 mt-0.5" />
+                      )}
+                    </div>
+
+                    {/* Lock Message - Show if locked */}
+                    {isLocked && (
+                      <p className="text-[10px] text-amber-300/70 italic pl-8">
+                        Complete Step {groupIndex} to unlock
+                      </p>
+                    )}
+                  </button>
+
+                  {/* Expandable Content - Smooth collapse/expand animation */}
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      shouldShowContent ? "max-h-96" : "max-h-0"
+                    }`}
+                  >
+                    <div className="space-y-2.5 rounded-b-lg border-2 border-t-0 border-inherit bg-surface-border/10 p-3.5">
+                      {/* Selection Type Hint */}
+                      <p className="text-[10px] uppercase tracking-[0.16em] text-gray-500 pl-8">
+                        {groupIndex === 0
+                          ? "Choose size"
+                          : groupIndex === 1
+                          ? "Choose Topping"
+                          : groupIndex === 2
+                          ? "Add Veggies"
+                          : group.selectionType === "SINGLE"
+                          ? "Choose one option"
+                          : "Choose any options"}
+                      </p>
+
+                      {/* Options Grid */}
+                      <div className="flex flex-wrap gap-2 pl-8">
+                        {group.options.map((option) => {
+                          const selected = (selection[group.id] ?? []).includes(option.id);
+                          const isMultiple = group.selectionType === "MULTIPLE";
+
+                          return (
+                            <button
+                              key={option.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isLocked) {
+                                  toggleOption(group.id, option.id, group.selectionType);
+                                }
+                              }}
+                              disabled={isLocked}
+                              className={[
+                                "rounded-full border px-3 py-2 text-xs font-medium transition-all whitespace-nowrap",
+                                isLocked
+                                  ? "opacity-30 cursor-not-allowed border-white/20 text-gray-600"
+                                  : selected
+                                  ? isMultiple
+                                    ? "border-brand-gold bg-brand-gold/20 text-brand-gold shadow-sm shadow-brand-gold/20"
+                                    : "border-brand-red bg-brand-red text-white shadow-lg shadow-brand-red/30"
+                                  : "border-white/60 text-gray-300 hover:border-white hover:text-white hover:bg-white/5",
+                              ].join(" ")}
+                            >
+                              {option.name}
+                              {option.price > 0 ? (
+                                <span className="text-[10px] opacity-80">
+                                  {" "}
+                                  +{formatCurrency(option.price)}
+                                </span>
+                              ) : null}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 </div>
               );

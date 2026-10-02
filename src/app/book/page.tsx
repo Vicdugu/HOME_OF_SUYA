@@ -14,6 +14,7 @@ import { FloatingCartButton } from "@/components/booking/FloatingCartButton";
 import { trackClientEvent } from "@/lib/client-analytics";
 import { DEFAULT_DELIVERY_SETTINGS } from "@/lib/delivery-settings";
 import { getDeliveryFee } from "@/lib/delivery-pricing";
+import { isFridayString } from "@/lib/availability";
 import type { DeliveryType } from "@/types";
 
 const STEPS = [
@@ -41,7 +42,7 @@ interface AvailabilityDay {
 
 export default function BookPage() {
   const router = useRouter();
-  const { state, setDate, setTimeSlot, setDelivery, subtotal, totalItems, cartOpen, setCartOpen } =
+  const { state, setDate, setTimeSlot, setDelivery, showToast, subtotal, totalItems, cartOpen, setCartOpen } =
     useCart();
 
   const [settings, setSettings] = useState<DeliverySettings>(DEFAULT_DELIVERY_SETTINGS);
@@ -64,6 +65,15 @@ export default function BookPage() {
       .then((data) => setAvailabilityDays(Array.isArray(data?.days) ? data.days : []))
       .catch(() => {});
   }, []);
+
+  // Handle Friday restriction when delivery type changes to POSTAGE
+  useEffect(() => {
+    if (state.deliveryType === "POSTAGE" && state.bookingDate && isFridayString(state.bookingDate)) {
+      // Clear the date if Friday is selected with POSTAGE
+      setDate("");
+      showToast("Please select Mon- Thurs for UK postage");
+    }
+  }, [state.deliveryType]);
 
   const availableDates = availabilityDays.map((day) => day.date);
   const selectedAvailability = availabilityDays.find((day) => day.date === state.bookingDate) ?? null;

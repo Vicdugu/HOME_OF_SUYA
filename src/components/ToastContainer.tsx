@@ -9,5 +9,5 @@ export function ToastContainer() {
 
   if (!toastMessage) return null;
 
-  return <Toast message={toastMessage} duration={2000} onClose={clearToast} />;
+  return <Toast message={toastMessage} duration={3000} onClose={clearToast} />;
 }

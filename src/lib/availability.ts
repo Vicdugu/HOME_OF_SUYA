@@ -161,3 +161,32 @@ export function getEarliestSelectableDate(deliveryType: DeliveryType | null, now
   tomorrow.setDate(tomorrow.getDate() + 1);
   return tomorrow;
 }
+
+/** Check if a date falls on Friday (Friday = 5) */
+export function isFriday(date: Date): boolean {
+  return date.getDay() === 5;
+}
+
+/**
+ * Check if a date string represents a Friday
+ * dateStr should be in YYYY-MM-DD format
+ */
+export function isFridayString(dateStr: string): boolean {
+  return isFriday(fromDateString(dateStr));
+}
+
+/**
+ * Check if a date is selectable for a given delivery type
+ * For POSTAGE: Fridays are not allowed (Monday-Thursday only)
+ * For other delivery types: All bookable days are allowed
+ */
+export function isDateSelectableForDelivery(date: Date, deliveryType: DeliveryType | null): boolean {
+  if (!deliveryType) return true;
+  
+  // POSTAGE: Restrict to Monday-Thursday (no Fridays)
+  if (deliveryType === "POSTAGE" && isFriday(date)) {
+    return false;
+  }
+  
+  return true;
+}

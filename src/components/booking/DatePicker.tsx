@@ -8,6 +8,8 @@ import {
   isTooSoon,
   toDateString,
   getEarliestSelectableDate,
+  isFriday,
+  isDateSelectableForDelivery,
 } from "@/lib/availability";
 import type { DeliveryType } from "@/types";
 
@@ -100,8 +102,11 @@ export function DatePicker({ selectedDate, onSelect, availableDates = [], delive
           const isBookable = isBookableDay(date);
           const isTooEarly = date < earliestSelectableDate;
           const isAvailable = availableSet.has(dateStr);
+          const isFridayDate = isFriday(date);
+          const isDeliveryCompatible = isDateSelectableForDelivery(date, deliveryType);
           const isBlocked = isBookable && !isTooEarly && !isAvailable;
-          const isSelectable = isBookable && !isTooEarly && isAvailable;
+          const isFridayRestricted = isFridayDate && !isDeliveryCompatible;
+          const isSelectable = isBookable && !isTooEarly && isAvailable && isDeliveryCompatible;
 
           return (
             <div key={dateStr} className="flex items-center justify-center py-0.5">
@@ -113,6 +118,8 @@ export function DatePicker({ selectedDate, onSelect, availableDates = [], delive
                     ? deliveryType === "POSTAGE"
                       ? "Postage orders require 24-hour processing time"
                       : "Same-day orders closed after 2:00 PM — select a later date or choose Pickup/Delivery before 2:00 PM"
+                    : isFridayRestricted
+                    ? "Fridays not available for UK Postage"
                     : isBlocked
                     ? "Not available"
                     : !isBookable
@@ -125,7 +132,7 @@ export function DatePicker({ selectedDate, onSelect, availableDates = [], delive
                     ? "bg-brand-red text-white font-bold shadow-lg shadow-brand-red/30"
                     : isSelectable
                     ? "text-white font-semibold hover:bg-brand-red/20 hover:text-brand-gold cursor-pointer"
-                    : isBlocked || isTooEarly
+                    : isBlocked || isTooEarly || isFridayRestricted
                     ? "text-gray-600 line-through cursor-not-allowed"
                     : "text-gray-700 cursor-default",
                 ].join(" ")}
@@ -139,7 +146,9 @@ export function DatePicker({ selectedDate, onSelect, availableDates = [], delive
 
       <p className="text-gray-600 text-xs mt-3 text-center">
         Available{" "}
-        <span className="text-brand-gold font-medium">Monday to Saturday</span>
+        <span className="text-brand-gold font-medium">
+          {deliveryType === "POSTAGE" ? "Monday to Thursday" : "Monday to Saturday"}
+        </span>
       </p>
     </div>
   );
