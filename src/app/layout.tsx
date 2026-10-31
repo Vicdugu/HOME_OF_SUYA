@@ -8,6 +8,7 @@ import CookieConsent from "@/components/ui/CookieConsent";
 import { MaintenanceModechecker } from "@/components/MaintenanceModeChecker";
 import { ToastContainer } from "@/components/ToastContainer";
 import ServiceWorkerRegister from "@/components/ui/ServiceWorkerRegister";
+import InstallBanner from "@/components/ui/InstallBanner";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -73,6 +74,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-white">
         <CartProvider>
           <MaintenanceModechecker>
+            <InstallBanner />
             <GlobalHeader />
             {children}
             <FooterWrapper />
