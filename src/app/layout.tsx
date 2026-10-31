@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
@@ -7,8 +7,13 @@ import GlobalHeader from "@/components/ui/GlobalHeader";
 import CookieConsent from "@/components/ui/CookieConsent";
 import { MaintenanceModechecker } from "@/components/MaintenanceModeChecker";
 import { ToastContainer } from "@/components/ToastContainer";
+import ServiceWorkerRegister from "@/components/ui/ServiceWorkerRegister";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+
+export const viewport: Viewport = {
+  themeColor: "#C41E3A",
+};
 
 export const metadata: Metadata = {
   title: "Home of Suya — BBQ Booking",
@@ -17,15 +22,24 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
   ),
+  applicationName: "Home of Suya",
+  appleWebApp: {
+    capable: true,
+    title: "Home of Suya",
+    statusBarStyle: "black-translucent",
+  },
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+  },
   icons: {
     icon: [
       {
-        url: "/api/meal-photos?name=Logo.jpeg",
-        type: "image/jpeg",
-        sizes: "any",
+        url: "/icons/icon-192.png",
+        type: "image/png",
+        sizes: "192x192",
       },
     ],
-    apple: "/api/meal-photos?name=Logo.jpeg",
+    apple: "/icons/apple-touch-icon.png",
   },
   openGraph: {
     title: "Home of Suya",
@@ -64,6 +78,7 @@ export default function RootLayout({
             <FooterWrapper />
             <CookieConsent />
             <ToastContainer />
+            <ServiceWorkerRegister />
           </MaintenanceModechecker>
         </CartProvider>
       </body>

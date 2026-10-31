@@ -25,6 +25,11 @@ export default function Footer() {
                   Phone: 0746 7767223
                 </a>
               </li>
+              <li>
+                <a href="/install" className="text-gray-400 hover:text-brand-orange transition leading-snug">
+                  Install the app on your phone
+                </a>
+              </li>
             </ul>
           </div>
 
