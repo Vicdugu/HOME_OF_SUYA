@@ -59,6 +59,7 @@ jobs:
         with:
           status: ${{ job.status }}
           text: "Weekly S3 database backup: ${{ job.status }}"
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
           fields: repo,message,commit,author
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         continue-on-error: true
