@@ -64,6 +64,7 @@
     "postcss": "^8.5.18",
     "undici": "^6.29.1",
     "source-map-js": "^1.2.2",
+    "zod": "^4.6.7",
     "eslint": {
       "minimatch": {
         "brace-expansion": "^1.1.21"
