@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Save, CalendarOff, Trash2, Plus, Upload, X } from "lucide-react";
-import { isBookableDay, toDateString } from "@/lib/availability";
+import { DEFAULT_AVAILABLE_DAYS, isBookableDay, toDateString } from "@/lib/availability";
 import {
   DISCOUNTED_POSTAGE_FEE,
   DISCOUNTED_POSTAGE_THRESHOLD,
@@ -13,7 +13,7 @@ const MAX_LOGO_SIZE_BYTES = 2 * 1024 * 1024;
 const ACCEPTED_LOGO_TYPES = new Set(["image/png", "image/jpeg", "image/svg+xml"]);
 
 interface Settings extends DeliverySettingsDTO {
-  availableDays?: number[]; // 1=Monday, 2=Tuesday, ..., 6=Saturday
+  availableDays?: number[]; // 0=Sunday, 1=Monday, ..., 6=Saturday
   timeSlots?: Array<{ id: string; label: string }>;
   isMaintenanceMode?: boolean;
 }
@@ -168,7 +168,7 @@ export default function AdminSettingsPage() {
     if (!newDate) return;
     const [y, m, d] = newDate.split("-").map(Number);
     const date = new Date(y, m - 1, d);
-    if (!isBookableDay(date)) {
+    if (!isBookableDay(date, settings?.availableDays ?? DEFAULT_AVAILABLE_DAYS)) {
       alert("Only bookable days can be blocked.");
       return;
     }
@@ -320,6 +320,7 @@ export default function AdminSettingsPage() {
         <p className="text-gray-500 text-xs">Select which days customers can book orders.</p>
         <div className="grid grid-cols-3 gap-3">
           {[
+            { day: 0, label: "Sunday" },
             { day: 1, label: "Monday" },
             { day: 2, label: "Tuesday" },
             { day: 3, label: "Wednesday" },
@@ -330,9 +331,9 @@ export default function AdminSettingsPage() {
             <label key={day} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-surface-dark transition">
               <input
                 type="checkbox"
-                checked={(settings.availableDays ?? [1, 2, 3, 4, 5, 6]).includes(day)}
+                checked={(settings.availableDays ?? DEFAULT_AVAILABLE_DAYS).includes(day)}
                 onChange={(e) => {
-                  const current = settings.availableDays ?? [1, 2, 3, 4, 5, 6];
+                  const current = settings.availableDays ?? [...DEFAULT_AVAILABLE_DAYS];
                   const updated = e.target.checked
                     ? [...current, day].sort((a, b) => a - b)
                     : current.filter((d) => d !== day);

@@ -12,13 +12,36 @@ export const TIME_SLOTS = [
 
 export type TimeSlotId = (typeof TIME_SLOTS)[number]["id"];
 
-// Fulfillment Rule: Same-day pickup/delivery cutoff time (14:00 = 2:00 PM)
-const SAME_DAY_CUTOFF_HOUR = 14;
+// Fulfillment Rule: Same-day pickup/delivery cutoff time (18:00 = 6:00 PM)
+const SAME_DAY_CUTOFF_HOUR = 18;
 
-/** Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4, Friday = 5, Saturday = 6 */
-export function isBookableDay(date: Date): boolean {
-  const d = date.getDay();
-  return d >= 1 && d <= 6; // Monday to Saturday
+/** Sunday = 0, Monday = 1, ..., Saturday = 6 (matches Date.getDay()) */
+export const DEFAULT_AVAILABLE_DAYS: readonly number[] = [1, 2, 3, 4, 5, 6];
+
+const WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+/** Normalises the admin-configured available days, falling back to Mon-Sat */
+export function parseAvailableDays(value: unknown): number[] {
+  if (!Array.isArray(value)) return [...DEFAULT_AVAILABLE_DAYS];
+  return value
+    .filter((d): d is number => Number.isInteger(d) && d >= 0 && d <= 6)
+    .sort((a, b) => a - b);
+}
+
+/** Admin-configured bookable weekdays (defaults to Mon-Sat) */
+export function isBookableDay(date: Date, availableDays: readonly number[] = DEFAULT_AVAILABLE_DAYS): boolean {
+  return availableDays.includes(date.getDay());
+}
+
+/** Formats weekdays as "Monday to Saturday" for contiguous ranges, otherwise a comma list */
+export function formatAvailableDayRange(days: readonly number[]): string {
+  const sorted = [...days].sort((a, b) => a - b);
+  if (sorted.length === 0) return "";
+  const contiguous = sorted.every((d, i) => i === 0 || d === sorted[i - 1] + 1);
+  if (contiguous && sorted.length > 1) {
+    return `${WEEKDAY_NAMES[sorted[0]]} to ${WEEKDAY_NAMES[sorted[sorted.length - 1]]}`;
+  }
+  return sorted.map((d) => WEEKDAY_NAMES[d]).join(", ");
 }
 
 /** Dates must be at least 1 full day ahead (no same-day booking) */
@@ -80,7 +103,7 @@ export function formatTimeSlot(slotId: string): string {
 
 /**
  * Returns available bookable dates (Mon-Sat), starting from today.
- * The caller (client-side) handles time-based filtering (2:00 PM cutoff).
+ * The caller (client-side) handles time-based filtering (6:00 PM cutoff).
  * Excludes any dates in the blockedDates array.
  */
 export function getAvailableDates(
@@ -112,9 +135,9 @@ export function getAvailableDates(
  * Check if same-day orders are allowed for a given delivery type at the current time
  * 
  * FULFILLMENT RULES:
- * - PICKUP and CARDIFF: Same-day cutoff is 2:00 PM (14:00)
- *   - If current time is before 2:00 PM, same-day is allowed
- *   - If current time is 2:00 PM or later, same-day is NOT allowed
+ * - PICKUP and CARDIFF: Same-day cutoff is 6:00 PM (18:00)
+ *   - If current time is before 6:00 PM, same-day is allowed
+ *   - If current time is 6:00 PM or later, same-day is NOT allowed
  * - POSTAGE: Requires 24-hour advance processing time
  *   - Same-day is never allowed for postal orders
  */
@@ -124,7 +147,7 @@ export function canOrderSameDay(deliveryType: DeliveryType | null, now = new Dat
   // POSTAGE never allows same-day (24-hour processing requirement)
   if (deliveryType === "POSTAGE") return false;
   
-  // PICKUP and CARDIFF: check 2:00 PM cutoff
+  // PICKUP and CARDIFF: check 6:00 PM cutoff
   if (deliveryType === "PICKUP" || deliveryType === "CARDIFF") {
     const currentHour = now.getHours();
     return currentHour < SAME_DAY_CUTOFF_HOUR;
@@ -137,7 +160,7 @@ export function canOrderSameDay(deliveryType: DeliveryType | null, now = new Dat
  * Get the earliest selectable date for a given delivery type
  * 
  * - If no delivery type selected yet: Allow today (no filtering)
- * - If same-day is allowed (before 2:00 PM for PICKUP/CARDIFF):
+ * - If same-day is allowed (before 6:00 PM for PICKUP/CARDIFF):
  *   Return today's date
  * - If same-day is NOT allowed:
  *   Return tomorrow's date
@@ -173,20 +196,4 @@ export function isFriday(date: Date): boolean {
  */
 export function isFridayString(dateStr: string): boolean {
   return isFriday(fromDateString(dateStr));
-}
-
-/**
- * Check if a date is selectable for a given delivery type
- * For POSTAGE: Fridays are not allowed (Monday-Thursday only)
- * For other delivery types: All bookable days are allowed
- */
-export function isDateSelectableForDelivery(date: Date, deliveryType: DeliveryType | null): boolean {
-  if (!deliveryType) return true;
-  
-  // POSTAGE: Restrict to Monday-Thursday (no Fridays)
-  if (deliveryType === "POSTAGE" && isFriday(date)) {
-    return false;
-  }
-  
-  return true;
 }

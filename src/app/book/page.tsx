@@ -14,7 +14,7 @@ import { FloatingCartButton } from "@/components/booking/FloatingCartButton";
 import { trackClientEvent } from "@/lib/client-analytics";
 import { DEFAULT_DELIVERY_SETTINGS } from "@/lib/delivery-settings";
 import { getDeliveryFee } from "@/lib/delivery-pricing";
-import { isFridayString } from "@/lib/availability";
+import { DEFAULT_AVAILABLE_DAYS, parseAvailableDays } from "@/lib/availability";
 import type { DeliveryType } from "@/types";
 
 const STEPS = [
@@ -47,6 +47,7 @@ export default function BookPage() {
 
   const [settings, setSettings] = useState<DeliverySettings>(DEFAULT_DELIVERY_SETTINGS);
   const [availabilityDays, setAvailabilityDays] = useState<AvailabilityDay[]>([]);
+  const [bookableWeekdays, setBookableWeekdays] = useState<number[]>([...DEFAULT_AVAILABLE_DAYS]);
 
   // Redirect if cart empty
   useEffect(() => {
@@ -62,18 +63,12 @@ export default function BookPage() {
       .catch(() => {});
     fetch("/api/availability")
       .then((r) => r.json())
-      .then((data) => setAvailabilityDays(Array.isArray(data?.days) ? data.days : []))
+      .then((data) => {
+        setAvailabilityDays(Array.isArray(data?.days) ? data.days : []);
+        setBookableWeekdays(parseAvailableDays(data?.availableDays));
+      })
       .catch(() => {});
   }, []);
-
-  // Handle Friday restriction when delivery type changes to POSTAGE
-  useEffect(() => {
-    if (state.deliveryType === "POSTAGE" && state.bookingDate && isFridayString(state.bookingDate)) {
-      // Clear the date if Friday is selected with POSTAGE
-      setDate("");
-      showToast("Please select Mon- Thurs for UK postage");
-    }
-  }, [state.deliveryType]);
 
   const availableDates = availabilityDays.map((day) => day.date);
   const selectedAvailability = availabilityDays.find((day) => day.date === state.bookingDate) ?? null;
@@ -196,6 +191,7 @@ export default function BookPage() {
                 selectedDate={state.bookingDate}
                 onSelect={setDate}
                 availableDates={availableDates}
+                availableDays={bookableWeekdays}
                 deliveryType={state.deliveryType}
               />
             </section>
@@ -263,7 +259,7 @@ export default function BookPage() {
             <section className="card max-w-xl p-5 space-y-3">
               <h2 className="text-brand-gold font-semibold text-xs uppercase tracking-widest">Before You Book</h2>
               <ul className="space-y-2 text-sm text-gray-300">
-                <li>Orders close at 2:00 PM on the day of your selected booking date for same-day pickup or delivery.</li>
+                <li>Orders close at 6:00 PM on the day of your selected booking date for same-day pickup or delivery.</li>
                 <li>Postal orders require 24-hour advance notice and cannot be placed same-day.</li>
                 <li>Slots remain live and can sell out while unpaid bookings expire.</li>
                 <li>If you need a larger catering order, use the Contact Us tab for a custom arrangement.</li>

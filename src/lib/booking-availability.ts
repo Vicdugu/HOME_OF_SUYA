@@ -1,4 +1,10 @@
-import { TIME_SLOTS, fromDateString, isBookableDay, toDateString } from "@/lib/availability";
+import {
+  DEFAULT_AVAILABLE_DAYS,
+  TIME_SLOTS,
+  fromDateString,
+  isBookableDay,
+  toDateString,
+} from "@/lib/availability";
 import type { DeliveryType, PaymentStatus } from "@/types";
 
 export const BOOKING_CUTOFF_HOUR_LOCAL = 22;
@@ -42,8 +48,12 @@ export function getBookingCutoff(date: Date) {
   return cutoff;
 }
 
-export function isBookingWindowOpen(date: Date, now = new Date()) {
-  if (!isBookableDay(date)) {
+export function isBookingWindowOpen(
+  date: Date,
+  now = new Date(),
+  availableDays: readonly number[] = DEFAULT_AVAILABLE_DAYS
+) {
+  if (!isBookableDay(date, availableDays)) {
     return false;
   }
 
@@ -54,7 +64,7 @@ export function isBookingWindowOpen(date: Date, now = new Date()) {
   today.setHours(0, 0, 0, 0);
   
   // Allow today and future dates
-  // Time-based filtering (2:00 PM cutoff, 24-hour postage rule) is handled client-side
+  // Time-based filtering (6:00 PM cutoff, 24-hour postage rule) is handled client-side
   if (bookingDate < today) {
     return false;
   }
@@ -148,7 +158,11 @@ export function getSlotRemainingCapacity(
   return slot.remainingByDelivery[deliveryType] ?? 0;
 }
 
-export function getBookableDatesForRange(weeksAhead = 10, now = new Date()) {
+export function getBookableDatesForRange(
+  weeksAhead = 10,
+  now = new Date(),
+  availableDays: readonly number[] = DEFAULT_AVAILABLE_DAYS
+) {
   const dates: Date[] = [];
   const today = new Date(now);
   today.setHours(0, 0, 0, 0);
@@ -158,7 +172,7 @@ export function getBookableDatesForRange(weeksAhead = 10, now = new Date()) {
 
   for (let current = new Date(today); current <= end; current.setDate(current.getDate() + 1)) {
     const date = new Date(current.getFullYear(), current.getMonth(), current.getDate());
-    if (isBookingWindowOpen(date, now)) {
+    if (isBookingWindowOpen(date, now, availableDays)) {
       dates.push(date);
     }
   }

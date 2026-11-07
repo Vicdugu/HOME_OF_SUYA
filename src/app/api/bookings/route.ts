@@ -6,7 +6,7 @@ import { formatCartItemName } from "@/lib/meal-variations";
 import { mergePromoCodeVisibility } from "@/lib/promo-code-visibility";
 import { getRequestFingerprint, isRateLimited } from "@/lib/request-guard";
 import { generateReference } from "@/lib/utils";
-import { TIME_SLOTS } from "@/lib/availability";
+import { parseAvailableDays, TIME_SLOTS } from "@/lib/availability";
 import {
   buildDayAvailability,
   getSlotRemainingCapacity,
@@ -72,7 +72,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Booking date is invalid" }, { status: 400 });
   }
 
-  if (!isBookingWindowOpen(parsedBookingDate)) {
+  const settings = await prisma.deliverySettings.findFirst();
+  const availableDays = parseAvailableDays(
+    typeof settings?.availableDays === "string" ? JSON.parse(settings.availableDays) : settings?.availableDays
+  );
+  if (!isBookingWindowOpen(parsedBookingDate, new Date(), availableDays)) {
     return NextResponse.json(
       { error: "This booking date is no longer available. Please choose another date." },
       { status: 409 }
@@ -85,11 +89,11 @@ export async function POST(req: NextRequest) {
   const isSameDay = parsedBookingDate.getTime() === today.getTime();
 
   if (isSameDay && (deliveryType === "PICKUP" || deliveryType === "CARDIFF")) {
-    // Same-day pickup/delivery must be ordered by 2:00 PM (14:00)
+    // Same-day pickup/delivery must be ordered by 6:00 PM (18:00)
     const hour = new Date().getHours();
-    if (hour >= 14) {
+    if (hour >= 18) {
       return NextResponse.json(
-        { error: "Same-day pickup/delivery orders close at 2:00 PM. Please select a later date." },
+        { error: "Same-day pickup/delivery orders close at 6:00 PM. Please select a later date." },
         { status: 409 }
       );
     }

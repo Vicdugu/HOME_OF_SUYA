@@ -43,7 +43,7 @@ export default function TermsAndConditions() {
           <ul className="list-disc list-inside space-y-2 ml-4 mb-4">
             <li>We ship nationwide using <strong>Royal Mail Tracked 24 (Next Day Delivery)</strong>.</li>
             <li>All orders must be placed in time and allow for 24hrs delivery window by Royal Mail.</li>
-            <li>There shall be no deliveries on Sunday.</li>
+            <li>Sunday is available for collection, Cardiff delivery and postage. Postage orders placed for a Sunday are dispatched on the following Monday.</li>
             <li>Royal Mail aims to deliver the next working day, but delays may occur due to weather, strikes, or operational issues.</li>
             <li>Once dispatched, you will receive a tracking number.</li>
             <li>Home of Suya is not responsible for delays caused by Royal Mail, however we shall track all orders.</li>

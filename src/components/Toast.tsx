@@ -30,13 +30,15 @@ export function Toast({
   const icon = type === "success" ? <Check size={18} /> : null;
 
   return (
-    <div
-      className={`fixed bottom-6 left-1/2 transform -translate-x-1/2 ${bgColor} text-white px-5 py-3.5 rounded-lg shadow-lg flex items-center gap-2.5 animate-slide-up z-50`}
-      role="alert"
-      aria-live="polite"
-    >
-      {icon}
-      <span className="text-sm font-medium">{message}</span>
+    <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+      <div
+        className={`${bgColor} text-white px-5 py-3.5 rounded-lg shadow-lg flex items-center gap-2.5 animate-slide-up`}
+        role="alert"
+        aria-live="polite"
+      >
+        {icon}
+        <span className="text-sm font-medium">{message}</span>
+      </div>
     </div>
   );
 }

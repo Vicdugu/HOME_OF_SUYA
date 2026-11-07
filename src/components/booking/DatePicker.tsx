@@ -8,8 +8,8 @@ import {
   isTooSoon,
   toDateString,
   getEarliestSelectableDate,
-  isFriday,
-  isDateSelectableForDelivery,
+  formatAvailableDayRange,
+  DEFAULT_AVAILABLE_DAYS,
 } from "@/lib/availability";
 import type { DeliveryType } from "@/types";
 
@@ -23,10 +23,17 @@ interface DatePickerProps {
   selectedDate: string | null;
   onSelect: (date: string) => void;
   availableDates?: string[];
+  availableDays?: number[];
   deliveryType?: DeliveryType | null;
 }
 
-export function DatePicker({ selectedDate, onSelect, availableDates = [], deliveryType = null }: DatePickerProps) {
+export function DatePicker({
+  selectedDate,
+  onSelect,
+  availableDates = [],
+  availableDays = [...DEFAULT_AVAILABLE_DAYS],
+  deliveryType = null,
+}: DatePickerProps) {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
@@ -99,14 +106,11 @@ export function DatePicker({ selectedDate, onSelect, availableDates = [], delive
 
           const dateStr = toDateString(date);
           const isSelected = selectedDate === dateStr;
-          const isBookable = isBookableDay(date);
+          const isBookable = isBookableDay(date, availableDays);
           const isTooEarly = date < earliestSelectableDate;
           const isAvailable = availableSet.has(dateStr);
-          const isFridayDate = isFriday(date);
-          const isDeliveryCompatible = isDateSelectableForDelivery(date, deliveryType);
           const isBlocked = isBookable && !isTooEarly && !isAvailable;
-          const isFridayRestricted = isFridayDate && !isDeliveryCompatible;
-          const isSelectable = isBookable && !isTooEarly && isAvailable && isDeliveryCompatible;
+          const isSelectable = isBookable && !isTooEarly && isAvailable;
 
           return (
             <div key={dateStr} className="flex items-center justify-center py-0.5">
@@ -117,13 +121,11 @@ export function DatePicker({ selectedDate, onSelect, availableDates = [], delive
                   isTooEarly
                     ? deliveryType === "POSTAGE"
                       ? "Postage orders require 24-hour processing time"
-                      : "Same-day orders closed after 2:00 PM — select a later date or choose Pickup/Delivery before 2:00 PM"
-                    : isFridayRestricted
-                    ? "Fridays not available for UK Postage"
+                      : "Same-day orders closed after 6:00 PM — select a later date or choose Pickup/Delivery before 6:00 PM"
                     : isBlocked
                     ? "Not available"
                     : !isBookable
-                    ? "Bookings on Tue & Thu only"
+                    ? "Not open for bookings on this day"
                     : undefined
                 }
                 className={[
@@ -132,7 +134,7 @@ export function DatePicker({ selectedDate, onSelect, availableDates = [], delive
                     ? "bg-brand-red text-white font-bold shadow-lg shadow-brand-red/30"
                     : isSelectable
                     ? "text-white font-semibold hover:bg-brand-red/20 hover:text-brand-gold cursor-pointer"
-                    : isBlocked || isTooEarly || isFridayRestricted
+                    : isBlocked || isTooEarly
                     ? "text-gray-600 line-through cursor-not-allowed"
                     : "text-gray-700 cursor-default",
                 ].join(" ")}
@@ -147,7 +149,10 @@ export function DatePicker({ selectedDate, onSelect, availableDates = [], delive
       <p className="text-gray-600 text-xs mt-3 text-center">
         Available{" "}
         <span className="text-brand-gold font-medium">
-          {deliveryType === "POSTAGE" ? "Monday to Thursday" : "Monday to Saturday"}
+          {/* Jan 7 2024 is a Sunday, so 7 + weekday gives a date with that weekday */}
+          {formatAvailableDayRange(
+            availableDays
+          )}
         </span>
       </p>
     </div>

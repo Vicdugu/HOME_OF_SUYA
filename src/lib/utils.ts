@@ -14,7 +14,7 @@ export function generateReference(): string {
  * Returns available booking dates (Monday to Saturday) starting from today,
  * excluding blocked dates.
  * 
- * Note: Time-based filtering (2:00 PM cutoff) is handled client-side.
+ * Note: Time-based filtering (6:00 PM cutoff) is handled client-side.
  * This function provides all potential bookable dates to the frontend.
  */
 export function getAvailableDates(

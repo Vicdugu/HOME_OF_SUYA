@@ -61,7 +61,25 @@ function NavLinks({
   );
 }
 
+const PUBLIC_AUTH = ["/admin/login", "/admin/verify", "/admin/forgot-password", "/admin/reset-password"];
+
 export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+
+  // Public auth pages render without sidebar. Split into a separate component so
+  // hooks in the authenticated layout are never skipped when the route changes.
+  if (PUBLIC_AUTH.includes(pathname)) {
+    return <>{children}</>;
+  }
+
+  return <AuthenticatedAdminLayout>{children}</AuthenticatedAdminLayout>;
+}
+
+function AuthenticatedAdminLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -69,12 +87,6 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  // Public auth pages — render without sidebar
-  const PUBLIC_AUTH = ["/admin/login", "/admin/verify", "/admin/forgot-password", "/admin/reset-password"];
-  if (PUBLIC_AUTH.includes(pathname)) {
-    return <>{children}</>;
-  }
 
   // Enable session timeout for authenticated pages
   useSessionTimeout();

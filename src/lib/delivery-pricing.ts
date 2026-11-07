@@ -1,7 +1,7 @@
 import type { DeliveryType } from "@/types";
 
 export const DISCOUNTED_POSTAGE_THRESHOLD = 25;
-export const DISCOUNTED_POSTAGE_FEE = 7;
+export const DISCOUNTED_POSTAGE_FEE = 8;
 
 interface DeliveryPricingSettings {
   cardiffFee: number;

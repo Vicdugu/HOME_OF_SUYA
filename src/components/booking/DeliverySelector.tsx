@@ -36,7 +36,7 @@ export function DeliverySelector({
     {
       type: "PICKUP",
       label: "Pickup",
-      description: "Collect in person — location details sent on confirmation. Same-day orders must be placed by 2:00 PM.",
+      description: "Collect in person — location details sent on confirmation. Same-day orders must be placed by 6:00 PM.",
       fee: 0,
       icon: <MapPin size={20} />,
       available: true,
@@ -44,7 +44,7 @@ export function DeliverySelector({
     {
       type: "CARDIFF",
       label: "Cardiff Delivery",
-      description: "Delivered to your door within Cardiff. Same-day orders must be placed by 2:00 PM.",
+      description: "Delivered to your door within Cardiff. Same-day orders must be placed by 6:00 PM.",
       fee: cardiffFee,
       icon: <Truck size={20} />,
       available: true,
