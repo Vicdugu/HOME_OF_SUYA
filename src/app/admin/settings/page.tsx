@@ -233,6 +233,15 @@ export default function AdminSettingsPage() {
         <label className="flex items-center gap-3 cursor-pointer">
           <input
             type="checkbox"
+            checked={settings.cardiffDeliveryEnabled}
+            onChange={(e) => setSettings((s) => s ? { ...s, cardiffDeliveryEnabled: e.target.checked } : s)}
+            className="rounded"
+          />
+          <span className="text-sm text-gray-300">Cardiff Delivery enabled</span>
+        </label>
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
             checked={settings.postageAvailable}
             onChange={(e) => setSettings((s) => s ? { ...s, postageAvailable: e.target.checked } : s)}
             className="rounded"

@@ -28,6 +28,7 @@ interface DeliverySettings {
   cardiffFee: number;
   postageFee: number;
   postageAvailable: boolean;
+  cardiffDeliveryEnabled: boolean;
 }
 
 interface AvailabilityDay {
@@ -211,6 +212,7 @@ export default function BookPage() {
                   cardiffFee={settings.cardiffFee}
                   postageFee={displayedPostageFee}
                   postageAvailable={settings.postageAvailable}
+                  cardiffAvailable={settings.cardiffDeliveryEnabled}
                 />
               </section>
             )}

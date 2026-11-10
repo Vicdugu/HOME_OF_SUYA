@@ -23,6 +23,7 @@ interface DeliverySelectorProps {
   cardiffFee: number;
   postageFee: number;
   postageAvailable: boolean;
+  cardiffAvailable?: boolean;
 }
 
 export function DeliverySelector({
@@ -31,6 +32,7 @@ export function DeliverySelector({
   cardiffFee,
   postageFee,
   postageAvailable,
+  cardiffAvailable = true,
 }: DeliverySelectorProps) {
   const options: DeliveryOption[] = [
     {
@@ -47,7 +49,7 @@ export function DeliverySelector({
       description: "Delivered to your door within Cardiff. Same-day orders must be placed by 6:00 PM.",
       fee: cardiffFee,
       icon: <Truck size={20} />,
-      available: true,
+      available: cardiffAvailable,
     },
     {
       type: "POSTAGE",

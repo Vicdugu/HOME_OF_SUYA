@@ -85,6 +85,7 @@ export interface DeliverySettingsDTO {
   cardiffFee: number;
   postageFee: number;
   postageAvailable: boolean;
+  cardiffDeliveryEnabled: boolean;
   minOrderCardiff: number;
   minOrderPostage: number;
   logoUrl: string | null;

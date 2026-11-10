@@ -17,7 +17,7 @@ import { BookingOrderSummary } from "@/components/booking/BookingOrderSummary";
 import { PromoCodeInput } from "@/components/booking/PromoCodeInput";
 import { FormField, inputCls } from "@/components/ui/FormField";
 import { trackClientEvent } from "@/lib/client-analytics";
-import { DEFAULT_DELIVERY_SETTINGS } from "@/lib/delivery-settings";
+import { DEFAULT_DELIVERY_SETTINGS, type DeliverySettingsSnapshot } from "@/lib/delivery-settings";
 import { getDeliveryFee } from "@/lib/delivery-pricing";
 const STEPS = [
   { n: 1, label: "Menu" },
@@ -73,9 +73,14 @@ export default function CheckoutPage() {
   useEffect(() => {
     fetch("/api/delivery-settings")
       .then((r) => r.json())
-      .then(setSettings)
+      .then((data: DeliverySettingsSnapshot) => {
+        setSettings(data);
+        if (data.cardiffDeliveryEnabled === false && state.deliveryType === "CARDIFF") {
+          router.replace("/book");
+        }
+      })
       .catch(() => {});
-  }, []);
+  }, [router, state.deliveryType]);
 
   const deliveryFee = getDeliveryFee(state.deliveryType, subtotal, settings);
   const total = subtotal + deliveryFee - state.promoDiscount;

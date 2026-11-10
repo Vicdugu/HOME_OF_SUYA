@@ -110,6 +110,7 @@ model DeliverySettings {
   cardiffFee         Float    @default(5.0)
   postageFee         Float    @default(8.0)
   postageAvailable   Boolean  @default(true)
+  cardiffDeliveryEnabled Boolean @default(true)
   minOrderCardiff    Float    @default(0)
   minOrderPostage    Float    @default(0)
   logoUrl            String?

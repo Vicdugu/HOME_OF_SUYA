@@ -73,6 +73,12 @@ export async function POST(req: NextRequest) {
   }
 
   const settings = await prisma.deliverySettings.findFirst();
+  if (deliveryType === "CARDIFF" && settings?.cardiffDeliveryEnabled === false) {
+    return NextResponse.json(
+      { error: "Cardiff delivery is currently unavailable. Please choose another delivery option." },
+      { status: 409 }
+    );
+  }
   const availableDays = parseAvailableDays(
     typeof settings?.availableDays === "string" ? JSON.parse(settings.availableDays) : settings?.availableDays
   );
