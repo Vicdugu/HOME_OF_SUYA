@@ -17,6 +17,13 @@ function getResend(): Resend | null {
 const FROM = process.env.FROM_EMAIL ?? "noreply@homeofsuya.com";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
+const NOTICE_HTML = `<div style="margin-top:24px;padding:16px 0 0;border-top:1px solid #DDD;font-size:12px;color:#666;font-family:system-ui,sans-serif">
+  <p>You are receiving this e-mail because you are a customer of Home of Suya.</p>
+  <p><strong>Security Notice & Disclaimer:</strong><br>This email was sent from an automated notification system (<code>noreply@homeofsuya.com</code>). Please do not reply directly to this message.</p>
+  <p><strong>Unsolicited Activity:</strong> If you did not request this communication or believe you have received it in error, please <strong>alert our system administrator immediately</strong>.</p>
+  <p><strong>Confidentiality:</strong> The information contained in this transmission is confidential and may be legally privileged. If you are not the intended recipient, any disclosure, copying, distribution, or reliance upon the contents is strictly prohibited.</p>
+</div>`;
+
 export async function sendContactEnquiryEmail(data: {
   name: string;
   email: string;
@@ -47,7 +54,7 @@ export async function sendContactEnquiryEmail(data: {
       <p><strong>Phone:</strong> ${safePhone || "Not provided"}</p>
       <p><strong>Message:</strong></p>
       <div style="padding:12px 14px;border-radius:10px;background:#111827;color:#e5e7eb;border:1px solid #374151">${safeMessage}</div>
-    `,
+    ${NOTICE_HTML}`,
   });
 
   if (error) {
@@ -98,7 +105,7 @@ export async function sendCateringEnquiryEmail(data: {
       <p><strong>Delivery area:</strong> ${safe(data.deliveryArea) || "Not provided"}</p>
       <p><strong>Message:</strong></p>
       <div style="padding:12px 14px;border-radius:10px;background:#111827;color:#e5e7eb;border:1px solid #374151">${safeMessage}</div>
-    `,
+    ${NOTICE_HTML}`,
   });
 
   if (error) {
@@ -162,7 +169,7 @@ export async function sendAdminBookingAlert(
         <tbody>${itemsHtml}${deliveryFeeRow}</tbody>
       </table>
       <p><strong>Order Total: £${data.total.toFixed(2)}</strong></p>
-    `,
+    ${NOTICE_HTML}`,
   });
 
   if (error) {
@@ -232,6 +239,7 @@ export async function sendCustomerConfirmationEmail(
       </table>
       <p><strong>Order Total: £${data.total.toFixed(2)}</strong></p>
       <p style="color:#888;font-size:13px">We'll send you a message on WhatsApp when your order is ready!</p>
+      ${NOTICE_HTML}
     `,
   });
 
@@ -261,6 +269,7 @@ function emailShell(bodyHtml: string): string {
     <div style="padding:16px 28px;border-top:1px solid #2A2A2A;text-align:center">
       <p style="color:#555;font-size:11px;margin:0">This email was sent by the Home of Suya Admin System.<br>Do not share this email with anyone.</p>
     </div>
+    ${NOTICE_HTML}
   </div>
 </body>
 </html>`;
@@ -449,6 +458,7 @@ export async function sendBookingReminderEmail(
           <div style="padding:16px 28px;border-top:1px solid #2A2A2A;text-align:center">
             <p style="color:#555;font-size:11px;margin:0">This is a reminder for your pending booking.<br>Please complete payment to confirm your reservation.</p>
           </div>
+          ${NOTICE_HTML}
         </div>
       </body>
       </html>
