@@ -288,7 +288,7 @@ export default function CheckoutPage() {
                   required
                   hint={
                     state.deliveryType === "POSTAGE"
-                      ? "Include postcode — Royal Mail delivery"
+                      ? "Include postcode — Evri delivery"
                       : "Include postcode — Cardiff only"
                   }
                   error={errors.address}

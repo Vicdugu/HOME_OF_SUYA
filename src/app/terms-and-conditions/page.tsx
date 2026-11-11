@@ -39,14 +39,14 @@ export default function TermsAndConditions() {
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">3. Delivery Terms</h2>
 
-          <h3 className="text-lg font-semibold text-brand-orange mb-3">3.1 UK Nationwide Delivery (Royal Mail Next Day)</h3>
+          <h3 className="text-lg font-semibold text-brand-orange mb-3">3.1 UK Nationwide Delivery (Evri Next Day Delivery)</h3>
           <ul className="list-disc list-inside space-y-2 ml-4 mb-4">
-            <li>We ship nationwide using <strong>Royal Mail Tracked 24 (Next Day Delivery)</strong>.</li>
-            <li>All orders must be placed in time and allow for 24hrs delivery window by Royal Mail.</li>
+            <li>We ship nationwide using <strong>Evri Next Day Delivery</strong>.</li>
+            <li>All orders must be placed in time and allow for 24hrs delivery window by Evri.</li>
             <li>Sunday is available for collection, Cardiff delivery and postage. Postage orders placed for a Sunday are dispatched on the following Monday.</li>
-            <li>Royal Mail aims to deliver the next working day, but delays may occur due to weather, strikes, or operational issues.</li>
+            <li>Evri aims to deliver the next working day, but delays may occur due to weather, strikes, or operational issues.</li>
             <li>Once dispatched, you will receive a tracking number.</li>
-            <li>Home of Suya is not responsible for delays caused by Royal Mail, however we shall track all orders.</li>
+            <li>Home of Suya is not responsible for delays caused by Evri, however we shall track all orders.</li>
           </ul>
 
           <h3 className="text-lg font-semibold text-brand-orange mb-3">3.2 Cardiff & Same-City Delivery</h3>
@@ -83,7 +83,7 @@ export default function TermsAndConditions() {
 
           <p className="mb-3">Refunds will <strong>not</strong> be issued for:</p>
           <ul className="list-disc list-inside space-y-2 ml-4 mb-4">
-            <li>Delays caused by Royal Mail or external couriers.</li>
+            <li>Delays caused by Evri or external couriers.</li>
             <li>Incorrect delivery information provided by the customer.</li>
             <li>Change of mind after the order has been prepared or dispatched.</li>
             <li>Missed deliveries due to customer unavailability.</li>

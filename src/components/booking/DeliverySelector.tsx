@@ -54,7 +54,7 @@ export function DeliverySelector({
     {
       type: "POSTAGE",
       label: "UK Postage",
-      description: `Sent via Royal Mail — UK mainland only. Requires 24-hour processing time. Orders over ${formatCurrency(
+      description: `Sent via Evri — UK mainland only. Requires 24-hour processing time. Orders over ${formatCurrency(
         DISCOUNTED_POSTAGE_THRESHOLD
       )} pay ${formatCurrency(DISCOUNTED_POSTAGE_FEE)} postage.`,
       fee: postageFee,
